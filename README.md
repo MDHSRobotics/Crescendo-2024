@@ -1,1 +1,2 @@
-# Crescendo-2024
+# Generic Bot
+Template Bot
