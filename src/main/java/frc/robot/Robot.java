@@ -83,9 +83,9 @@ public class Robot extends TimedRobot {
     public void disabledPeriodic() {
     }
 
-    public Command getAutonomousCommand() {
-        return m_robotContainer.getAutonomousCommand();
-    }
+    //public Command getAutonomousCommand() {
+    //    return m_robotContainer.getAutonomousCommand();
+    //}
 
     /**
      * This autonomous runs the autonomous command selected by your {@link BotCommands} class.
@@ -97,10 +97,10 @@ public class Robot extends TimedRobot {
         CommandScheduler.getInstance().cancelAll();
 
         // Schedule the autonomous command
-        Command autonomousCommand = getAutonomousCommand();
-        if (autonomousCommand != null) {
-            autonomousCommand.schedule();
-        }
+        //Command autonomousCommand = getAutonomousCommand();
+        //if (autonomousCommand != null) {
+        //    autonomousCommand.schedule();
+        //}
     }
 
     /**
