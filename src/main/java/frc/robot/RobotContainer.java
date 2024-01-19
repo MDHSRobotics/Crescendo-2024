@@ -66,8 +66,13 @@ public class RobotContainer {
         /* Driver Buttons */
         //zeroGyro.onTrue(new InstantCommand(() -> s_Swerve.zeroHeading()));
         
-        shoot.onTrue(new InstantCommand(() -> s_Shooter.runMotors(-1)));
+        shoot.toggleOnTrue(new RunCommand(() -> s_Shooter.runMotors(roundAvoid(xboxController.getLeftY(),1))));
         shootStop.onTrue(new InstantCommand(() -> s_Shooter.runMotors(0)));
+    }
+
+    public static double roundAvoid(double value, int places) {
+        double scale = Math.pow(10, places);
+        return Math.round(value * scale) / scale;
     }
 
     /**

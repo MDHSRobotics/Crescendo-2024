@@ -3,7 +3,6 @@ package frc.robot.subsystems;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkBase.IdleMode;
 
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.revrobotics.CANSparkLowLevel.MotorType;
@@ -14,8 +13,8 @@ public class Shooter extends SubsystemBase{
     CANSparkMax shooter2;
 
     public Shooter(){
-        shooter1 = new CANSparkMax(12, MotorType.kBrushless);
-        shooter2 = new CANSparkMax(8, MotorType.kBrushless);
+        shooter1 = new CANSparkMax(4, MotorType.kBrushless);
+        shooter2 = new CANSparkMax(3, MotorType.kBrushless);
         shooter2.setIdleMode(IdleMode.kCoast);
     }
 
