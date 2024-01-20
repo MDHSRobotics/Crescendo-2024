@@ -72,7 +72,10 @@ public class RobotContainer {
 
     public static double roundAvoid(double value, int places) {
         double scale = Math.pow(10, places);
-        return Math.round(value * scale) / scale;
+        double newValue = Math.round(value * scale) / scale;
+        newValue = newValue > 0.8 ? 0.8 : newValue;
+        newValue = newValue < 0.2 ? 0.2 : newValue;
+        return newValue; 
     }
 
     /**
