@@ -1,5 +1,7 @@
 package frc.robot;
 
+import edu.wpi.first.wpilibj.AddressableLED;
+import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
@@ -31,6 +33,9 @@ public class RobotContainer {
 
     /* Subsystems */
     private final Swerve s_Swerve = new Swerve();
+    private final AddressableLED m_led; 
+    private final AddressableLEDBuffer m_ledBuffer;
+    
 
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -44,7 +49,19 @@ public class RobotContainer {
                 () -> robotCentric.getAsBoolean()
             )
         );
+    
+        
+        m_led = new AddressableLED(5);
 
+        // Reuse buffer
+        // Default to a length of 60, start empty output
+        // Length is expensive to set, so only set it once, then just update data
+        m_ledBuffer = new AddressableLEDBuffer(60);
+        m_led.setLength(m_ledBuffer.getLength());
+
+        set_color(0, 255, 0);
+        
+        
         // Configure the button bindings
         configureButtonBindings();
     }
@@ -69,4 +86,14 @@ public class RobotContainer {
         // An ExampleCommand will run in autonomous
     //    return new new Command
     //}
+
+    public void set_color(int r, int g, int b){
+        for (var i = 0; i < m_ledBuffer.getLength(); i++) {
+            // Sets the specified LED to the RGB values for red
+            m_ledBuffer.setRGB(i, r, g, b);
+         }
+        // Set the data
+        m_led.setData(m_ledBuffer);
+        m_led.start();
+    }
 }
