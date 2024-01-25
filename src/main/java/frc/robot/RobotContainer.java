@@ -30,16 +30,20 @@ public class RobotContainer {
     private final int strafeAxis = XboxController.Axis.kLeftX.value;
     private final int rotationAxis = XboxController.Axis.kRightX.value;
 
+    private int shootAxis = XboxController.Axis.kLeftTrigger.value;
+    private int feedAxis = XboxController.Axis.kRightTrigger.value;
+
     /* Driver Buttons */
     private final JoystickButton zeroGyro = new JoystickButton(driver, XboxController.Button.kY.value);
     private final JoystickButton robotCentric = new JoystickButton(driver, XboxController.Button.kLeftBumper.value);
-    private final JoystickButton shoot = new JoystickButton(driver, XboxController.Button.kA.value);
-    private final JoystickButton shootStop = new JoystickButton(driver, XboxController.Button.kB.value);
+    
+    private final JoystickButton intake = new JoystickButton(driver, XboxController.Button.kA.value);
 
 
     /* Subsystems */
     //private final Swerve s_Swerve = new Swerve();
     private final Shooter s_Shooter = new Shooter();
+    private final Intake s_Intake = new Intake();
 
     
 
@@ -49,6 +53,10 @@ public class RobotContainer {
         /*s_Shooter.setDefaultCommand(
             new RunCommand((() -> s_Shooter.runMotors(translationAxis)), s_Shooter)
         );*/
+
+        s_Shooter.setDefaultCommand(
+            new RunCommand(() -> s_Shooter.runShooter(shootAxis, feedAxis), s_Shooter)
+        );
 
         //xboxController.a().onTrue(s_Shooter.runMotorsCommand());
 
@@ -66,8 +74,8 @@ public class RobotContainer {
         /* Driver Buttons */
         //zeroGyro.onTrue(new InstantCommand(() -> s_Swerve.zeroHeading()));
         
-        shoot.toggleOnTrue(new RunCommand(() -> s_Shooter.runMotors(roundAvoid(xboxController.getLeftY(),1))));
-        shootStop.onTrue(new InstantCommand(() -> s_Shooter.runMotors(0)));
+        //shoot.toggleOnTrue(new RunCommand(() -> s_Shooter.runMotors(roundAvoid(xboxController.getLeftY(),1))))
+        intake.toggleOnTrue(new RunCommand(() -> s_Intake.runIntake(1), s_Intake));
     }
 
     public static double roundAvoid(double value, int places) {
