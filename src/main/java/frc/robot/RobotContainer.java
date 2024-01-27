@@ -1,13 +1,20 @@
 package frc.robot;
 
+import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
-import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 
 /**
@@ -18,32 +25,47 @@ import frc.robot.subsystems.*;
  */
 public class RobotContainer {
     /* Controllers */
-    private final Joystick driver = new Joystick(0);
-
-    /* Drive Controls */
-    private final int translationAxis = XboxController.Axis.kLeftY.value;
-    private final int strafeAxis = XboxController.Axis.kLeftX.value;
-    private final int rotationAxis = XboxController.Axis.kRightX.value;
-
-    /* Driver Buttons */
-    private final JoystickButton zeroGyro = new JoystickButton(driver, XboxController.Button.kY.value);
-    private final JoystickButton robotCentric = new JoystickButton(driver, XboxController.Button.kLeftBumper.value);
+    private final CommandXboxController joystick = new CommandXboxController(0); // My joystick
 
     /* Subsystems */
-    private final Swerve s_Swerve = new Swerve();
+    private final Swerve drivetrain = Constants.TunerConstants.DriveTrain; // My drivetrain
+
+
+
+    private double MaxSpeed = 6; // 6 meters per second desired top speed
+    private double MaxAngularRate = 1.5 * Math.PI; // 3/4 of a rotation per second max angular velocity
+
+    /* Setting up bindings for necessary control of the swerve drive platform */
+
+
+
+    private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+        .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+        .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // I want field-centric
+                                                                // driving in open loop
+    private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
+    private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
+    private final Telemetry logger = new Telemetry(MaxSpeed);
+
+
+
+
 
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
-        s_Swerve.setDefaultCommand(
-            new TeleopSwerve(
-                s_Swerve, 
-                () -> -driver.getRawAxis(translationAxis), 
-                () -> -driver.getRawAxis(strafeAxis), 
-                () -> -driver.getRawAxis(rotationAxis), 
-                () -> robotCentric.getAsBoolean()
-            )
-        );
+
+        drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
+            drivetrain.applyRequest(() -> drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with
+                                                                                            // negative Y (forward)
+                .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+                .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+            ));
+
+        if (Utils.isSimulation()) {
+        drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
+        }
+        drivetrain.registerTelemetry(logger::telemeterize);
 
         // Configure the button bindings
         configureButtonBindings();
@@ -57,7 +79,21 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         /* Driver Buttons */
-        zeroGyro.onTrue(new InstantCommand(() -> s_Swerve.zeroHeading()));
+
+        joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
+        
+        joystick.b().whileTrue(drivetrain
+            .applyRequest(() -> point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))));
+
+        joystick.y().whileTrue(drivetrain
+            .applyRequest(() -> drive.withVelocityX( MaxSpeed) // Drive forward 
+                .withVelocityY(0.) 
+                .withRotationalRate(0.) 
+            ));
+
+        // reset the field-centric heading on left bumper press
+        joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
+
     }
 
     /**
