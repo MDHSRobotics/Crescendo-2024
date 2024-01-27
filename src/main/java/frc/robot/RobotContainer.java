@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
 import frc.robot.commands.*;
@@ -31,10 +32,13 @@ public class RobotContainer {
     private final JoystickButton zeroGyro = new JoystickButton(driver, XboxController.Button.kY.value);
     private final JoystickButton robotCentric = new JoystickButton(driver, XboxController.Button.kLeftBumper.value);
 
+    private final JoystickButton blinkLED = new JoystickButton(driver, XboxController.Button.kB.value);
+    
+
     /* Subsystems */
     private final Swerve s_Swerve = new Swerve();
-    private final AddressableLED m_led; 
-    private final AddressableLEDBuffer m_ledBuffer;
+    private final LED s_Led = new LED();
+    
     
 
 
@@ -49,17 +53,6 @@ public class RobotContainer {
                 () -> robotCentric.getAsBoolean()
             )
         );
-    
-        
-        m_led = new AddressableLED(5);
-
-        // Reuse buffer
-        // Default to a length of 60, start empty output
-        // Length is expensive to set, so only set it once, then just update data
-        m_ledBuffer = new AddressableLEDBuffer(60);
-        m_led.setLength(m_ledBuffer.getLength());
-
-        set_color(0, 255, 0);
         
         
         // Configure the button bindings
@@ -75,6 +68,9 @@ public class RobotContainer {
     private void configureButtonBindings() {
         /* Driver Buttons */
         zeroGyro.onTrue(new InstantCommand(() -> s_Swerve.zeroHeading()));
+
+        blinkLED.onTrue(new RunCommand(()->s_Led.setColor(0, 0, System.currentTimeMillis() % 1000 > 500 ? 255 : 0),s_Led).withTimeout(10));
+
     }
 
     /**
@@ -87,13 +83,5 @@ public class RobotContainer {
     //    return new new Command
     //}
 
-    public void set_color(int r, int g, int b){
-        for (var i = 0; i < m_ledBuffer.getLength(); i++) {
-            // Sets the specified LED to the RGB values for red
-            m_ledBuffer.setRGB(i, r, g, b);
-         }
-        // Set the data
-        m_led.setData(m_ledBuffer);
-        m_led.start();
-    }
+    
 }
