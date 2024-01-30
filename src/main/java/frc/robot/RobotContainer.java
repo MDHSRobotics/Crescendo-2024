@@ -32,8 +32,8 @@ public class RobotContainer {
     private final JoystickButton zeroGyro = new JoystickButton(driver, XboxController.Button.kY.value);
     private final JoystickButton robotCentric = new JoystickButton(driver, XboxController.Button.kLeftBumper.value);
 
-    private final JoystickButton blinkLED = new JoystickButton(driver, XboxController.Button.kB.value);
-    
+    private final JoystickButton blinkLEDblue = new JoystickButton(driver, XboxController.Button.kB.value);
+    private final JoystickButton blinkLEDyellow = new JoystickButton(driver, XboxController.Button.kA.value);
 
     /* Subsystems */
     private final Swerve s_Swerve = new Swerve();
@@ -53,6 +53,10 @@ public class RobotContainer {
                 () -> robotCentric.getAsBoolean()
             )
         );
+
+        s_Led.setDefaultCommand(
+            new RunCommand(()-> s_Led.redShift(), s_Led)
+        );
         
         
         // Configure the button bindings
@@ -69,10 +73,9 @@ public class RobotContainer {
         /* Driver Buttons */
         zeroGyro.onTrue(new InstantCommand(() -> s_Swerve.zeroHeading()));
 
-        blinkLED.onTrue(new RunCommand(()->s_Led.setColor(0, 0, System.currentTimeMillis() % 1000 > 500 ? 255 : 0),s_Led).withTimeout(10));
-
+        blinkLEDblue.onTrue(new RunCommand(()->s_Led.setColor(0, 0, System.currentTimeMillis() % 1000 > 500 ? 255 : 0),s_Led).withTimeout(10));
+        blinkLEDyellow.onTrue(new RunCommand(()->s_Led.setColor(System.currentTimeMillis() % 1000 > 500 ? 255 : 0, System.currentTimeMillis() % 1000 > 500 ? 255 : 0,0),s_Led).withTimeout(10));
     }
-
     /**
      * Use this to pass the autonomous command to the main {@link Robot} class.
      *
