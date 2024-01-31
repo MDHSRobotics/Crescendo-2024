@@ -56,11 +56,9 @@ public class LED extends SubsystemBase{
         m_ledBuffer.setRGB(m_lastPixel, 0, 0, 0);
 
         m_firstPixel++;
-        m_firstPixel %= 300;
+        m_firstPixel %= m_length;
         m_lastPixel++;
-        m_lastPixel %= 300;
-
-        System.out.println(m_firstPixel);
+        m_lastPixel %= m_length;
     
         m_led.setData(m_ledBuffer);
         m_led.start();

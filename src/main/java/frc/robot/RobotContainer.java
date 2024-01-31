@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 
 import frc.robot.subsystems.*;
 
@@ -28,20 +29,12 @@ public class RobotContainer {
     /* Subsystems */
     private final Swerve drivetrain = Constants.TunerConstants.DriveTrain; // My drivetrain
 
-
-    private final JoystickButton blinkLEDblue = new JoystickButton(driver, XboxController.Button.kB.value);
-    private final JoystickButton blinkLEDyellow = new JoystickButton(driver, XboxController.Button.kA.value);
-
     private final LED s_Led = new LED();
     
-    
-
     private double MaxSpeed = 6; // 6 meters per second desired top speed
     private double MaxAngularRate = 1.5 * Math.PI; // 3/4 of a rotation per second max angular velocity
 
     /* Setting up bindings for necessary control of the swerve drive platform */
-
-
 
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
         .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
@@ -50,11 +43,6 @@ public class RobotContainer {
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
     private final Telemetry logger = new Telemetry(MaxSpeed);
-
-
-
-
-
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
@@ -103,8 +91,10 @@ public class RobotContainer {
         // reset the field-centric heading on left bumper press
         joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
 
-        blinkLEDblue.onTrue(new RunCommand(()->s_Led.setColor(0, 0, System.currentTimeMillis() % 1000 > 500 ? 255 : 0),s_Led).withTimeout(10));
-        blinkLEDyellow.onTrue(new RunCommand(()->s_Led.setColor(System.currentTimeMillis() % 1000 > 500 ? 255 : 0, System.currentTimeMillis() % 1000 > 500 ? 255 : 0,0),s_Led).withTimeout(10));
+        joystick.rightTrigger().onTrue(new RunCommand(()->s_Led.setColor(0, 0, System.currentTimeMillis() % 1000 > 500 ? 255 : 0),s_Led).withTimeout(10));
+        joystick.leftTrigger().onTrue(new RunCommand(()->s_Led.setColor(System.currentTimeMillis() % 1000 > 500 ? 255 : 0,System.currentTimeMillis() % 1000 > 500 ? 255 : 0,0),s_Led).withTimeout(10));
+        //blinkLEDblue.onTrue(new RunCommand(()->s_Led.setColor(0, 0, System.currentTimeMillis() % 1000 > 500 ? 255 : 0),s_Led).withTimeout(10));
+        //blinkLEDyellow.onTrue(new RunCommand(()->s_Led.setColor(System.currentTimeMillis() % 1000 > 500 ? 255 : 0, System.currentTimeMillis() % 1000 > 500 ? 255 : 0,0),s_Led).withTimeout(10));
     }
     /**
      * Use this to pass the autonomous command to the main {@link Robot} class.
