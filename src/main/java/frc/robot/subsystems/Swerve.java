@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 
@@ -19,6 +20,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 /**
  * Class that extends the Phoenix SwerveDrivetrain class and implements subsystem
  * so it can be used in command-based projects easily.
@@ -27,6 +30,9 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
+
+    private final SwerveRequest.ApplyChassisSpeeds applyChassisSpeedsRequest = new SwerveRequest.ApplyChassisSpeeds();
+    //private speedRequest = applyChassisSpeedsRequest.withSpeeds​(ChassisSpeeds speeds) {};
 
     public Swerve(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency, SwerveModuleConstants... modules) {
         super(driveTrainConstants, OdometryUpdateFrequency, modules);
@@ -85,19 +91,31 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     // The following are callbacks needed for the Path Planner Auto Builder
 
     private Pose2d getPose() {
-        return this.getPose();
+        SwerveDriveState currentState = getState();
+        Pose2d currentPose = currentState.Pose;
+        return currentPose;
     }
 
     private Pose2d resetPose(Pose2d newPose) {
-        return this.resetPose(newPose);
+        // TODO: Implement correctly
+        return new Pose2d();
     }
 
     private ChassisSpeeds getRobotRelativeSpeeds(){
-        return this.getRobotRelativeSpeeds();
+         SwerveDriveState currentState = getState();
+         SwerveModuleState [] moduleStates = currentState.ModuleStates;
+         SwerveDriveKinematics kinematics = this.m_kinematics;
+         ChassisSpeeds chassisSpeeds = kinematics.toChassisSpeeds(moduleStates);
+        return chassisSpeeds;
     }
 
     public void driveRobotRelative(ChassisSpeeds speeds){
-        this.driveRobotRelative(speeds);
+        applyRequest(() -> applyChassisSpeedsRequest.withSpeeds(speeds)
+    );
+            
+        
+        //SwerveRequest.ApplyChassisSpeeds.)
+        
       }
 
     // Simulation
