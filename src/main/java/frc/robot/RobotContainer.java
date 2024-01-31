@@ -7,6 +7,8 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.AddressableLED;
+import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -27,6 +29,12 @@ public class RobotContainer {
     private final Swerve drivetrain = Constants.TunerConstants.DriveTrain; // My drivetrain
 
 
+    private final JoystickButton blinkLEDblue = new JoystickButton(driver, XboxController.Button.kB.value);
+    private final JoystickButton blinkLEDyellow = new JoystickButton(driver, XboxController.Button.kA.value);
+
+    private final LED s_Led = new LED();
+    
+    
 
     private double MaxSpeed = 6; // 6 meters per second desired top speed
     private double MaxAngularRate = 1.5 * Math.PI; // 3/4 of a rotation per second max angular velocity
@@ -63,6 +71,11 @@ public class RobotContainer {
         }
         drivetrain.registerTelemetry(logger::telemeterize);
 
+        s_Led.setDefaultCommand(
+            new RunCommand(()-> s_Led.redShift(), s_Led)
+        );
+        
+        
         // Configure the button bindings
         configureButtonBindings();
     }
@@ -90,8 +103,9 @@ public class RobotContainer {
         // reset the field-centric heading on left bumper press
         joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
 
+        blinkLEDblue.onTrue(new RunCommand(()->s_Led.setColor(0, 0, System.currentTimeMillis() % 1000 > 500 ? 255 : 0),s_Led).withTimeout(10));
+        blinkLEDyellow.onTrue(new RunCommand(()->s_Led.setColor(System.currentTimeMillis() % 1000 > 500 ? 255 : 0, System.currentTimeMillis() % 1000 > 500 ? 255 : 0,0),s_Led).withTimeout(10));
     }
-
     /**
      * Use this to pass the autonomous command to the main {@link Robot} class.
      *
@@ -101,4 +115,6 @@ public class RobotContainer {
         // An ExampleCommand will run in autonomous
     //    return new new Command
     //}
+
+    
 }
