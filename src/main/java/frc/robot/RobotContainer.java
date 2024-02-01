@@ -44,6 +44,7 @@ public class RobotContainer {
     //private final Swerve s_Swerve = new Swerve();
     private final Shooter s_Shooter = new Shooter();
     private final Intake s_Intake = new Intake();
+    private final Climb c_Climb = new Climb();
 
     
 
@@ -59,6 +60,13 @@ public class RobotContainer {
         );
 
         //xboxController.a().onTrue(s_Shooter.runMotorsCommand());
+
+
+  /*c_Climb.setDefaultCommand(
+            new RunCommand((() -> c_Climb.runMotors(translationAxis)), c_Climb)
+        );*/
+
+        //xboxController.a().onTrue(c_Climb.runMotorsCommand());
 
         // Configure the button bindings
         configureButtonBindings();
@@ -76,6 +84,11 @@ public class RobotContainer {
         
         //shoot.toggleOnTrue(new RunCommand(() -> s_Shooter.runMotors(roundAvoid(xboxController.getLeftY(),1))))
         intake.toggleOnTrue(new RunCommand(() -> s_Intake.runIntake(1), s_Intake));
+        shoot.toggleOnTrue(new RunCommand(() -> s_Shooter.runMotors(roundAvoid(xboxController.getLeftY(),1))));
+        shootStop.onTrue(new InstantCommand(() -> s_Shooter.runMotors(0)));
+
+        shoot.toggleOnTrue(new RunCommand(() -> c_Climb.runMotors(roundAvoid(xboxController.getRightY(),1))));
+        shootStop.onTrue(new InstantCommand(() -> c_Climb.runMotors(0)));
     }
 
     public static double roundAvoid(double value, int places) {
@@ -87,7 +100,7 @@ public class RobotContainer {
     }
 
     /**
-     * Use this to pass the autonomous command to the main {@link Robot} class.
+     * Use this to pass the a   utonomous command to the main {@link Robot} class.
      *
      * @return the command to run in autonomous
      */
