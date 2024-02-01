@@ -44,29 +44,18 @@ public class RobotContainer {
     //private final Swerve s_Swerve = new Swerve();
     private final Shooter s_Shooter = new Shooter();
     private final Intake s_Intake = new Intake();
-    private final Climb c_Climb = new Climb();
-
-    
-
+    private final Climb s_Climb = new Climb();
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
+
         /*s_Shooter.setDefaultCommand(
-            new RunCommand((() -> s_Shooter.runMotors(translationAxis)), s_Shooter)
-        );*/
-
-        s_Shooter.setDefaultCommand(
             new RunCommand(() -> s_Shooter.runShooter(shootAxis, feedAxis), s_Shooter)
-        );
-
-        //xboxController.a().onTrue(s_Shooter.runMotorsCommand());
-
-
-  /*c_Climb.setDefaultCommand(
-            new RunCommand((() -> c_Climb.runMotors(translationAxis)), c_Climb)
         );*/
 
-        //xboxController.a().onTrue(c_Climb.runMotorsCommand());
+        s_Climb.setDefaultCommand(
+            new RunCommand((() -> s_Climb.runMotors(translationAxis)), s_Climb)
+        );
 
         // Configure the button bindings
         configureButtonBindings();
@@ -84,11 +73,6 @@ public class RobotContainer {
         
         //shoot.toggleOnTrue(new RunCommand(() -> s_Shooter.runMotors(roundAvoid(xboxController.getLeftY(),1))))
         intake.toggleOnTrue(new RunCommand(() -> s_Intake.runIntake(1), s_Intake));
-        shoot.toggleOnTrue(new RunCommand(() -> s_Shooter.runMotors(roundAvoid(xboxController.getLeftY(),1))));
-        shootStop.onTrue(new InstantCommand(() -> s_Shooter.runMotors(0)));
-
-        shoot.toggleOnTrue(new RunCommand(() -> c_Climb.runMotors(roundAvoid(xboxController.getRightY(),1))));
-        shootStop.onTrue(new InstantCommand(() -> c_Climb.runMotors(0)));
     }
 
     public static double roundAvoid(double value, int places) {
