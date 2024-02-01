@@ -108,7 +108,7 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        System.out.print("In auto");
+        System.out.println("In auto");
         return new PathPlannerAuto("Auto - Simple");
     }
     

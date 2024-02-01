@@ -2,6 +2,8 @@ package frc.robot.subsystems;
 
 import java.util.function.Supplier;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
@@ -21,7 +23,11 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModule;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+
 /**
  * Class that extends the Phoenix SwerveDrivetrain class and implements subsystem
  * so it can be used in command-based projects easily.
@@ -31,9 +37,10 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
 
-    private final SwerveRequest.ApplyChassisSpeeds applyChassisSpeedsRequest = new SwerveRequest.ApplyChassisSpeeds();
+    //private final SwerveRequest.ApplyChassisSpeeds applyChassisSpeedsRequest = new SwerveRequest.ApplyChassisSpeeds();
     //private speedRequest = applyChassisSpeedsRequest.withSpeeds​(ChassisSpeeds speeds) {};
 
+    private final SwerveRequest.RobotCentric applyChassisSpeedsRequest = new SwerveRequest.RobotCentric();
     public Swerve(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency, SwerveModuleConstants... modules) {
         super(driveTrainConstants, OdometryUpdateFrequency, modules);
         if (Utils.isSimulation()) {
@@ -93,12 +100,22 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     private Pose2d getPose() {
         SwerveDriveState currentState = getState();
         Pose2d currentPose = currentState.Pose;
+        System.out.print("Current pos" + currentPose.toString());
         return currentPose;
     }
 
     private Pose2d resetPose(Pose2d newPose) {
-        // TODO: Implement correctly
-        return new Pose2d();
+        SwerveDrivePoseEstimator poseEstimator = this.m_odometry;
+        
+        poseEstimator.resetPosition(
+            Rotation2d.fromDegrees(m_pigeon2.getAngle()),
+            m_modulePositions,  
+            newPose
+        );
+
+        Pose2d checkPose = getPose();
+
+        return newPose;
     }
 
     private ChassisSpeeds getRobotRelativeSpeeds(){
@@ -110,12 +127,11 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     }
 
     public void driveRobotRelative(ChassisSpeeds speeds){
-        applyRequest(() -> applyChassisSpeedsRequest.withSpeeds(speeds)
-    );
-            
-        
-        //SwerveRequest.ApplyChassisSpeeds.)
-        
+        SwerveModuleState[] moduleStates = this.m_kinematics.toSwerveModuleStates(speeds);
+        SwerveModule[] modules = this.Modules;
+        for(int i = 0; i < modules.length; i++){
+            modules[i].apply(moduleStates[i], DriveRequestType.OpenLoopVoltage);
+        }
       }
 
     // Simulation
