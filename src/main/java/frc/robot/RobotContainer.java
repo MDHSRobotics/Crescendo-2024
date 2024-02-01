@@ -22,23 +22,7 @@ import frc.robot.subsystems.*;
  */
 public class RobotContainer {
     /* Controllers */
-    private final Joystick driver = new Joystick(0);
-    private final CommandXboxController xboxController = new CommandXboxController(0);
-
-    /* Drive Controls */
-    private final int translationAxis = XboxController.Axis.kLeftY.value;
-    private final int strafeAxis = XboxController.Axis.kLeftX.value;
-    private final int rotationAxis = XboxController.Axis.kRightX.value;
-
-    private int shootAxis = XboxController.Axis.kLeftTrigger.value;
-    private int feedAxis = XboxController.Axis.kRightTrigger.value;
-
-    /* Driver Buttons */
-    private final JoystickButton zeroGyro = new JoystickButton(driver, XboxController.Button.kY.value);
-    private final JoystickButton robotCentric = new JoystickButton(driver, XboxController.Button.kLeftBumper.value);
-    
-    private final JoystickButton intake = new JoystickButton(driver, XboxController.Button.kA.value);
-
+    private final CommandXboxController joystick = new CommandXboxController(0); // My joystick
 
     /* Subsystems */
     //private final Swerve s_Swerve = new Swerve();
@@ -49,12 +33,12 @@ public class RobotContainer {
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
 
-        /*s_Shooter.setDefaultCommand(
-            new RunCommand(() -> s_Shooter.runShooter(shootAxis, feedAxis), s_Shooter)
-        );*/
+        s_Shooter.setDefaultCommand(
+            new RunCommand(() -> s_Shooter.runShooter(roundAvoid(joystick.getLeftTriggerAxis(),1), roundAvoid(joystick.getRightTriggerAxis(),1)), s_Shooter)
+        );
 
         s_Climb.setDefaultCommand(
-            new RunCommand((() -> s_Climb.runMotors(translationAxis)), s_Climb)
+            new RunCommand((() -> s_Climb.runMotors(roundAvoid(joystick.getLeftY(),1))), s_Climb)
         );
 
         // Configure the button bindings
@@ -72,14 +56,12 @@ public class RobotContainer {
         //zeroGyro.onTrue(new InstantCommand(() -> s_Swerve.zeroHeading()));
         
         //shoot.toggleOnTrue(new RunCommand(() -> s_Shooter.runMotors(roundAvoid(xboxController.getLeftY(),1))))
-        intake.toggleOnTrue(new RunCommand(() -> s_Intake.runIntake(1), s_Intake));
+        joystick.a().toggleOnTrue(new RunCommand(() -> s_Intake.runIntake(1), s_Intake));
     }
 
     public static double roundAvoid(double value, int places) {
         double scale = Math.pow(10, places);
         double newValue = Math.round(value * scale) / scale;
-        newValue = newValue > 0.8 ? 0.8 : newValue;
-        newValue = newValue < 0.2 ? 0.2 : newValue;
         return newValue; 
     }
 
