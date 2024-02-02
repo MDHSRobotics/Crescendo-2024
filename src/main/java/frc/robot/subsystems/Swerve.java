@@ -100,12 +100,15 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     private Pose2d getPose() {
         SwerveDriveState currentState = getState();
         Pose2d currentPose = currentState.Pose;
-        System.out.print("Current pos" + currentPose.toString());
+        System.out.println("Current pos" + currentPose.toString());
+
         return currentPose;
     }
 
     private Pose2d resetPose(Pose2d newPose) {
         SwerveDrivePoseEstimator poseEstimator = this.m_odometry;
+
+        System.out.println("Resetting pose to " + newPose.toString());
         
         poseEstimator.resetPosition(
             Rotation2d.fromDegrees(m_pigeon2.getAngle()),
@@ -113,20 +116,27 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
             newPose
         );
 
-        Pose2d checkPose = getPose();
-
         return newPose;
     }
 
     private ChassisSpeeds getRobotRelativeSpeeds(){
+
          SwerveDriveState currentState = getState();
          SwerveModuleState [] moduleStates = currentState.ModuleStates;
          SwerveDriveKinematics kinematics = this.m_kinematics;
+
          ChassisSpeeds chassisSpeeds = kinematics.toChassisSpeeds(moduleStates);
+         
+         System.out.println("Getting current robot speeds " + chassisSpeeds.toString());
+
         return chassisSpeeds;
     }
 
     public void driveRobotRelative(ChassisSpeeds speeds){
+
+
+        System.out.println("Drive Robot Relative speeds: " + speeds.toString());
+
         SwerveModuleState[] moduleStates = this.m_kinematics.toSwerveModuleStates(speeds);
         SwerveModule[] modules = this.Modules;
         for(int i = 0; i < modules.length; i++){
