@@ -2,12 +2,9 @@ package frc.robot.subsystems;
 
 import java.util.function.Supplier;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 
@@ -23,10 +20,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModule;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 
 /**
  * Class that extends the Phoenix SwerveDrivetrain class and implements subsystem
@@ -37,10 +31,8 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
 
-    //private final SwerveRequest.ApplyChassisSpeeds applyChassisSpeedsRequest = new SwerveRequest.ApplyChassisSpeeds();
-    //private speedRequest = applyChassisSpeedsRequest.withSpeeds​(ChassisSpeeds speeds) {};
+    private final SwerveRequest.ApplyChassisSpeeds applyChassisSpeedsRequest = new SwerveRequest.ApplyChassisSpeeds();
 
-    private final SwerveRequest.RobotCentric applyChassisSpeedsRequest = new SwerveRequest.RobotCentric();
     public Swerve(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency, SwerveModuleConstants... modules) {
         super(driveTrainConstants, OdometryUpdateFrequency, modules);
         if (Utils.isSimulation()) {
@@ -64,9 +56,9 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
 
         AutoBuilder.configureHolonomic(
                     this::getPose, // Robot pose supplier
-                    this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
+                    this::seedFieldRelative,  // Method to reset odometry (will be called if your auto has a starting pose)
                     this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-                    this::driveRobotRelative, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
+                    this::driveRobotRelative, // Consumer of ChassisSpeeds to drive the robot // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
                     new HolonomicPathFollowerConfig( // HolonomicPathFollowerConfig, this should likely live in your Constants class
                             new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
                             new PIDConstants(5.0, 0.0, 0.0), // Rotation PID constants
@@ -105,21 +97,9 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         return currentPose;
     }
 
-    private Pose2d resetPose(Pose2d newPose) {
-        SwerveDrivePoseEstimator poseEstimator = this.m_odometry;
-
-        System.out.println("Resetting pose to " + newPose.toString());
-        
-        poseEstimator.resetPosition(
-            Rotation2d.fromDegrees(m_pigeon2.getAngle()),
-            m_modulePositions,  
-            newPose
-        );
-
-        return newPose;
-    }
-
     private ChassisSpeeds getRobotRelativeSpeeds(){
+
+        //return m_kinematics.toChassisSpeeds(getState().ModuleStates);
 
          SwerveDriveState currentState = getState();
          SwerveModuleState [] moduleStates = currentState.ModuleStates;
@@ -134,14 +114,9 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
 
     public void driveRobotRelative(ChassisSpeeds speeds){
 
+        setControl(applyChassisSpeedsRequest.withSpeeds(speeds));
 
         System.out.println("Drive Robot Relative speeds: " + speeds.toString());
-
-        SwerveModuleState[] moduleStates = this.m_kinematics.toSwerveModuleStates(speeds);
-        SwerveModule[] modules = this.Modules;
-        for(int i = 0; i < modules.length; i++){
-            modules[i].apply(moduleStates[i], DriveRequestType.OpenLoopVoltage);
-        }
       }
 
     // Simulation
