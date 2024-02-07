@@ -24,7 +24,7 @@ public final class Constants {
         // When using closed-loop control, the drive motor uses the control
         // output type specified by SwerveModuleConstants.DriveMotorClosedLoopOutput
         private static final Slot0Configs driveGains = new Slot0Configs()
-            .withKP(20.0).withKI(0).withKD(0)
+            .withKP(3.0).withKI(0).withKD(0)
             .withKS(0).withKV(0).withKA(0);
 
 // The closed-loop output type to use for the steer motors;
@@ -40,7 +40,7 @@ public final class Constants {
 
         // Theoretical free speed (m/s) at 12v applied output;
         // This needs to be tuned to your individual robot
-        public static final double kSpeedAt12VoltsMps = 10.43;
+        public static final double kSpeedAt12VoltsMps = 5.215;
 
         // Every 1 rotation of the azimuth results in kCoupleRatio drive motor turns;
         // This may need to be tuned to your individual robot
