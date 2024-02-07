@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
+import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
 
 /**
@@ -30,7 +31,7 @@ public class RobotContainer {
     private final CommandXboxController joystick = new CommandXboxController(0); // My joystick
 
     /* Subsystems */
-    private final Swerve drivetrain = Constants.TunerConstants.DriveTrain; // My drivetrain
+    private final Swerve drivetrain = TunerConstants.DriveTrain; // My drivetrain
 
     private final LED s_Led = new LED();
     
