@@ -24,10 +24,10 @@ public final class Constants {
         // When using closed-loop control, the drive motor uses the control
         // output type specified by SwerveModuleConstants.DriveMotorClosedLoopOutput
         private static final Slot0Configs driveGains = new Slot0Configs()
-            .withKP(3).withKI(0).withKD(0)
+            .withKP(20.0).withKI(0).withKD(0)
             .withKS(0).withKV(0).withKA(0);
 
-        // The closed-loop output type to use for the steer motors;
+// The closed-loop output type to use for the steer motors;
         // This affects the PID/FF gains for the steer motors
         private static final ClosedLoopOutputType steerClosedLoopOutput = ClosedLoopOutputType.Voltage;
         // The closed-loop output type to use for the drive motors;
@@ -46,9 +46,9 @@ public final class Constants {
         // This may need to be tuned to your individual robot
         private static final double kCoupleRatio = 3.5714285714285716;
 
-        private static final double kDriveGearRatio = 6.122448979591837;
+        private static final double kDriveGearRatio = 8.14;
         private static final double kSteerGearRatio = 12.8;
-        private static final double kWheelRadiusInches = 4;
+        private static final double kWheelRadiusInches = 2;
 
         private static final boolean kSteerMotorReversed = false;
         private static final boolean kInvertLeftSide = false;
