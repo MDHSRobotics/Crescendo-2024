@@ -110,7 +110,7 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand() {
         System.out.println("In auto");
-        return new PathPlannerAuto("Auto - Simple");
+        return new PathPlannerAuto("Auto Simple Turn");
     }
     
 }

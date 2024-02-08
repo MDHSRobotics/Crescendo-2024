@@ -1,6 +1,5 @@
 package frc.robot.generated;
 
-
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
@@ -17,12 +16,12 @@ public class TunerConstants {
     // The steer motor uses any SwerveModule.SteerRequestType control request with the
     // output type specified by SwerveModuleConstants.SteerMotorClosedLoopOutput
     private static final Slot0Configs steerGains = new Slot0Configs()
-        .withKP(100).withKI(0).withKD(0.2)
+        .withKP(100).withKI(0).withKD(0.02)
         .withKS(0).withKV(1.5).withKA(0);
     // When using closed-loop control, the drive motor uses the control
     // output type specified by SwerveModuleConstants.DriveMotorClosedLoopOutput
     private static final Slot0Configs driveGains = new Slot0Configs()
-        .withKP(3.0).withKI(0).withKD(0)
+        .withKP(1.0).withKI(1.0).withKD(0.1)
         .withKS(0).withKV(0).withKA(0);
 
     // The closed-loop output type to use for the steer motors;
@@ -38,13 +37,13 @@ public class TunerConstants {
 
     // Theoretical free speed (m/s) at 12v applied output;
     // This needs to be tuned to your individual robot
-    public static final double kSpeedAt12VoltsMps = 5.215;
+    public static final double kSpeedAt12VoltsMps = 3.92;
 
     // Every 1 rotation of the azimuth results in kCoupleRatio drive motor turns;
     // This may need to be tuned to your individual robot
     private static final double kCoupleRatio = 3.5714285714285716;
 
-    private static final double kDriveGearRatio = 8.14;
+    private static final double kDriveGearRatio = 8.142857142857142;
     private static final double kSteerGearRatio = 12.8;
     private static final double kWheelRadiusInches = 2;
 
@@ -99,7 +98,7 @@ public class TunerConstants {
     private static final int kFrontRightDriveMotorId = 18;
     private static final int kFrontRightSteerMotorId = 19;
     private static final int kFrontRightEncoderId = 3;
-    private static final double kFrontRightEncoderOffset = .464599609375;
+    private static final double kFrontRightEncoderOffset = 0.464599609375;
 
     private static final double kFrontRightXPosInches = 11.5;
     private static final double kFrontRightYPosInches = -9;
