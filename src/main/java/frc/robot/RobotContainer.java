@@ -32,6 +32,9 @@ public class RobotContainer {
 
     /* Subsystems */
     private final Swerve drivetrain = TunerConstants.DriveTrain; // My drivetrain
+    private final Shooter s_Shooter = new Shooter();
+    private final Intake s_Intake = new Intake();
+    private final Climb s_Climb = new Climb();
 
     private final LED s_Led = new LED();
     
@@ -67,9 +70,15 @@ public class RobotContainer {
 
         s_Led.setDefaultCommand(
             new RunCommand(()-> s_Led.redShift(), s_Led)
+
+        s_Shooter.setDefaultCommand(
+            new RunCommand(() -> s_Shooter.runShooter(roundAvoid(joystick.getLeftTriggerAxis(),1), roundAvoid(joystick.getRightTriggerAxis(),1)), s_Shooter)
         );
-        
-        
+
+        s_Climb.setDefaultCommand(
+            new RunCommand((() -> s_Climb.runMotors(roundAvoid(joystick.getLeftY(),1))), s_Climb)
+        );
+
         // Configure the button bindings
         configureButtonBindings();
     }
@@ -83,17 +92,22 @@ public class RobotContainer {
     private void configureButtonBindings() {
         /* Driver Buttons */
 
-        //driverController.x().toggleOnTrue(new RunCommand(()-> drivetrain.getLimelightInfo(), drivetrain));
-
         // reset the field-centric heading on left bumper press
         driverController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
 
         driverController.povUp().onTrue(new RunCommand(()->s_Led.setColor(0, 0, System.currentTimeMillis() % 1000 > 500 ? 255 : 0),s_Led).withTimeout(10));
         driverController.povDown().onTrue(new RunCommand(()->s_Led.setColor(System.currentTimeMillis() % 1000 > 500 ? 255 : 0,System.currentTimeMillis() % 1000 > 500 ? 255 : 0,0),s_Led).withTimeout(10));
+        joystick.a().toggleOnTrue(new RunCommand(() -> s_Intake.runIntake(1), s_Intake));
+    }
+
+    public static double roundAvoid(double value, int places) {
+        double scale = Math.pow(10, places);
+        double newValue = Math.round(value * scale) / scale;
+        return newValue; 
     }
 
     /**
-     * Use this to pass the autonomous command to the main {@link Robot} class.
+     * Use this to pass the a   utonomous command to the main {@link Robot} class.
      *
      * @return the command to run in autonomous
      */
