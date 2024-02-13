@@ -83,26 +83,13 @@ public class RobotContainer {
     private void configureButtonBindings() {
         /* Driver Buttons */
 
-        driverController.a().whileTrue(drivetrain.applyRequest(() -> brake));
-        
-        driverController.b().whileTrue(drivetrain
-            .applyRequest(() -> point.withModuleDirection(new Rotation2d(-driverController.getLeftY(), -driverController.getLeftX()))));
-
-        driverController.y().whileTrue(drivetrain
-            .applyRequest(() -> drive.withVelocityX( MaxSpeed) // Drive forward 
-                .withVelocityY(0.) 
-                .withRotationalRate(0.) 
-            ));
-
-        driverController.x().toggleOnTrue(new RunCommand(()-> drivetrain.getLimelightInfo(), drivetrain));
+        //driverController.x().toggleOnTrue(new RunCommand(()-> drivetrain.getLimelightInfo(), drivetrain));
 
         // reset the field-centric heading on left bumper press
         driverController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
 
-        driverController.rightTrigger().onTrue(new RunCommand(()->s_Led.setColor(0, 0, System.currentTimeMillis() % 1000 > 500 ? 255 : 0),s_Led).withTimeout(10));
-        driverController.leftTrigger().onTrue(new RunCommand(()->s_Led.setColor(System.currentTimeMillis() % 1000 > 500 ? 255 : 0,System.currentTimeMillis() % 1000 > 500 ? 255 : 0,0),s_Led).withTimeout(10));
-        //blinkLEDblue.onTrue(new RunCommand(()->s_Led.setColor(0, 0, System.currentTimeMillis() % 1000 > 500 ? 255 : 0),s_Led).withTimeout(10));
-        //blinkLEDyellow.onTrue(new RunCommand(()->s_Led.setColor(System.currentTimeMillis() % 1000 > 500 ? 255 : 0, System.currentTimeMillis() % 1000 > 500 ? 255 : 0,0),s_Led).withTimeout(10));
+        driverController.povUp().onTrue(new RunCommand(()->s_Led.setColor(0, 0, System.currentTimeMillis() % 1000 > 500 ? 255 : 0),s_Led).withTimeout(10));
+        driverController.povDown().onTrue(new RunCommand(()->s_Led.setColor(System.currentTimeMillis() % 1000 > 500 ? 255 : 0,System.currentTimeMillis() % 1000 > 500 ? 255 : 0,0),s_Led).withTimeout(10));
     }
 
     /**
