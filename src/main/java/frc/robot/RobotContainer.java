@@ -12,8 +12,12 @@ import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 
+import com.pathplanner.lib.commands.PathPlannerAuto;
+
+import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
 
 /**
@@ -27,7 +31,7 @@ public class RobotContainer {
     private final CommandXboxController joystick = new CommandXboxController(0); // My joystick
 
     /* Subsystems */
-    private final Swerve drivetrain = Constants.TunerConstants.DriveTrain; // My drivetrain
+    private final Swerve drivetrain = TunerConstants.DriveTrain; // My drivetrain
 
     private final LED s_Led = new LED();
     
@@ -42,6 +46,8 @@ public class RobotContainer {
                                                                 // driving in open loop
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
+
+    // Set up telemetry
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -96,15 +102,15 @@ public class RobotContainer {
         //blinkLEDblue.onTrue(new RunCommand(()->s_Led.setColor(0, 0, System.currentTimeMillis() % 1000 > 500 ? 255 : 0),s_Led).withTimeout(10));
         //blinkLEDyellow.onTrue(new RunCommand(()->s_Led.setColor(System.currentTimeMillis() % 1000 > 500 ? 255 : 0, System.currentTimeMillis() % 1000 > 500 ? 255 : 0,0),s_Led).withTimeout(10));
     }
+
     /**
      * Use this to pass the autonomous command to the main {@link Robot} class.
      *
      * @return the command to run in autonomous
      */
-    //public Command getAutonomousCommand() {
-        // An ExampleCommand will run in autonomous
-    //    return new new Command
-    //}
-
+    public Command getAutonomousCommand() {
+        System.out.println("In auto");
+        return new PathPlannerAuto("Test Auto");
+    }
     
 }
