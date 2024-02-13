@@ -47,8 +47,6 @@ public class RobotContainer {
         .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // I want field-centric
                                                                 // driving in open loop
-    private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-    private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
     // Set up telemetry
     private final Telemetry logger = new Telemetry(MaxSpeed);
@@ -70,13 +68,14 @@ public class RobotContainer {
 
         s_Led.setDefaultCommand(
             new RunCommand(()-> s_Led.redShift(), s_Led)
-
+        );
+        
         s_Shooter.setDefaultCommand(
-            new RunCommand(() -> s_Shooter.runShooter(roundAvoid(joystick.getLeftTriggerAxis(),1), roundAvoid(joystick.getRightTriggerAxis(),1)), s_Shooter)
+            new RunCommand(() -> s_Shooter.runShooter(roundAvoid(operatorController.getLeftTriggerAxis(),1), roundAvoid(operatorController.getRightTriggerAxis(),1)), s_Shooter)
         );
 
         s_Climb.setDefaultCommand(
-            new RunCommand((() -> s_Climb.runMotors(roundAvoid(joystick.getLeftY(),1))), s_Climb)
+            new RunCommand((() -> s_Climb.runMotors(roundAvoid(operatorController.getLeftY(),1))), s_Climb)
         );
 
         // Configure the button bindings
@@ -97,7 +96,7 @@ public class RobotContainer {
 
         driverController.povUp().onTrue(new RunCommand(()->s_Led.setColor(0, 0, System.currentTimeMillis() % 1000 > 500 ? 255 : 0),s_Led).withTimeout(10));
         driverController.povDown().onTrue(new RunCommand(()->s_Led.setColor(System.currentTimeMillis() % 1000 > 500 ? 255 : 0,System.currentTimeMillis() % 1000 > 500 ? 255 : 0,0),s_Led).withTimeout(10));
-        joystick.a().toggleOnTrue(new RunCommand(() -> s_Intake.runIntake(1), s_Intake));
+        operatorController.a().toggleOnTrue(new RunCommand(() -> s_Intake.runIntake(1), s_Intake));
     }
 
     public static double roundAvoid(double value, int places) {
