@@ -41,6 +41,8 @@ public class RobotContainer {
     private final Shooter s_Shooter = new Shooter();
     private final Intake s_Intake = new Intake();
     private final Climb s_Climb = new Climb();
+    private final Limelight s_Limelight = new Limelight();
+
     private final LED s_Led = new LED();
     
     DigitalInput intakeLimitSwitch = new DigitalInput(0);

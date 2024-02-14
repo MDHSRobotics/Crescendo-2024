@@ -20,6 +20,10 @@ public class Aiming {
         return (goalHeight - lensHeight) / Math.tan(angleToGoalRadians);
     }
 
+    public static double calculateDistance3d(double goalHeight, double hypotenuse) {
+        return Math.sqrt(Math.pow(hypotenuse, 2) - Math.pow(goalHeight, 2));
+    }
+
     /**
      * @param distance Distance from the limelight to the apriltag in inches
      * @param heightDifference Distance to the height of the apriltag in inches
