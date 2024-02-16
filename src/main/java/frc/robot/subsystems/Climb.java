@@ -18,15 +18,9 @@ public class Climb extends SubsystemBase{
     }
 
     public void runMotors(double climbPower){
-        System.out.println("Climb power = " + climbPower);
         climb1.set(-climbPower);
         climb2.set(climbPower);
     }
-    /*
-    public Command runMotorsCommand() {
-        // implicitly require `this`
-        return this.startEnd(() -> runMotors(1),() -> runMotors(0));
-    }*/
 
 }
 

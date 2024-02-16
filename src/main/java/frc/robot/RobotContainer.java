@@ -7,14 +7,19 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
+import frc.math.Aiming;
+import frc.robot.Constants.SwerveSpeedConstants;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
 
@@ -29,45 +34,44 @@ public class RobotContainer {
     private final CommandXboxController driverController = new CommandXboxController(0); // My joystick
     private final CommandXboxController operatorController = new CommandXboxController(1); // My joystick
 
-
     /* Subsystems */
-    private final Swerve drivetrain = TunerConstants.DriveTrain; // My drivetrain
+    private final Swerve s_Swerve = TunerConstants.DriveTrain; // My drivetrain
     private final Shooter s_Shooter = new Shooter();
     private final Intake s_Intake = new Intake();
     private final Climb s_Climb = new Climb();
-
     private final LED s_Led = new LED();
     
-    private double MaxSpeed = 6; // 6 meters per second desired top speed
-    private double MaxAngularRate = 1.5 * Math.PI; // 3/4 of a rotation per second max angular velocity
+    DigitalInput intakeLimitSwitch = new DigitalInput(0);
+    DigitalInput shooterLimitSwitch = new DigitalInput(1);
 
     /* Setting up bindings for necessary control of the swerve drive platform */
 
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-        .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+        .withDeadband(SwerveSpeedConstants.MaxSpeed * 0.1).withRotationalDeadband(SwerveSpeedConstants.MaxAngularRate * 0.1) // Add a 10% deadband
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // I want field-centric
                                                                 // driving in open loop
 
     // Set up telemetry
-    private final Telemetry logger = new Telemetry(MaxSpeed);
+    private final Telemetry logger = new Telemetry(SwerveSpeedConstants.MaxSpeed);
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
 
-        drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
-            drivetrain.applyRequest(() -> drive.withVelocityX(-driverController.getLeftY() * MaxSpeed) // Drive forward with
+        /* Default Commands */
+        s_Swerve.setDefaultCommand( // Drivetrain will execute this command periodically
+            s_Swerve.applyRequest(() -> drive.withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed) // Drive forward with
                                                                                             // negative Y (forward)
-                .withVelocityY(-driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-                .withRotationalRate(-driverController.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+                .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed) // Drive left with negative X (left)
+                .withRotationalRate(-driverController.getRightX() * SwerveSpeedConstants.MaxAngularRate) // Drive counterclockwise with negative X (left)
             ));
 
         if (Utils.isSimulation()) {
-        drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
+        s_Swerve.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
         }
-        drivetrain.registerTelemetry(logger::telemeterize);
+        s_Swerve.registerTelemetry(logger::telemeterize);
 
         s_Led.setDefaultCommand(
-            new RunCommand(()-> s_Led.redShift(), s_Led)
+            new RunCommand(()-> s_Led.rainbow(), s_Led)
         );
         
         s_Shooter.setDefaultCommand(
@@ -75,8 +79,10 @@ public class RobotContainer {
         );
 
         s_Climb.setDefaultCommand(
-            new RunCommand((() -> s_Climb.runMotors(roundAvoid(operatorController.getLeftY(),1))), s_Climb)
+            new RunCommand((() -> s_Climb.runMotors(0)), s_Climb)
         );
+
+        new Trigger(intakeLimitSwitch::get).onTrue(new RunCommand(() -> s_Led.setColor(240, 161, 26), s_Led));
 
         // Configure the button bindings
         configureButtonBindings();
@@ -89,14 +95,59 @@ public class RobotContainer {
      * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureButtonBindings() {
+
         /* Driver Buttons */
 
-        // reset the field-centric heading on left bumper press
-        driverController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
+        // Reset the field-centric heading on left bumper press
+        driverController.leftBumper().onTrue(s_Swerve.runOnce(() -> s_Swerve.seedFieldRelative()));
 
-        driverController.povUp().onTrue(new RunCommand(()->s_Led.setColor(0, 0, System.currentTimeMillis() % 1000 > 500 ? 255 : 0),s_Led).withTimeout(10));
-        driverController.povDown().onTrue(new RunCommand(()->s_Led.setColor(System.currentTimeMillis() % 1000 > 500 ? 255 : 0,System.currentTimeMillis() % 1000 > 500 ? 255 : 0,0),s_Led).withTimeout(10));
+        // LED communication
+        driverController.povUp().onTrue(new RunCommand(()-> s_Led.blink(0, 0, 255, 1000), s_Led).withTimeout(10));
+        driverController.povDown().onTrue(new RunCommand(()-> s_Led.blink(255, 255, 0, 1000), s_Led).withTimeout(10));
+        
+        // Climb
+        driverController.a().onTrue(new RunCommand(() -> s_Climb.runMotors(1), s_Climb));
+        driverController.y().onTrue(new RunCommand(() -> s_Climb.runMotors(-1), s_Climb));
+
+        /* Operator Buttons */
+
         operatorController.a().toggleOnTrue(new RunCommand(() -> s_Intake.runIntake(1), s_Intake));
+
+        // Run intake
+
+        // Lock on
+        operatorController.x().toggleOnTrue(
+            s_Swerve.applyRequest(() -> drive.withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed) // Drive forward with // negative Y (forward)
+                .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed) // Drive left with negative X (left)
+                .withRotationalRate(Aiming.getYawAdjustment(LimelightHelper.getTX(""))) // Turn at the rate given by limelight
+            )
+            .alongWith(
+                new RunCommand(() -> s_Shooter.setAngleFromLimelight(), s_Shooter)
+            ).alongWith(
+                new RunCommand(() -> s_Led.setColor(255, 0, 0), s_Led)
+            )
+        );
+
+        // Shoot
+        operatorController.a().onTrue(
+            new SequentialCommandGroup(
+                // Ramp up
+                new RunCommand(() -> s_Shooter.runShooter(1, 0), s_Shooter).withTimeout(2),
+                
+                //Shoot
+                new RunCommand(() -> s_Shooter.runShooter(1, 1), s_Shooter).withTimeout(2)
+
+            ).alongWith(
+                // Blink red to indicate shooting
+                new RunCommand(() -> s_Led.blink(255, 0, 0, 1000), s_Led).withTimeout(4)
+            )
+            .andThen(
+                // Blink green to indicate good to go
+                new RunCommand(() -> s_Led.setColor(0, 255, 0), s_Led).withTimeout(5)
+            )
+        );
+
+        // Manual Control
     }
 
     public static double roundAvoid(double value, int places) {

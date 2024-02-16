@@ -2,6 +2,8 @@ package frc.math;
 
 import java.lang.Math;
 
+import frc.robot.Constants.SwerveSpeedConstants;
+
 public class Aiming {
     
     /**
@@ -26,9 +28,14 @@ public class Aiming {
     public static double getPitch(double distance, double heightDifference){
         return Math.atan2(distance, heightDifference);
     }
-
-
-
     
+    /**
+     * 
+     * @param tx The current tx value given by limelight
+     * @return The output turning power
+     */
+    public static double getYawAdjustment(double tx){
+        return tx * SwerveSpeedConstants.MaxAngularRate;
+    }
 
 }
