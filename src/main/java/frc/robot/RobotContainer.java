@@ -10,8 +10,10 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -74,13 +76,21 @@ public class RobotContainer {
             new RunCommand(()-> s_Led.rainbow(), s_Led)
         );
         
+        /*s_Shooter.setDefaultCommand(
+            new RunCommand(() -> s_Shooter.runShooter(0, 0), s_Shooter)
+        );*/
+
         s_Shooter.setDefaultCommand(
-            new RunCommand(() -> s_Shooter.runShooter(roundAvoid(operatorController.getLeftTriggerAxis(),1), roundAvoid(operatorController.getRightTriggerAxis(),1)), s_Shooter)
+            new RunCommand(()-> s_Shooter.runAngle(operatorController.getLeftY(), operatorController.getRightY()), s_Shooter)
         );
 
         s_Climb.setDefaultCommand(
-            new RunCommand((() -> s_Climb.runMotors(0)), s_Climb)
+            new RunCommand((() -> s_Climb.runMotors(0,0)), s_Climb)
         );
+
+        SmartDashboard.putData(s_Shooter);
+        SmartDashboard.putData(s_Led);
+        SmartDashboard.putData(s_Climb);
 
         new Trigger(intakeLimitSwitch::get).onTrue(new RunCommand(() -> s_Led.setColor(240, 161, 26), s_Led));
 
@@ -106,8 +116,10 @@ public class RobotContainer {
         driverController.povDown().onTrue(new RunCommand(()-> s_Led.blink(255, 255, 0, 1000), s_Led).withTimeout(10));
         
         // Climb
-        driverController.a().onTrue(new RunCommand(() -> s_Climb.runMotors(1), s_Climb));
-        driverController.y().onTrue(new RunCommand(() -> s_Climb.runMotors(-1), s_Climb));
+        driverController.a().whileTrue(new RunCommand(() -> s_Climb.runMotors(1,0), s_Climb));
+        driverController.y().whileTrue(new RunCommand(() -> s_Climb.runMotors(-1, 0), s_Climb));
+        driverController.x().whileTrue(new RunCommand(() -> s_Climb.runMotors(0, 1), s_Climb));
+        driverController.b().whileTrue(new RunCommand(() -> s_Climb.runMotors(0, -1), s_Climb));
 
         /* Operator Buttons */
 
@@ -128,6 +140,7 @@ public class RobotContainer {
             )
         );
 
+        
         // Shoot
         operatorController.a().onTrue(
             new SequentialCommandGroup(
@@ -136,14 +149,11 @@ public class RobotContainer {
                 
                 //Shoot
                 new RunCommand(() -> s_Shooter.runShooter(1, 1), s_Shooter).withTimeout(2)
-
-            ).alongWith(
-                // Blink red to indicate shooting
-                new RunCommand(() -> s_Led.blink(255, 0, 0, 1000), s_Led).withTimeout(4)
             )
             .andThen(
+                new RunCommand(() -> s_Shooter.runShooter(0, 0), s_Shooter).withTimeout(2),
                 // Blink green to indicate good to go
-                new RunCommand(() -> s_Led.setColor(0, 255, 0), s_Led).withTimeout(5)
+                new RunCommand(() -> s_Led.setColor(0, 255, 0), s_Led).withTimeout(2)
             )
         );
 

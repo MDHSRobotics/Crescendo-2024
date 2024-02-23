@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.LEDConstants;
@@ -34,6 +35,7 @@ public class LED extends SubsystemBase{
             m_ledBuffer.setRGB(i, r, g, b);
          }
         // Set the data
+        SmartDashboard.putString("LED RGB", "r:" + r + " g: " + g + " b: " + b);
         m_led.setData(m_ledBuffer);
         m_led.start();
     }

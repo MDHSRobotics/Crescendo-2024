@@ -8,17 +8,17 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Intake extends SubsystemBase{
 
-    private CANSparkMax mainIntake;
-    private CANSparkMax conveyor;
+    //private CANSparkMax mainIntake;
+    //private CANSparkMax conveyor;
 
     public Intake(){
-        mainIntake = new CANSparkMax(8, MotorType.kBrushless);
-        conveyor = new CANSparkMax(9, MotorType.kBrushless);
+        //mainIntake = new CANSparkMax(10, MotorType.kBrushless);
+       // conveyor = new CANSparkMax(11, MotorType.kBrushless);
     }
 
     public void runIntake(double power){
-        mainIntake.set(power);
-        conveyor.set(power);
+       // mainIntake.set(power);
+        //conveyor.set(power);
         SmartDashboard.putNumber("Intake Power", power);
     }
     
