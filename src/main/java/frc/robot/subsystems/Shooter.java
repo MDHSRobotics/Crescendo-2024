@@ -5,6 +5,9 @@ import com.revrobotics.SparkAbsoluteEncoder;
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.SparkPIDController;
 
+import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -25,6 +28,11 @@ public class Shooter extends SubsystemBase{
 
     private SparkPIDController m_pidController;
 
+    private ShuffleboardTab tab = Shuffleboard.getTab("Shooter");
+    private GenericEntry shootSpeed =
+      tab.add("Max Speed", 1)
+         .getEntry();
+
     public Shooter(){
         topShooter = new CANSparkFlex(ShooterConstants.kTopID, MotorType.kBrushless);
         bottomShooter = new CANSparkFlex(ShooterConstants.kBottomID, MotorType.kBrushless);
@@ -42,17 +50,17 @@ public class Shooter extends SubsystemBase{
     }
 
     public void runShooter(double power, double feed){
-        topShooter.set(power);
-        bottomShooter.set(-power);
+        topShooter.set(-power * shootSpeed.getDouble(1.0));
+        bottomShooter.set(power * shootSpeed.getDouble(1.0));
         SmartDashboard.putNumber("Shooter Power", power);
         SmartDashboard.putNumber("Feed Power", feed);
         feeder.set(-feed);
     } 
 
-    public void runAngle(double power,  double feed){
+    public void runAngle(double angle,  double feed){
         //System.out.println(power);
-        angle1.set(power);
-        feeder.set(feed);
+        angle1.set(angle);
+        feeder.set(-feed);
     }
 
     //adjust the angle of the shooter

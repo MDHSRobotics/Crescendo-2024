@@ -81,11 +81,15 @@ public class RobotContainer {
         );*/
 
         s_Shooter.setDefaultCommand(
-            new RunCommand(()-> s_Shooter.runAngle(operatorController.getLeftY(), operatorController.getRightY()), s_Shooter)
+            new RunCommand(()-> s_Shooter.runAngle(operatorController.getLeftY() * 0.5, -operatorController.getRightY() * 0.5), s_Shooter)
         );
 
         s_Climb.setDefaultCommand(
             new RunCommand((() -> s_Climb.runMotors(0,0)), s_Climb)
+        );
+
+        s_Intake.setDefaultCommand(
+            new RunCommand(() -> s_Intake.runIntake(0, -operatorController.getRightY()), s_Intake)
         );
 
         SmartDashboard.putData(s_Shooter);
@@ -116,16 +120,15 @@ public class RobotContainer {
         driverController.povDown().onTrue(new RunCommand(()-> s_Led.blink(255, 255, 0, 1000), s_Led).withTimeout(10));
         
         // Climb
-        driverController.a().whileTrue(new RunCommand(() -> s_Climb.runMotors(1,0), s_Climb));
-        driverController.y().whileTrue(new RunCommand(() -> s_Climb.runMotors(-1, 0), s_Climb));
-        driverController.x().whileTrue(new RunCommand(() -> s_Climb.runMotors(0, 1), s_Climb));
+        driverController.x().whileTrue(new RunCommand(() -> s_Climb.runMotors(1,0), s_Climb));
+        driverController.a().whileTrue(new RunCommand(() -> s_Climb.runMotors(-1, 0), s_Climb));
+        driverController.y().whileTrue(new RunCommand(() -> s_Climb.runMotors(0, 1), s_Climb));
         driverController.b().whileTrue(new RunCommand(() -> s_Climb.runMotors(0, -1), s_Climb));
 
         /* Operator Buttons */
 
-        operatorController.a().toggleOnTrue(new RunCommand(() -> s_Intake.runIntake(1), s_Intake));
-
         // Run intake
+        operatorController.y().whileTrue(new RunCommand(() -> s_Intake.runIntake(-operatorController.getRightX(), operatorController.getRightTriggerAxis()), s_Intake));
 
         // Lock on
         operatorController.x().toggleOnTrue(
@@ -148,7 +151,7 @@ public class RobotContainer {
                 new RunCommand(() -> s_Shooter.runShooter(1, 0), s_Shooter).withTimeout(2),
                 
                 //Shoot
-                new RunCommand(() -> s_Shooter.runShooter(1, 1), s_Shooter).withTimeout(2)
+                new RunCommand(() -> s_Shooter.runShooter(1, 0.2), s_Shooter).withTimeout(2)
             )
             .andThen(
                 new RunCommand(() -> s_Shooter.runShooter(0, 0), s_Shooter).withTimeout(2),

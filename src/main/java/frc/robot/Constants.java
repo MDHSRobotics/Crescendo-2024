@@ -38,11 +38,11 @@ public final class Constants {
     public class ShooterConstants {
 
         /* Motor IDs */
-        public static final int kTopID = 3;
-        public static final int kBottomID = 4;
-        public static final int kAngleLeftID = 5;
-        public static final int kAngleRightID = 6;
-        public static final int kFeederID = 9;
+        public static final int kTopID = 3; //
+        public static final int kBottomID = 4; //
+        public static final int kAngleLeftID = 5; //
+        public static final int kAngleRightID = 6; //
+        public static final int kFeederID = 7; //
 
         //The max and min angles of the shooter in degrees
         public static final double kShooterMaxAngle = 90;
@@ -58,17 +58,17 @@ public final class Constants {
     public class IntakeConstants {
 
         /* Motor IDs */
-        public static final int kLeftAngleID = 0;
-        public static final int kRightAngleID = 0;
-        public static final int kConveyorID = 0;
-        public static final int kIntakeID = 0;
+        public static final int kLeftAngleID = 8; //
+        public static final int kRightAngleID = 9; //
+        public static final int kConveyorID = 10; //
+        public static final int kIntakeID = 11; // 
     }
 
     public class ClimbConstants {
         
         /* Motor IDs */
-        public static final int kLeftClimbMotorID = 13;
-        public static final int kRightClimbMotorID = 14;
+        public static final int kLeftClimbMotorID = 1; //
+        public static final int kRightClimbMotorID = 2; //
 
     }
 
