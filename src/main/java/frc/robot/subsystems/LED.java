@@ -2,6 +2,8 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -14,6 +16,8 @@ public class LED extends SubsystemBase{
     private int m_rainbowFirstPixelHue;
     private int m_firstPixel = LEDConstants.kStrobeLength;
     private int m_lastPixel = 1;
+
+    private ShuffleboardTab tab = Shuffleboard.getTab("LED");
 
     public LED(){
         m_led = new AddressableLED(0);

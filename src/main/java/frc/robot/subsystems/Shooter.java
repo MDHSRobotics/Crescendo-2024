@@ -2,10 +2,14 @@ package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkAbsoluteEncoder;
+
+import java.util.Map;
+
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.SparkPIDController;
 
 import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -31,7 +35,15 @@ public class Shooter extends SubsystemBase{
     private ShuffleboardTab tab = Shuffleboard.getTab("Shooter");
     private GenericEntry shootSpeed =
       tab.add("Max Speed", 1)
-         .getEntry();
+        .withWidget(BuiltInWidgets.kNumberSlider)
+        .withProperties(Map.of("min", 0, "max", 1)) // specify widget properties here
+        .getEntry();
+    private GenericEntry angle1Rotations =
+      tab.add("Left Motor Rotations", 0.0)
+        .getEntry();
+    private GenericEntry angle2Rotations =
+      tab.add("Right Motor Rotations", 0.0)
+        .getEntry();
 
     public Shooter(){
         topShooter = new CANSparkFlex(ShooterConstants.kTopID, MotorType.kBrushless);
@@ -58,9 +70,13 @@ public class Shooter extends SubsystemBase{
     } 
 
     public void runAngle(double angle,  double feed){
+        
         //System.out.println(power);
         angle1.set(angle);
         feeder.set(-feed);
+
+        angle1Rotations.setDouble(angle1.getEncoder().getPosition());
+        angle2Rotations.setDouble(angle2.getEncoder().getPosition());
     }
 
     //adjust the angle of the shooter
