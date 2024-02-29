@@ -22,12 +22,12 @@ public class Aiming {
 
     /**
      * @param lensHeight The height of the limelight from the floor in inches
-     * @param goalHeight The height of the goal from the floor in inches
+     * @param tagHeight The height of the tag from the floor in inches
      * @param distance The distance from the limelight straight to the apriltag in inches
      * @return Horizontal distance from the limelight to the apriltag in inches
      */
-    public static double calculateDistance3d(double lensHeight, double goalHeight, double distance) {
-        return Math.sqrt(Math.pow(distance, 2) - Math.pow(goalHeight - lensHeight, 2));
+    public static double calculateDistance3d(double lensHeight, double tagHeight, double distance) {
+        return Math.sqrt(Math.pow(distance, 2) - Math.pow(tagHeight - lensHeight, 2));
     }
 
     /**

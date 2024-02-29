@@ -24,6 +24,8 @@ public final class Constants {
         public static final double kSourceTagHeight = kTagAdditionalHeight + 48.125;
         // Height of speaker tags
         public static final double kSpeakerTagHeight = kTagAdditionalHeight + 51.875; //h1
+        // Height of speaker tags (center instead of top)
+        public static final double kSpeakerTagCenterHeight = 56.375;
         // Height of amp tags
         public static final double kAmpTagHeight = kTagAdditionalHeight + 48.125;
         // Height of stage tags
