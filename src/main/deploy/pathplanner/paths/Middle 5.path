@@ -1,0 +1,106 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 2.5079619390008028,
+        "y": 4.272386237080167
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.261288368726189,
+        "y": 2.9995506144858832
+      },
+      "isLocked": false,
+      "linkedName": "Bottom Note Ending Position"
+    },
+    {
+      "anchor": {
+        "x": 5.014165412941816,
+        "y": 1.5688439069186213
+      },
+      "prevControl": {
+        "x": 4.039505623380988,
+        "y": 1.7925363176374978
+      },
+      "nextControl": {
+        "x": 5.616048924401146,
+        "y": 1.430706707567301
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.786776342783456,
+        "y": 0.7696215392430785
+      },
+      "prevControl": {
+        "x": 6.905394620846268,
+        "y": 0.8686531933933244
+      },
+      "nextControl": {
+        "x": 8.66493425294543,
+        "y": 0.6709521111349916
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.625915867211955,
+        "y": 1.6971141634591345
+      },
+      "prevControl": {
+        "x": 6.217932435864873,
+        "y": 1.4504405931888795
+      },
+      "nextControl": {
+        "x": 5.03326908381012,
+        "y": 1.9440503232081026
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 4.185342216838282,
+        "y": 2.5259373595670285
+      },
+      "prevControl": {
+        "x": 4.964830698887773,
+        "y": 1.9240538481077343
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Bottom Shooting Position"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 2.6,
+      "rotationDegrees": 180.0,
+      "rotateFast": false
+    }
+  ],
+  "constraintZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 5.2,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 142.0,
+    "rotateFast": false
+  },
+  "reversed": false,
+  "folder": "Middle Note Pickup",
+  "previewStartingState": {
+    "rotation": 165.0,
+    "velocity": 0
+  },
+  "useDefaultConstraints": true
+}

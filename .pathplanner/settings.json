@@ -1,10 +1,14 @@
 {
-  "robotWidth": 0.75,
-  "robotLength": 1.0,
+  "robotWidth": 0.8382,
+  "robotLength": 0.9652,
   "holonomicMode": true,
-  "pathFolders": [],
+  "pathFolders": [
+    "Middle Note Pickup",
+    "Note Backups",
+    "Starting Positions to Shoot"
+  ],
   "autoFolders": [],
-  "defaultMaxVel": 3.0,
+  "defaultMaxVel": 5.2,
   "defaultMaxAccel": 3.0,
   "defaultMaxAngVel": 540.0,
   "defaultMaxAngAccel": 720.0,

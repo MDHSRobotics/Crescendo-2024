@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.3106230827846286,
-        "y": 4.084914323674802
+        "x": 2.774369394892637,
+        "y": 6.90685996756609
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.7975420566225764,
-        "y": 4.489458978917958
+        "x": 2.2415544831089678,
+        "y": 6.304976456106759
       },
       "isLocked": false,
-      "linkedName": "Pickup 1"
+      "linkedName": "Top Note Ending Position"
     },
     {
       "anchor": {
-        "x": 1.5410015435415498,
-        "y": 5.4860202028096365
+        "x": 2.0540825697036027,
+        "y": 5.564955745296107
       },
       "prevControl": {
-        "x": 2.1231511693792635,
-        "y": 5.446552431566402
+        "x": 1.7580742853793416,
+        "y": 5.959633457728454
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Shoot End"
+      "linkedName": "Middle Note Starting Position"
     }
   ],
   "rotationTargets": [],
@@ -45,7 +45,7 @@
   "reversed": false,
   "folder": null,
   "previewStartingState": {
-    "rotation": 180.0,
+    "rotation": -165.0,
     "velocity": 0
   },
   "useDefaultConstraints": true

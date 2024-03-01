@@ -52,8 +52,8 @@ public class Shooter extends SubsystemBase{
         angle2 = new CANSparkFlex(ShooterConstants.kAngleRightID, MotorType.kBrushless);
         feeder = new CANSparkMax(ShooterConstants.kFeederID, MotorType.kBrushless);
 
-        //m_pidController = angle1.getPIDController();
-        //m_pidController.setP(0.01);
+        m_pidController = angle1.getPIDController();
+        m_pidController.setP(0.01);
         
         angle2.follow(angle1);
         SmartDashboard.putNumber("Angle 1 rotations", angle1.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition());
@@ -98,10 +98,12 @@ public class Shooter extends SubsystemBase{
     public void setAngle(double angle){
 
         //Calculate angle to rotations
+        double rotations = angle * ShooterConstants.kAngleGearRatio;
 
 
         //Set the rotations
-        //m_pidController.setReference(angle, CANSparkMax.ControlType.kPosition);
+        m_pidController.setReference(rotations, CANSparkMax.ControlType.kPosition);
+
         SmartDashboard.putNumber("Set Angle", angle);
     }
 
