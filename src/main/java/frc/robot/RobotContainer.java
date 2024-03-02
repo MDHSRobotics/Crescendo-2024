@@ -7,22 +7,27 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+
+import frc.math.Aiming;
+
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
-import com.pathplanner.lib.commands.PathPlannerAuto;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
-import frc.math.Aiming;
 import frc.robot.Constants.SwerveSpeedConstants;
 import frc.robot.generated.TunerConstants;
+
 import frc.robot.subsystems.*;
 
 /**
@@ -32,6 +37,7 @@ import frc.robot.subsystems.*;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+    
     /* Controllers */
     private final CommandXboxController driverController = new CommandXboxController(0); // My joystick
     private final CommandXboxController operatorController = new CommandXboxController(1); // My joystick
@@ -43,11 +49,11 @@ public class RobotContainer {
     private final Climb s_Climb = new Climb();
     private final LED s_Led = new LED();
     
+    /* Limit Switches */
     DigitalInput intakeLimitSwitch = new DigitalInput(0);
     DigitalInput shooterLimitSwitch = new DigitalInput(1);
 
     /* Setting up bindings for necessary control of the swerve drive platform */
-
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
         .withDeadband(SwerveSpeedConstants.MaxSpeed * 0.1).withRotationalDeadband(SwerveSpeedConstants.MaxAngularRate * 0.1) // Add a 10% deadband
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // I want field-centric
@@ -55,6 +61,9 @@ public class RobotContainer {
 
     // Set up telemetry
     private final Telemetry logger = new Telemetry(SwerveSpeedConstants.MaxSpeed);
+
+    /* Auto Chooser */
+    private final SendableChooser<Command> autoChooser;
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
@@ -75,10 +84,6 @@ public class RobotContainer {
         s_Led.setDefaultCommand(
             new RunCommand(()-> s_Led.rainbow(), s_Led)
         );
-        
-        /*s_Shooter.setDefaultCommand(
-            new RunCommand(() -> s_Shooter.runShooter(0, 0), s_Shooter)
-        );*/
 
         s_Shooter.setDefaultCommand(
             new RunCommand(()-> s_Shooter.runAngle(operatorController.getLeftY() * 0.5, -operatorController.getRightY() * 0.5), s_Shooter)
@@ -102,7 +107,6 @@ public class RobotContainer {
         configureButtonBindings();
 
         /* Named Auto Commands */
-        
         NamedCommands.registerCommand("Shoot", 
             new SequentialCommandGroup(
                 // Ramp up
@@ -112,6 +116,10 @@ public class RobotContainer {
                 new RunCommand(() -> s_Shooter.runShooter(1, 0.2), s_Shooter).withTimeout(2)
             )
         );
+
+        /* Auto Chooser */
+        autoChooser = AutoBuilder.buildAutoChooser(); // Default auto will be `Commands.none()`
+        SmartDashboard.putData("Auto Mode", autoChooser);
     }
 
     /**
@@ -182,13 +190,12 @@ public class RobotContainer {
     }
 
     /**
-     * Use this to pass the a   utonomous command to the main {@link Robot} class.
+     * Use this to pass the autonomous command to the main {@link Robot} class.
      *
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        System.out.println("In auto");
-        return new PathPlannerAuto("Test Auto");
+        return autoChooser.getSelected();
     }
     
 }
