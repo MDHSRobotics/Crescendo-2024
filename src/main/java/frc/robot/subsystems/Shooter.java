@@ -71,9 +71,12 @@ public class Shooter extends SubsystemBase{
 
     public void runAngle(double angle,  double feed){
         
-        //System.out.println(power);
+        System.out.println(feed);
         angle1.set(angle);
-        feeder.set(-feed);
+        feeder.set(feed);
+
+        topShooter.set(0);
+        bottomShooter.set(0);
 
         angle1Rotations.setDouble(angle1.getEncoder().getPosition());
         angle2Rotations.setDouble(angle2.getEncoder().getPosition());
@@ -98,7 +101,7 @@ public class Shooter extends SubsystemBase{
     public void setAngle(double angle){
 
         //Calculate angle to rotations
-        double rotations = angle * ShooterConstants.kAngleGearRatio;
+        double rotations = angle * ShooterConstants.kAngleGearRatio - (ShooterConstants.kInitialMeasureAngle * ShooterConstants.kAngleGearRatio) + ShooterConstants.kInitialRotations;
 
 
         //Set the rotations

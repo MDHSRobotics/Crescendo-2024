@@ -36,7 +36,7 @@ public class Intake extends SubsystemBase{
         intake.set(power);
         conveyor.set(-power);
 
-        rightAngle.set(position);
+        rightAngle.set(position * 0.2);
 
         SmartDashboard.putNumber("Intake Power", power);
         SmartDashboard.putNumber("Intake Position", position);

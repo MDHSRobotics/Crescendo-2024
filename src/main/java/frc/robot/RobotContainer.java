@@ -43,7 +43,7 @@ public class RobotContainer {
     private final CommandXboxController operatorController = new CommandXboxController(1); // My joystick
 
     /* Subsystems */
-    private final Swerve s_Swerve = TunerConstants.DriveTrain; // My drivetrain
+    public final Swerve s_Swerve = TunerConstants.DriveTrain; // My drivetrain
     private final Shooter s_Shooter = new Shooter();
     private final Intake s_Intake = new Intake();
     private final Climb s_Climb = new Climb();
@@ -86,7 +86,7 @@ public class RobotContainer {
         );
 
         s_Shooter.setDefaultCommand(
-            new RunCommand(()-> s_Shooter.runAngle(operatorController.getLeftY() * 0.5, -operatorController.getRightY() * 0.5), s_Shooter)
+            new RunCommand(()-> s_Shooter.runAngle(operatorController.getLeftY() * 0.5, (operatorController.getLeftTriggerAxis() - operatorController.getRightTriggerAxis()) * 0.5), s_Shooter)
         );
 
         s_Climb.setDefaultCommand(
@@ -94,7 +94,7 @@ public class RobotContainer {
         );
 
         s_Intake.setDefaultCommand(
-            new RunCommand(() -> s_Intake.runIntake(0, -operatorController.getRightY()), s_Intake)
+            new RunCommand(() -> s_Intake.runIntake(operatorController.getRightY(), operatorController.getLeftTriggerAxis() - operatorController.getRightTriggerAxis()), s_Intake)
         );
 
         SmartDashboard.putData(s_Shooter);
@@ -113,7 +113,7 @@ public class RobotContainer {
                 new RunCommand(() -> s_Shooter.runShooter(1, 0), s_Shooter).withTimeout(2),
                 
                 //Shoot
-                new RunCommand(() -> s_Shooter.runShooter(1, 0.2), s_Shooter).withTimeout(2)
+                new RunCommand(() -> s_Shooter.runShooter(1, 1), s_Shooter).withTimeout(2)
             )
         );
 
@@ -171,12 +171,12 @@ public class RobotContainer {
                 new RunCommand(() -> s_Shooter.runShooter(1, 0), s_Shooter).withTimeout(2),
                 
                 //Shoot
-                new RunCommand(() -> s_Shooter.runShooter(1, 0.2), s_Shooter).withTimeout(2)
+                new RunCommand(() -> s_Shooter.runShooter(1, -0.5), s_Shooter).withTimeout(1)
             )
             .andThen(
-                new RunCommand(() -> s_Shooter.runShooter(0, 0), s_Shooter).withTimeout(2),
+                new RunCommand(() -> s_Shooter.runShooter(0, 0), s_Shooter).withTimeout(2)
                 // Blink green to indicate good to go
-                new RunCommand(() -> s_Led.setColor(0, 255, 0), s_Led).withTimeout(2)
+                //new RunCommand(() -> s_Led.setColor(0, 255, 0), s_Led).withTimeout(2)
             )
         );
 

@@ -53,6 +53,10 @@ public final class Constants {
 
         // Gear ratio between the pivot and motors
         public static final double kAngleGearRatio = 1920;
+
+        // At some angle, measure the angle and rotations and the code will account for it when calculating the rotations
+        public static final double kInitialMeasureAngle = 0;
+        public static final double kInitialRotations = 0;
     }
 
     public class IntakeConstants {
