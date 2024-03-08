@@ -55,8 +55,10 @@ public final class Constants {
         public static final double kAngleGearRatio = 1920;
 
         // At some angle, measure the angle and rotations and the code will account for it when calculating the rotations
-        public static final double kInitialMeasureAngle = 0;
-        public static final double kInitialRotations = 0;
+        public static final double kTopMeasureAngle = 90;
+        public static final double kTopRotations = -6.7884979;
+        public static final double kBottomMeasureAngle = 23;
+        public static final double kBottomRotations = 31.88364;
     }
 
     public class IntakeConstants {
@@ -73,6 +75,11 @@ public final class Constants {
         /* Motor IDs */
         public static final int kLeftClimbMotorID = 1;
         public static final int kRightClimbMotorID = 2;
+
+        public static final int leftTopLimit = 0;
+        public static final int rightTopLimit = 0;
+        public static final int leftBottomLimit = 10;
+        public static final int rightBottomLimit = 10;
 
     }
 

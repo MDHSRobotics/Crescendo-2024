@@ -88,6 +88,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
 
     // Apply a request to the swerve subsystem
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
+
         return run(() -> this.setControl(requestSupplier.get()));
     }
 

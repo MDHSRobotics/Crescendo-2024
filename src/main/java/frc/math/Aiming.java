@@ -26,7 +26,7 @@ public class Aiming {
      * @return Target pitch angle in radians 
      */
     public static double getPitch(double distance, double heightDifference){
-        return Math.atan2(distance, heightDifference);
+        return Math.atan2(heightDifference, distance);
     }
     
     /**
@@ -35,7 +35,7 @@ public class Aiming {
      * @return The output turning power
      */
     public static double getYawAdjustment(double tx){
-        return Math.max(-SwerveSpeedConstants.MaxAngularRate, Math.min(SwerveSpeedConstants.MaxAngularRate, tx));
+        return -0.15 * Math.max(-SwerveSpeedConstants.MaxAngularRate, Math.min(SwerveSpeedConstants.MaxAngularRate, tx));
     }
 
 }

@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -65,15 +66,18 @@ public class RobotContainer {
     /* Auto Chooser */
     private final SendableChooser<Command> autoChooser;
 
+    /* Swerve Speeds */
+    private boolean m_slowMode = false;
+
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
 
         /* Default Commands */
         s_Swerve.setDefaultCommand( // Drivetrain will execute this command periodically
-            s_Swerve.applyRequest(() -> drive.withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed) // Drive forward with
+            s_Swerve.applyRequest(() -> drive.withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.3 : 1.0)) // Drive forward with
                                                                                             // negative Y (forward)
-                .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed) // Drive left with negative X (left)
-                .withRotationalRate(-driverController.getRightX() * SwerveSpeedConstants.MaxAngularRate) // Drive counterclockwise with negative X (left)
+                .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.3 : 1.0)) // Drive left with negative X (left)
+                .withRotationalRate(-driverController.getRightX() * SwerveSpeedConstants.MaxAngularRate * (m_slowMode ? 0.3 : 1.0)) // Drive counterclockwise with negative X (left)
             ));
 
         if (Utils.isSimulation()) {
@@ -94,7 +98,7 @@ public class RobotContainer {
         );
 
         s_Intake.setDefaultCommand(
-            new RunCommand(() -> s_Intake.runIntake(operatorController.getRightY(), operatorController.getLeftTriggerAxis() - operatorController.getRightTriggerAxis()), s_Intake)
+            new RunCommand(() -> s_Intake.topPosition(), s_Intake)
         );
 
         SmartDashboard.putData(s_Shooter);
@@ -145,10 +149,13 @@ public class RobotContainer {
         driverController.y().whileTrue(new RunCommand(() -> s_Climb.runMotors(0, 1), s_Climb));
         driverController.b().whileTrue(new RunCommand(() -> s_Climb.runMotors(0, -1), s_Climb));
 
+        driverController.povUp().onTrue(new InstantCommand(() -> m_slowMode = true));
+        driverController.povDown().onTrue(new InstantCommand(() -> m_slowMode = false));
+
         /* Operator Buttons */
 
         // Run intake
-        operatorController.y().whileTrue(new RunCommand(() -> s_Intake.runIntake(-operatorController.getRightX(), operatorController.getRightTriggerAxis()), s_Intake));
+        operatorController.y().toggleOnTrue(new RunCommand(() -> s_Intake.bottomPosition(), s_Intake));
 
         // Lock on
         operatorController.x().toggleOnTrue(
@@ -197,5 +204,8 @@ public class RobotContainer {
     public Command getAutonomousCommand() {
         return autoChooser.getSelected();
     }
-    
+
+    public void periodic(){
+        
+    }
 }
