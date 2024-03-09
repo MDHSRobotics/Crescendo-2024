@@ -33,7 +33,7 @@ public class Climb extends SubsystemBase{
     }
 
     public void runMotors(double climb1Power, double climb2Power){
-        double lep = leftClimb.getEncoder().getPosition();
+        /*double lep = leftClimb.getEncoder().getPosition();
         double rep = rightClimb.getEncoder().getPosition();
 
         leftClimbRotations.setDouble(lep);
@@ -43,8 +43,13 @@ public class Climb extends SubsystemBase{
         }
         if (rep < ClimbConstants.rightTopLimit && rep > ClimbConstants.rightBottomLimit){
             rightClimb.set(climb2Power);
-        }
-        rightClimb.set(climb2Power);
+        } */
+
+        leftClimbRotations.setDouble(leftClimb.getEncoder().getPosition());
+        rightClimbRotations.setDouble(rightClimb.getEncoder().getPosition());
+        leftClimb.set(-climb1Power);
+
+        rightClimb.set(climb1Power);
         SmartDashboard.putNumber("Climb Power", climb1Power);
     }
 

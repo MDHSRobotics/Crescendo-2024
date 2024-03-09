@@ -35,7 +35,9 @@ public class Aiming {
      * @return The output turning power
      */
     public static double getYawAdjustment(double tx){
-        return Math.max(-SwerveSpeedConstants.MaxAngularRate, Math.min(SwerveSpeedConstants.MaxAngularRate, 0.009 * Math.pow(tx,1.8)));
+        double value = Math.max(-SwerveSpeedConstants.MaxAngularRate, Math.min(SwerveSpeedConstants.MaxAngularRate, tx * -0.15));
+        //System.out.println(value);
+        return value;
     }
 
 }

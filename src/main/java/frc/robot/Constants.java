@@ -30,8 +30,8 @@ public final class Constants {
         public static final double kStageTagHeight = kTagAdditionalHeight + 47.5;
 
         //Height to the ideal speaker entrance in inches
-        public static final double kSpeakerHeight = 80.0; // h2
-        public static final double kSpeakerHorizontal = 4.0; // l2
+        public static final double kSpeakerHeight = 86.0; // h2
+        public static final double kSpeakerHorizontal = 9.0; // l2
 
     }
 
@@ -55,10 +55,8 @@ public final class Constants {
         public static final double kAngleGearRatio = 1920;
 
         // At some angle, measure the angle and rotations and the code will account for it when calculating the rotations
-        public static final double kTopMeasureAngle = 90;
-        public static final double kTopRotations = -6.7884979;
-        public static final double kBottomMeasureAngle = 23;
-        public static final double kBottomRotations = 31.88364;
+        public static final double kBottomMeasureAngle = 25.0;
+        public static final double kBottomRotations = 0;
     }
 
     public class IntakeConstants {

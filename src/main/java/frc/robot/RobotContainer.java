@@ -51,8 +51,8 @@ public class RobotContainer {
     private final LED s_Led = new LED();
     
     /* Limit Switches */
-    DigitalInput intakeLimitSwitch = new DigitalInput(0);
-    DigitalInput shooterLimitSwitch = new DigitalInput(1);
+    DigitalInput intakeLimitSwitch = new DigitalInput(1);
+    DigitalInput shooterLimitSwitch = new DigitalInput(0);
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -104,8 +104,10 @@ public class RobotContainer {
         SmartDashboard.putData(s_Shooter);
         SmartDashboard.putData(s_Led);
         SmartDashboard.putData(s_Climb);
+        SmartDashboard.putData(s_Intake);
 
         new Trigger(intakeLimitSwitch::get).onTrue(new RunCommand(() -> s_Led.setColor(240, 161, 26), s_Led));
+        //new Trigger(shooterLimitSwitch::get).onTrue(new InstantCommand(() -> s_Shooter.runFeed(0), s_Shooter));
 
         // Configure the button bindings
         configureButtonBindings();
@@ -149,13 +151,14 @@ public class RobotContainer {
         driverController.y().whileTrue(new RunCommand(() -> s_Climb.runMotors(0, 1), s_Climb));
         driverController.b().whileTrue(new RunCommand(() -> s_Climb.runMotors(0, -1), s_Climb));
 
-        driverController.povUp().onTrue(new InstantCommand(() -> m_slowMode = true));
-        driverController.povDown().onTrue(new InstantCommand(() -> m_slowMode = false));
+        driverController.povUp().onTrue(new InstantCommand(() -> m_slowMode = false));
+        driverController.povDown().onTrue(new InstantCommand(() -> m_slowMode = true));
 
         /* Operator Buttons */
 
         // Run intake
-        operatorController.y().toggleOnTrue(new RunCommand(() -> s_Intake.bottomPosition(), s_Intake));
+        operatorController.y().toggleOnTrue(new RunCommand(() -> s_Intake.bottomPosition(), s_Intake).alongWith(new RunCommand(() -> s_Shooter.runFeed(0.4), s_Shooter)));
+        operatorController.povDown().toggleOnTrue(new RunCommand(() -> s_Intake.spitOut(), s_Intake).alongWith(new RunCommand(() -> s_Shooter.runFeed(-1), s_Shooter)));
 
         // Lock on
         operatorController.x().toggleOnTrue(
@@ -174,21 +177,22 @@ public class RobotContainer {
         // Shoot
         operatorController.a().onTrue(
             new SequentialCommandGroup(
+                new RunCommand(() -> s_Shooter.runShooter(0, 0.5), s_Shooter).withTimeout(0.05),
                 // Ramp up
-                new RunCommand(() -> s_Shooter.runShooter(1, 0), s_Shooter).withTimeout(2),
+                new RunCommand(() -> s_Shooter.runShooter(1.0, 0), s_Shooter).withTimeout(2),
                 
                 //Shoot
-                new RunCommand(() -> s_Shooter.runShooter(1, -0.5), s_Shooter).withTimeout(1)
+                new RunCommand(() -> s_Shooter.runShooter(1.0, -0.5), s_Shooter).withTimeout(1)
             )
             .andThen(
-                new RunCommand(() -> s_Shooter.runShooter(0, 0), s_Shooter).withTimeout(2)
+                new RunCommand(() -> s_Shooter.runShooter(0, 0), s_Shooter).withTimeout(1)
                 // Blink green to indicate good to go
                 //new RunCommand(() -> s_Led.setColor(0, 255, 0), s_Led).withTimeout(2)
             )
         );
 
         operatorController.start().onTrue(new InstantCommand(() -> s_Shooter.resetEncoders(), s_Shooter));
-
+        operatorController.back().onTrue(new InstantCommand(() -> s_Intake.resetEncoders(), s_Intake));
         // Manual Control
     }
 
@@ -205,9 +209,5 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand() {
         return autoChooser.getSelected();
-    }
-
-    public void periodic(){
-        
     }
 }

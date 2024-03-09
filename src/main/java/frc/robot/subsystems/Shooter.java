@@ -62,7 +62,7 @@ public class Shooter extends SubsystemBase{
         feeder = new CANSparkMax(ShooterConstants.kFeederID, MotorType.kBrushless);
 
         m_pidController = angle1.getPIDController();
-        m_pidController.setP(0.01);
+        m_pidController.setP(0.1);
         
         angle2.follow(angle1);
         SmartDashboard.putNumber("Angle 1 rotations", angle1.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition());
@@ -71,6 +71,7 @@ public class Shooter extends SubsystemBase{
     }
 
     public void runShooter(double power, double feed){
+        //System.out.println("Run Shooter " + power + " " + feed);
         topShooter.set(-power * shootSpeed.getDouble(1.0));
         bottomShooter.set(power * shootSpeed.getDouble(1.0));
         SmartDashboard.putNumber("Shooter Power", power);
@@ -79,6 +80,7 @@ public class Shooter extends SubsystemBase{
     } 
 
     public void runAngle(double angle,  double feed){
+        //System.out.println("Run Angle " + angle + " " + feed);
         
         //System.out.println(feed);
         angle1.set(angle);
@@ -94,6 +96,11 @@ public class Shooter extends SubsystemBase{
         
     }
 
+    public void runFeed(double power){
+        //System.out.println("Run Feed " + power);
+        feeder.set(power);
+    }
+
     //adjust the angle of the shooter
     public void setAngleFromLimelight(){
         double horizontalDistance = Aiming.calculateDistance(
@@ -105,7 +112,7 @@ public class Shooter extends SubsystemBase{
         double adjustedDistance = horizontalDistance + LimelightConstants.kLimelightPivotHorizontalDistance - LimelightConstants.kSpeakerHorizontal;
         double heightDifference = LimelightConstants.kSpeakerHeight - ShooterConstants.kPivotHeight;
 
-        //System.out.println(adjustedDistance +  " " + heightDifference);
+        System.out.println(adjustedDistance +  " " + heightDifference);
 
         double angle = Aiming.getPitch(adjustedDistance, heightDifference);
 
@@ -120,18 +127,20 @@ public class Shooter extends SubsystemBase{
 
         //Calculate angle to rotations
         //System.out.println(Math.toDegrees(angle));
-        double rotations = -0.577190 * (angle - ShooterConstants.kBottomMeasureAngle) + ShooterConstants.kBottomRotations;
+        double rotations = -0.5839 * (angle - ShooterConstants.kBottomMeasureAngle + 3.0);
 
 
         //Set the rotations
-        if(rotations > -6.7 && rotations < 31.8){
+        if(rotations > -45.8 && rotations < 0){
             m_pidController.setReference(rotations, CANSparkMax.ControlType.kPosition);
-            System.out.println(rotations);
+            //System.out.println(rotations);
         }else{
-            System.out.println("Not moving motor");
+            //System.out.println("Not moving motor");
         }
         //System.out.println(rotations);
         SmartDashboard.putNumber("Set Angle", angle);
+        angle1Rotations.setDouble(angle1.getEncoder().getPosition());
+        angle2Rotations.setDouble(angle2.getEncoder().getPosition());
     }
 
     public void resetEncoders(){

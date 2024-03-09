@@ -41,7 +41,7 @@ public class Intake extends SubsystemBase{
         leftAngle.setIdleMode(IdleMode.kBrake);
         
         m_pidController = rightAngle.getPIDController();
-        m_pidController.setP(0.01);
+        m_pidController.setP(0.03);
 
         leftAngle.follow(rightAngle, true);
     }
@@ -66,7 +66,18 @@ public class Intake extends SubsystemBase{
     public void bottomPosition(){
         m_pidController.setReference(intakeBottomRotations.getDouble(0), CANSparkMax.ControlType.kPosition);
         intake.set(1);
-        conveyor.set(-1);
+        conveyor.set(-0.5);
+
+    }
+
+    public void spitOut(){
+        intake.set(-1);
+        conveyor.set(1);
     }
     
+    
+    public void resetEncoders(){
+        leftAngle.getEncoder().setPosition(0);
+        rightAngle.getEncoder().setPosition(0);
+    }
 }
