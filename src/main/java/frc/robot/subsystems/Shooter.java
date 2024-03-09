@@ -134,8 +134,9 @@ public class Shooter extends SubsystemBase{
         SmartDashboard.putNumber("Set Angle", angle);
     }
 
-    public void shootSequence(){
-
+    public void resetEncoders(){
+        angle1.getEncoder().setPosition(0);
+        angle2.getEncoder().setPosition(0);
     }
 
 }

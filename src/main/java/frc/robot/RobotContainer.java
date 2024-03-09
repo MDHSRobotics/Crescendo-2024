@@ -187,6 +187,8 @@ public class RobotContainer {
             )
         );
 
+        operatorController.start().onTrue(new InstantCommand(() -> s_Shooter.resetEncoders(), s_Shooter));
+
         // Manual Control
     }
 
