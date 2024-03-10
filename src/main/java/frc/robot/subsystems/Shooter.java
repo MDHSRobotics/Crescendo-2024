@@ -53,6 +53,9 @@ public class Shooter extends SubsystemBase{
     private GenericEntry calculatedAngle =
       tab.add("calculated angle", 0.0)
         .getEntry();
+    private GenericEntry rotationsC =
+      tab.add("Rotations", -0.5839)
+        .getEntry();
 
     public Shooter(){
         topShooter = new CANSparkFlex(ShooterConstants.kTopID, MotorType.kBrushless);
@@ -127,7 +130,7 @@ public class Shooter extends SubsystemBase{
 
         //Calculate angle to rotations
         //System.out.println(Math.toDegrees(angle));
-        double rotations = -0.5839 * (angle - ShooterConstants.kBottomMeasureAngle + 3.0);
+        double rotations = rotationsC.getDouble(0.0) * (angle - ShooterConstants.kBottomMeasureAngle + 4.0);
 
 
         //Set the rotations
