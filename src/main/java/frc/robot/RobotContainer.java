@@ -90,7 +90,7 @@ public class RobotContainer {
         );
 
         s_Shooter.setDefaultCommand(
-            new RunCommand(()-> s_Shooter.runAngle(operatorController.getLeftY() * 0.5, (operatorController.getLeftTriggerAxis() - operatorController.getRightTriggerAxis()) * 0.5), s_Shooter)
+            new RunCommand(()-> s_Shooter.runAngle(operatorController.getRightY(), 0), s_Shooter)
         );
 
         s_Climb.setDefaultCommand(
@@ -98,7 +98,7 @@ public class RobotContainer {
         );
 
         s_Intake.setDefaultCommand(
-            new RunCommand(() -> s_Intake.topPosition(), s_Intake)
+            new RunCommand(() -> s_Intake.topPosition(operatorController.getLeftY()), s_Intake)
         );
 
         SmartDashboard.putData(s_Shooter);
@@ -170,6 +170,8 @@ public class RobotContainer {
                 new RunCommand(() -> s_Shooter.setAngleFromLimelight(), s_Shooter)
             ).alongWith(
                 new RunCommand(() -> s_Led.setColor(255, 0, 0), s_Led)
+            ).until(
+                () -> Math.abs(driverController.getRightX()) > 0.1
             )
         );
 
@@ -177,12 +179,12 @@ public class RobotContainer {
         // Shoot
         operatorController.a().onTrue(
             new SequentialCommandGroup(
-                new RunCommand(() -> s_Shooter.runShooter(0, 0.5), s_Shooter).withTimeout(0.05),
+                new RunCommand(() -> s_Shooter.runShooter(-0.2, 0.5), s_Shooter).withTimeout(0.05),
                 // Ramp up
-                new RunCommand(() -> s_Shooter.runShooter(1.0, 0), s_Shooter).withTimeout(2),
+                new RunCommand(() -> s_Shooter.runShooter(0.7, 0), s_Shooter).withTimeout(2),
                 
                 //Shoot
-                new RunCommand(() -> s_Shooter.runShooter(1.0, -0.5), s_Shooter).withTimeout(1)
+                new RunCommand(() -> s_Shooter.runShooter(0.7, -0.5), s_Shooter).withTimeout(1)
             )
             .andThen(
                 new RunCommand(() -> s_Shooter.runShooter(0, 0), s_Shooter).withTimeout(1)

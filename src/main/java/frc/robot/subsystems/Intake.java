@@ -28,7 +28,7 @@ public class Intake extends SubsystemBase{
       tab.add("Intake Top Rotations", 0.0)
         .getEntry();
     private GenericEntry intakeBottomRotations =
-      tab.add("Intake Bottom Rotations", 0.0)
+      tab.add("Intake Bottom Rotations", -20.0)
         .getEntry();
 
     public Intake(){
@@ -56,9 +56,13 @@ public class Intake extends SubsystemBase{
         SmartDashboard.putNumber("Intake Position", position);
     }
 
-    public void topPosition(){
-        m_pidController.setReference(intakeTopRotations.getDouble(0), CANSparkMax.ControlType.kPosition);
-
+    public void topPosition(double power){
+        if(Math.abs(power) < 0.1){
+            m_pidController.setReference(intakeTopRotations.getDouble(0), CANSparkMax.ControlType.kPosition);
+        }else{
+            intake.set(power);
+        }
+        
         intake.set(0);
         conveyor.set(0);
     }

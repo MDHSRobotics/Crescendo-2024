@@ -86,7 +86,12 @@ public class Shooter extends SubsystemBase{
         //System.out.println("Run Angle " + angle + " " + feed);
         
         //System.out.println(feed);
-        angle1.set(angle);
+        if(Math.abs(angle) > 0.1){
+            angle1.set(angle);
+        }else{
+            setAngle(25);
+        }
+        
         feeder.set(feed);
 
         topShooter.set(0);
