@@ -31,6 +31,10 @@ public class Intake extends SubsystemBase{
       tab.add("Intake Bottom Rotations", -20.0)
         .getEntry();
 
+    private GenericEntry intakeRotations =
+      tab.add("Intake Rotations", -20.0)
+        .getEntry(); 
+
     public Intake(){
         intake = new CANSparkFlex(IntakeConstants.kIntakeID, MotorType.kBrushless);
         conveyor = new CANSparkMax(IntakeConstants.kConveyorID, MotorType.kBrushless);
@@ -60,9 +64,11 @@ public class Intake extends SubsystemBase{
         if(Math.abs(power) < 0.1){
             m_pidController.setReference(intakeTopRotations.getDouble(0), CANSparkMax.ControlType.kPosition);
         }else{
-            intake.set(power);
+            rightAngle.set(power);
         }
         
+        intakeRotations.setDouble(rightAngle.getEncoder().getPosition());
+
         intake.set(0);
         conveyor.set(0);
     }

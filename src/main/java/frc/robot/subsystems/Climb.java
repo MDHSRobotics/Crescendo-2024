@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.ClimbConstants;
 
+import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 public class Climb extends SubsystemBase{
@@ -29,7 +30,9 @@ public class Climb extends SubsystemBase{
     public Climb(){
         leftClimb = new CANSparkMax(ClimbConstants.kLeftClimbMotorID, MotorType.kBrushless);
         rightClimb = new CANSparkMax(ClimbConstants.kRightClimbMotorID, MotorType.kBrushless);
- 
+        
+        rightClimb.setIdleMode(IdleMode.kBrake);
+        leftClimb.setIdleMode(IdleMode.kBrake);
     }
 
     public void runMotors(double climb1Power, double climb2Power){

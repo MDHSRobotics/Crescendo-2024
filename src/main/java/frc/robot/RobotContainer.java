@@ -74,10 +74,10 @@ public class RobotContainer {
 
         /* Default Commands */
         s_Swerve.setDefaultCommand( // Drivetrain will execute this command periodically
-            s_Swerve.applyRequest(() -> drive.withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.3 : 1.0)) // Drive forward with
+            s_Swerve.applyRequest(() -> drive.withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with
                                                                                             // negative Y (forward)
-                .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.3 : 1.0)) // Drive left with negative X (left)
-                .withRotationalRate(-driverController.getRightX() * SwerveSpeedConstants.MaxAngularRate * (m_slowMode ? 0.3 : 1.0)) // Drive counterclockwise with negative X (left)
+                .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
+                .withRotationalRate(-driverController.getRightX() * SwerveSpeedConstants.MaxAngularRate * (m_slowMode ? 1.0 : 1.0)) // Drive counterclockwise with negative X (left)
             ));
 
         if (Utils.isSimulation()) {
@@ -146,10 +146,10 @@ public class RobotContainer {
         driverController.povDown().onTrue(new RunCommand(()-> s_Led.blink(255, 255, 0, 1000), s_Led).withTimeout(10));
         
         // Climb
-        driverController.x().whileTrue(new RunCommand(() -> s_Climb.runMotors(1,0), s_Climb));
-        driverController.a().whileTrue(new RunCommand(() -> s_Climb.runMotors(-1, 0), s_Climb));
-        driverController.y().whileTrue(new RunCommand(() -> s_Climb.runMotors(0, 1), s_Climb));
-        driverController.b().whileTrue(new RunCommand(() -> s_Climb.runMotors(0, -1), s_Climb));
+        driverController.x().whileTrue(new RunCommand(() -> s_Climb.runMotors(0,1), s_Climb));
+        driverController.a().whileTrue(new RunCommand(() -> s_Climb.runMotors(-1, -1), s_Climb));
+        driverController.y().whileTrue(new RunCommand(() -> s_Climb.runMotors(1, 1), s_Climb));
+        driverController.b().whileTrue(new RunCommand(() -> s_Climb.runMotors(1, 0), s_Climb));
 
         driverController.povUp().onTrue(new InstantCommand(() -> m_slowMode = false));
         driverController.povDown().onTrue(new InstantCommand(() -> m_slowMode = true));
@@ -181,7 +181,7 @@ public class RobotContainer {
             new SequentialCommandGroup(
                 new RunCommand(() -> s_Shooter.runShooter(-0.2, 0.5), s_Shooter).withTimeout(0.05),
                 // Ramp up
-                new RunCommand(() -> s_Shooter.runShooter(0.7, 0), s_Shooter).withTimeout(2),
+                new RunCommand(() -> s_Shooter.runShooter(0.7, 0), s_Shooter).withTimeout(1),
                 
                 //Shoot
                 new RunCommand(() -> s_Shooter.runShooter(0.7, -0.5), s_Shooter).withTimeout(1)
