@@ -30,10 +30,11 @@ public class Intake extends SubsystemBase{
     private GenericEntry intakeBottomRotations =
       tab.add("Intake Bottom Rotations", -20.0)
         .getEntry();
-
     private GenericEntry intakeRotations =
       tab.add("Intake Rotations", -20.0)
         .getEntry(); 
+
+    private boolean m_calibration = false;
 
     public Intake(){
         intake = new CANSparkFlex(IntakeConstants.kIntakeID, MotorType.kBrushless);
@@ -61,7 +62,7 @@ public class Intake extends SubsystemBase{
     }
 
     public void topPosition(double power){
-        if(Math.abs(power) < 0.1){
+        if(!m_calibration){
             m_pidController.setReference(intakeTopRotations.getDouble(0), CANSparkMax.ControlType.kPosition);
         }else{
             rightAngle.set(power);
@@ -89,5 +90,9 @@ public class Intake extends SubsystemBase{
     public void resetEncoders(){
         leftAngle.getEncoder().setPosition(0);
         rightAngle.getEncoder().setPosition(0);
+    }
+
+    public void setCalibration(boolean mode){
+        m_calibration = mode;
     }
 }

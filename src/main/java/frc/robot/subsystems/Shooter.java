@@ -56,6 +56,11 @@ public class Shooter extends SubsystemBase{
     private GenericEntry rotationsC =
       tab.add("Rotations", -0.5839)
         .getEntry();
+    private GenericEntry locked =
+      tab.add("locked", false)
+        .getEntry();
+    
+    private boolean m_calibration = false;
 
     public Shooter(){
         topShooter = new CANSparkFlex(ShooterConstants.kTopID, MotorType.kBrushless);
@@ -85,8 +90,7 @@ public class Shooter extends SubsystemBase{
     public void runAngle(double angle,  double feed){
         //System.out.println("Run Angle " + angle + " " + feed);
         
-        //System.out.println(feed);
-        if(Math.abs(angle) > 0.1){
+        if(!m_calibration){
             angle1.set(angle);
         }else{
             setAngle(25);
@@ -120,8 +124,6 @@ public class Shooter extends SubsystemBase{
         double adjustedDistance = horizontalDistance + LimelightConstants.kLimelightPivotHorizontalDistance - LimelightConstants.kSpeakerHorizontal;
         double heightDifference = LimelightConstants.kSpeakerHeight - ShooterConstants.kPivotHeight;
 
-        System.out.println(adjustedDistance +  " " + heightDifference);
-
         double angle = Aiming.getPitch(adjustedDistance, heightDifference);
 
         setAngle(Math.toDegrees(angle));
@@ -154,6 +156,10 @@ public class Shooter extends SubsystemBase{
     public void resetEncoders(){
         angle1.getEncoder().setPosition(0);
         angle2.getEncoder().setPosition(0);
+    }
+
+    public void setCalibration(boolean mode){
+        m_calibration = mode;
     }
 
 }

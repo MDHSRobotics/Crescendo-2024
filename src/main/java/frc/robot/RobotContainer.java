@@ -86,7 +86,7 @@ public class RobotContainer {
         s_Swerve.registerTelemetry(logger::telemeterize);
 
         s_Led.setDefaultCommand(
-            new RunCommand(()-> s_Led.rainbow(), s_Led)
+            new RunCommand(()-> s_Led.setColor(100, 250, 100), s_Led)
         );
 
         s_Shooter.setDefaultCommand(
@@ -181,7 +181,7 @@ public class RobotContainer {
             new SequentialCommandGroup(
                 new RunCommand(() -> s_Shooter.runShooter(-0.2, 0.5), s_Shooter).withTimeout(0.05),
                 // Ramp up
-                new RunCommand(() -> s_Shooter.runShooter(0.7, 0), s_Shooter).withTimeout(1),
+                new RunCommand(() -> s_Shooter.runShooter(0.7, 0), s_Shooter).withTimeout(1.5),
                 
                 //Shoot
                 new RunCommand(() -> s_Shooter.runShooter(0.7, -0.5), s_Shooter).withTimeout(1)
