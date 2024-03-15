@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
+import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.SwerveSpeedConstants;
 import frc.robot.generated.TunerConstants;
 
@@ -90,11 +91,11 @@ public class RobotContainer {
         );
 
         s_Shooter.setDefaultCommand(
-            new RunCommand(()-> s_Shooter.runAngle(operatorController.getRightY(), 0), s_Shooter)
+            new RunCommand(()-> s_Shooter.run(operatorController.getRightY()), s_Shooter)
         );
 
         s_Climb.setDefaultCommand(
-            new RunCommand((() -> s_Climb.runMotors(0,0)), s_Climb)
+            new RunCommand((() -> s_Climb.runClimb(0,0)), s_Climb)
         );
 
         s_Intake.setDefaultCommand(
@@ -107,7 +108,6 @@ public class RobotContainer {
         SmartDashboard.putData(s_Intake);
 
         new Trigger(intakeLimitSwitch::get).onTrue(new RunCommand(() -> s_Led.setColor(240, 161, 26), s_Led));
-        //new Trigger(shooterLimitSwitch::get).onTrue(new InstantCommand(() -> s_Shooter.runFeed(0), s_Shooter));
 
         // Configure the button bindings
         configureButtonBindings();
@@ -146,25 +146,30 @@ public class RobotContainer {
         driverController.povDown().onTrue(new RunCommand(()-> s_Led.blink(255, 255, 0, 1000), s_Led).withTimeout(10));
         
         // Climb
-        driverController.x().whileTrue(new RunCommand(() -> s_Climb.runMotors(0,1), s_Climb));
-        driverController.a().whileTrue(new RunCommand(() -> s_Climb.runMotors(-1, -1), s_Climb));
-        driverController.y().whileTrue(new RunCommand(() -> s_Climb.runMotors(1, 1), s_Climb));
-        driverController.b().whileTrue(new RunCommand(() -> s_Climb.runMotors(1, 0), s_Climb));
+        driverController.x().whileTrue(new RunCommand(() -> s_Climb.runClimb(0,1), s_Climb));
+        driverController.a().whileTrue(new RunCommand(() -> s_Climb.runClimb(-1, -1), s_Climb));
+        driverController.y().whileTrue(new RunCommand(() -> s_Climb.runClimb(1, 1), s_Climb));
+        driverController.b().whileTrue(new RunCommand(() -> s_Climb.runClimb(1, 0), s_Climb));
 
         driverController.povUp().onTrue(new InstantCommand(() -> m_slowMode = false));
         driverController.povDown().onTrue(new InstantCommand(() -> m_slowMode = true));
 
         /* Operator Buttons */
 
+        Trigger speakerTag = new Trigger(() -> LimelightHelper.getFiducialID("") == 4 || LimelightHelper.getFiducialID("") == 7);
+        Trigger ampTag = new Trigger(() -> LimelightHelper.getFiducialID("") == 5 || LimelightHelper.getFiducialID("") == 6);
+
         // Run intake
         operatorController.y().toggleOnTrue(new RunCommand(() -> s_Intake.bottomPosition(), s_Intake).alongWith(new RunCommand(() -> s_Shooter.runFeed(0.4), s_Shooter)));
-        operatorController.povDown().toggleOnTrue(new RunCommand(() -> s_Intake.spitOut(), s_Intake).alongWith(new RunCommand(() -> s_Shooter.runFeed(-1), s_Shooter)));
+        operatorController.povDown().toggleOnTrue(new RunCommand(() -> s_Intake.spitOut(), s_Intake).alongWith(new RunCommand(() -> s_Shooter.runFeed(-1.0), s_Shooter)));
 
-        // Lock on
-        operatorController.x().toggleOnTrue(
+        // Lock on to speaker
+        operatorController.x()
+            .and(speakerTag)
+            .toggleOnTrue(
             s_Swerve.applyRequest(() -> drive.withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed) // Drive forward with // negative Y (forward)
                 .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed) // Drive left with negative X (left)
-                .withRotationalRate(Aiming.getYawAdjustment(LimelightHelper.getTX(""))) // Turn at the rate given by limelight
+                .withRotationalRate(Aiming.getYawTxAdjustment(LimelightHelper.getTX(""))) // Turn at the rate given by limelight
             )
             .alongWith(
                 new RunCommand(() -> s_Shooter.setAngleFromLimelight(), s_Shooter)
@@ -175,6 +180,29 @@ public class RobotContainer {
             )
         );
 
+        // Lock on to amp
+        operatorController.x()
+            .and(ampTag)
+            .toggleOnTrue(
+            s_Swerve.applyRequest(() -> drive.withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed) // Drive forward with // negative Y (forward)
+                .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed) // Drive left with negative X (left)
+                .withRotationalRate(Aiming.getYawGyroAdjustment(s_Swerve.getAngle())) // Turn at the rate given by limelight
+            )
+            .alongWith(
+                new RunCommand(() -> s_Shooter.setAngle(ShooterConstants.ampAngle), s_Shooter)
+            ).alongWith(
+                new RunCommand(() -> s_Led.setColor(255, 0, 0), s_Led)
+            ).until(
+                () -> Math.abs(driverController.getRightX()) > 0.1
+            )
+        );
+
+        operatorController.b().onTrue(
+            new InstantCommand(() -> s_Shooter.setCalibration(), s_Shooter)
+            .alongWith(
+                new InstantCommand(() -> s_Intake.setCalibration(), s_Intake)
+            )
+        );
         
         // Shoot
         operatorController.a().onTrue(

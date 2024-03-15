@@ -59,6 +59,9 @@ public class Shooter extends SubsystemBase{
     private GenericEntry locked =
       tab.add("locked", false)
         .getEntry();
+    private GenericEntry movingAngle =
+      tab.add("Moving angle motors", false)
+        .getEntry();
     
     private boolean m_calibration = false;
 
@@ -87,29 +90,27 @@ public class Shooter extends SubsystemBase{
         feeder.set(-feed);
     } 
 
-    public void runAngle(double angle,  double feed){
-        //System.out.println("Run Angle " + angle + " " + feed);
-        
+    public void run(double angleSpeed){     
         if(!m_calibration){
-            angle1.set(angle);
+            setAngle(30);
         }else{
-            setAngle(25);
+            angle1.set(angleSpeed);
         }
         
-        feeder.set(feed);
-
+        feeder.set(0);
         topShooter.set(0);
         bottomShooter.set(0);
 
+        /* Logging */
         angle1Rotations.setDouble(angle1.getEncoder().getPosition());
         angle2Rotations.setDouble(angle2.getEncoder().getPosition());
-
+        locked.setBoolean(false);
         limelightTY.setDouble(LimelightHelper.getTY(""));
+        calculatedAngle.setDouble(0);
         
     }
 
     public void runFeed(double power){
-        //System.out.println("Run Feed " + power);
         feeder.set(power);
     }
 
@@ -128,27 +129,28 @@ public class Shooter extends SubsystemBase{
 
         setAngle(Math.toDegrees(angle));
 
+        /* Logging */
         calculatedDistance.setDouble(horizontalDistance);
-        calculatedAngle.setDouble(Math.toDegrees(angle));
+        
         limelightTY.setDouble(LimelightHelper.getTY(""));
     }
 
     public void setAngle(double angle){
-
         //Calculate angle to rotations
-        //System.out.println(Math.toDegrees(angle));
         double rotations = rotationsC.getDouble(0.0) * (angle - ShooterConstants.kBottomMeasureAngle + 4.0);
-
 
         //Set the rotations
         if(rotations > -45.8 && rotations < 0){
             m_pidController.setReference(rotations, CANSparkMax.ControlType.kPosition);
-            //System.out.println(rotations);
+            movingAngle.setBoolean(true);
         }else{
-            //System.out.println("Not moving motor");
+            movingAngle.setBoolean(false);
         }
         //System.out.println(rotations);
-        SmartDashboard.putNumber("Set Angle", angle);
+
+        /* Logging */
+        calculatedAngle.setDouble(Math.toDegrees(angle));
+        locked.setBoolean(Aiming.approximatelyEqual(rotations, angle1.getEncoder().getPosition(), 1.0));
         angle1Rotations.setDouble(angle1.getEncoder().getPosition());
         angle2Rotations.setDouble(angle2.getEncoder().getPosition());
     }
@@ -158,8 +160,8 @@ public class Shooter extends SubsystemBase{
         angle2.getEncoder().setPosition(0);
     }
 
-    public void setCalibration(boolean mode){
-        m_calibration = mode;
+    public void setCalibration(){
+        m_calibration = !m_calibration;
     }
 
 }

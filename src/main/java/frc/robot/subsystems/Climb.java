@@ -5,7 +5,6 @@ import com.revrobotics.CANSparkMax;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.ClimbConstants;
@@ -35,25 +34,13 @@ public class Climb extends SubsystemBase{
         leftClimb.setIdleMode(IdleMode.kBrake);
     }
 
-    public void runMotors(double climb1Power, double climb2Power){
-        /*double lep = leftClimb.getEncoder().getPosition();
-        double rep = rightClimb.getEncoder().getPosition();
+    public void runClimb(double climb1Power, double climb2Power){  
+        leftClimb.set(-climb1Power);
+        rightClimb.set(climb1Power);
 
-        leftClimbRotations.setDouble(lep);
-        rightClimbRotations.setDouble(rep);
-        if (lep < ClimbConstants.leftTopLimit && lep > ClimbConstants.leftBottomLimit){
-            leftClimb.set(-climb1Power);
-        }
-        if (rep < ClimbConstants.rightTopLimit && rep > ClimbConstants.rightBottomLimit){
-            rightClimb.set(climb2Power);
-        } */
-
+        /* Logging */
         leftClimbRotations.setDouble(leftClimb.getEncoder().getPosition());
         rightClimbRotations.setDouble(rightClimb.getEncoder().getPosition());
-        leftClimb.set(-climb1Power);
-
-        rightClimb.set(climb1Power);
-        SmartDashboard.putNumber("Climb Power", climb1Power);
     }
 
 }

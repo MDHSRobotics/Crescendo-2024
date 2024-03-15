@@ -56,7 +56,9 @@ public final class Constants {
 
         // At some angle, measure the angle and rotations and the code will account for it when calculating the rotations
         public static final double kBottomMeasureAngle = 25.0;
-        public static final double kBottomRotations = 0;
+        public static final double kBottomRotations = 0.0;
+
+        public static final double ampAngle = 30.0;
     }
 
     public class IntakeConstants {

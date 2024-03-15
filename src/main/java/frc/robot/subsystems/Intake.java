@@ -9,7 +9,6 @@ import com.revrobotics.CANSparkFlex;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.IntakeConstants;
@@ -32,7 +31,7 @@ public class Intake extends SubsystemBase{
         .getEntry();
     private GenericEntry intakeRotations =
       tab.add("Intake Rotations", -20.0)
-        .getEntry(); 
+        .getEntry();
 
     private boolean m_calibration = false;
 
@@ -51,16 +50,6 @@ public class Intake extends SubsystemBase{
         leftAngle.follow(rightAngle, true);
     }
 
-    public void runIntake(double position, double power){
-        intake.set(power);
-        conveyor.set(-power);
-
-        rightAngle.set(position * 0.2);
-
-        SmartDashboard.putNumber("Intake Power", power);
-        SmartDashboard.putNumber("Intake Position", position);
-    }
-
     public void topPosition(double power){
         if(!m_calibration){
             m_pidController.setReference(intakeTopRotations.getDouble(0), CANSparkMax.ControlType.kPosition);
@@ -68,17 +57,21 @@ public class Intake extends SubsystemBase{
             rightAngle.set(power);
         }
         
-        intakeRotations.setDouble(rightAngle.getEncoder().getPosition());
+        intake.set(0.0);
+        conveyor.set(0.0);
 
-        intake.set(0);
-        conveyor.set(0);
+        /* Logging */
+        intakeRotations.setDouble(rightAngle.getEncoder().getPosition());
     }
 
     public void bottomPosition(){
         m_pidController.setReference(intakeBottomRotations.getDouble(0), CANSparkMax.ControlType.kPosition);
-        intake.set(1);
+        
+        intake.set(1.0);
         conveyor.set(-0.5);
 
+        /* Logging */
+        intakeRotations.setDouble(rightAngle.getEncoder().getPosition());
     }
 
     public void spitOut(){
@@ -92,7 +85,7 @@ public class Intake extends SubsystemBase{
         rightAngle.getEncoder().setPosition(0);
     }
 
-    public void setCalibration(boolean mode){
-        m_calibration = mode;
+    public void setCalibration(){
+        m_calibration = !m_calibration;
     }
 }

@@ -34,10 +34,20 @@ public class Aiming {
      * @param tx The current tx value given by limelight
      * @return The output turning power
      */
-    public static double getYawAdjustment(double tx){
+    public static double getYawTxAdjustment(double tx){
         double value = Math.max(-SwerveSpeedConstants.MaxAngularRate, Math.min(SwerveSpeedConstants.MaxAngularRate, tx * -0.15));
         //System.out.println(value);
         return value;
     }
+
+    public static double getYawGyroAdjustment(double yaw){
+        double value = Math.max(-SwerveSpeedConstants.MaxAngularRate, Math.min(SwerveSpeedConstants.MaxAngularRate, yaw * -0.06));
+        //System.out.println(value);
+        return value;
+    }
+
+    public static boolean approximatelyEqual(double v1, double v2, double tolerance){
+        return Math.abs(v1 - v2) < tolerance;
+      }
 
 }

@@ -1,5 +1,8 @@
 package frc.robot.subsystems;
 
+import java.util.Map;
+
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -18,6 +21,10 @@ public class LED extends SubsystemBase{
     private int m_lastPixel = 1;
 
     private ShuffleboardTab tab = Shuffleboard.getTab("LED");
+    private GenericEntry color =
+      tab.add("Color", false)
+        .withProperties(Map.of("colorWhenFalse", "black"))
+        .getEntry();
 
     public LED(){
         m_led = new AddressableLED(0);
@@ -42,6 +49,8 @@ public class LED extends SubsystemBase{
         SmartDashboard.putString("LED RGB", "r:" + r + " g: " + g + " b: " + b);
         m_led.setData(m_ledBuffer);
         m_led.start();
+
+        color.setBoolean(true);
     }
 
     /**

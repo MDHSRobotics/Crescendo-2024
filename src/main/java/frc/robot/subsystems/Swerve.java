@@ -139,4 +139,8 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         });
         m_simNotifier.startPeriodic(kSimLoopPeriod);
     }
+
+    public double getAngle(){
+        return this.m_pigeon2.getAngle();
+    }
 }
