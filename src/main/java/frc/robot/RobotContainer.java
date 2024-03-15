@@ -186,7 +186,7 @@ public class RobotContainer {
             .toggleOnTrue(
             s_Swerve.applyRequest(() -> drive.withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed) // Drive forward with // negative Y (forward)
                 .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed) // Drive left with negative X (left)
-                .withRotationalRate(Aiming.getYawGyroAdjustment(s_Swerve.getAngle())) // Turn at the rate given by limelight
+                .withRotationalRate(Aiming.getYawTxAdjustment(LimelightHelper.getTX(""))) // Turn at the rate given by limelight
             )
             .alongWith(
                 new RunCommand(() -> s_Shooter.setAngle(ShooterConstants.ampAngle), s_Shooter)
@@ -197,7 +197,7 @@ public class RobotContainer {
             )
         );
 
-        operatorController.b().onTrue(
+        operatorController.povLeft().onTrue(
             new InstantCommand(() -> s_Shooter.setCalibration(), s_Shooter)
             .alongWith(
                 new InstantCommand(() -> s_Intake.setCalibration(), s_Intake)
@@ -213,6 +213,22 @@ public class RobotContainer {
                 
                 //Shoot
                 new RunCommand(() -> s_Shooter.runShooter(0.7, -0.5), s_Shooter).withTimeout(1)
+            )
+            .andThen(
+                new RunCommand(() -> s_Shooter.runShooter(0, 0), s_Shooter).withTimeout(1)
+                // Blink green to indicate good to go
+                //new RunCommand(() -> s_Led.setColor(0, 255, 0), s_Led).withTimeout(2)
+            )
+        );
+
+        operatorController.b().onTrue(
+            new SequentialCommandGroup(
+                new RunCommand(() -> s_Shooter.runShooter(-0.2, 0.5), s_Shooter).withTimeout(0.05),
+                // Ramp up
+                new RunCommand(() -> s_Shooter.runShooter(0.145, 0), s_Shooter).withTimeout(1.5),
+                
+                //Shoot
+                new RunCommand(() -> s_Shooter.runShooter(0.145, -0.5), s_Shooter).withTimeout(1)
             )
             .andThen(
                 new RunCommand(() -> s_Shooter.runShooter(0, 0), s_Shooter).withTimeout(1)

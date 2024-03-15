@@ -149,7 +149,7 @@ public class Shooter extends SubsystemBase{
         //System.out.println(rotations);
 
         /* Logging */
-        calculatedAngle.setDouble(Math.toDegrees(angle));
+        calculatedAngle.setDouble(angle);
         locked.setBoolean(Aiming.approximatelyEqual(rotations, angle1.getEncoder().getPosition(), 1.0));
         angle1Rotations.setDouble(angle1.getEncoder().getPosition());
         angle2Rotations.setDouble(angle2.getEncoder().getPosition());

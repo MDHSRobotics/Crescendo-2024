@@ -141,6 +141,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     }
 
     public double getAngle(){
-        return this.m_pigeon2.getAngle();
+        System.out.println(m_odometry.getEstimatedPosition().getRotation().getDegrees());
+        return m_odometry.getEstimatedPosition().getRotation().getDegrees();
     }
 }

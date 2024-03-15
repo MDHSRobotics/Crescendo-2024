@@ -58,7 +58,7 @@ public final class Constants {
         public static final double kBottomMeasureAngle = 25.0;
         public static final double kBottomRotations = 0.0;
 
-        public static final double ampAngle = 30.0;
+        public static final double ampAngle = 54.0;
     }
 
     public class IntakeConstants {
