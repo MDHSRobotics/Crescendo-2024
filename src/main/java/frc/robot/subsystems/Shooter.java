@@ -33,8 +33,14 @@ public class Shooter extends SubsystemBase{
     private SparkPIDController m_pidController;
 
     private ShuffleboardTab tab = Shuffleboard.getTab("Shooter");
-    private GenericEntry shootSpeed =
+    private GenericEntry shootSpeedTop =
       tab.add("Max Speed", 1)
+        .withWidget(BuiltInWidgets.kNumberSlider)
+        .withProperties(Map.of("min", 0, "max", 1)) // specify widget properties here
+        .getEntry();
+    
+    private GenericEntry shootSpeedBot =
+      tab.add("Max Speed Bot", 1)
         .withWidget(BuiltInWidgets.kNumberSlider)
         .withProperties(Map.of("min", 0, "max", 1)) // specify widget properties here
         .getEntry();
@@ -62,6 +68,9 @@ public class Shooter extends SubsystemBase{
     private GenericEntry movingAngle =
       tab.add("Moving angle motors", false)
         .getEntry();
+     private GenericEntry ampAngle =
+      tab.add("Amp angle", 50)
+        .getEntry();
     
     private boolean m_calibration = false;
 
@@ -81,14 +90,24 @@ public class Shooter extends SubsystemBase{
         //shooter2.setIdleMode(IdleMode.kCoast);
     }
 
-    public void runShooter(double power, double feed){
+    public void runShooter(double topPower, double bottomPower, double feed){
         //System.out.println("Run Shooter " + power + " " + feed);
-        topShooter.set(-power * shootSpeed.getDouble(1.0));
-        bottomShooter.set(power * shootSpeed.getDouble(1.0));
-        SmartDashboard.putNumber("Shooter Power", power);
+        topShooter.set(-topPower * shootSpeedTop.getDouble(1.0));
+        bottomShooter.set(bottomPower * shootSpeedBot.getDouble(1.0));
+        SmartDashboard.putNumber("Shooter Power", bottomPower);
         SmartDashboard.putNumber("Feed Power", feed);
         feeder.set(-feed);
     } 
+
+    public void pullBack(){
+        topShooter.set(0.2);
+        bottomShooter.set(-0.2);
+        feeder.set(0.5);
+    }
+
+    public void ampAngle(){
+        setAngle(ampAngle.getDouble(50));
+    }
 
     public void run(double angleSpeed){     
         if(!m_calibration){

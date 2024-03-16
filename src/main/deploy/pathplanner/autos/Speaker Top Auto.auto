@@ -5,7 +5,7 @@
       "x": 0.48523866278501937,
       "y": 7.005529395674177
     },
-    "rotation": 0
+    "rotation": 180.0
   },
   "command": {
     "type": "sequential",
@@ -39,36 +39,6 @@
           "type": "named",
           "data": {
             "name": "Shoot"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Top Note Pickup"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Top to Mid"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Middle Note Pickup"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Mid to Bot"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Bottom Note Pickup"
           }
         },
         {

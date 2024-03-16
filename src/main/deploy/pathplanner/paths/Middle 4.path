@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.5276958246224197,
-        "y": 4.301987065512593
+        "x": 2.6263652527305066,
+        "y": 4.272386237080167
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.281022254347806,
-        "y": 3.0291514429183093
+        "x": 2.379691682455893,
+        "y": 2.9995506144858832
       },
       "isLocked": false,
       "linkedName": "Bottom Note Ending Position"

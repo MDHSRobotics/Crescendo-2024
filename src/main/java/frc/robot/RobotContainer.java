@@ -26,7 +26,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
-import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.SwerveSpeedConstants;
 import frc.robot.generated.TunerConstants;
 
@@ -122,22 +121,22 @@ public class RobotContainer {
         /* Named Auto Commands */
         NamedCommands.registerCommand("Shoot", 
                 //Shoot
-                new RunCommand(() -> s_Shooter.runShooter(0.7, -1), s_Shooter).withTimeout(0.5)
+                new RunCommand(() -> s_Shooter.runShooter(0.7, 0.7, -1), s_Shooter).withTimeout(0.5)
         );
 
         NamedCommands.registerCommand("Feeder", 
                 //Shoot
-                new RunCommand(() -> s_Shooter.runShooter(0, -1), s_Shooter).withTimeout(0.5)
+                new RunCommand(() -> s_Shooter.runShooter(0, 0, -1), s_Shooter).withTimeout(0.5)
         );
 
         NamedCommands.registerCommand("Shoot Start",  
             new SequentialCommandGroup(
-                new RunCommand(() -> s_Shooter.runShooter(-0.2, 0.5), s_Shooter).withTimeout(0.05),
+                new RunCommand(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), s_Shooter).withTimeout(0.05),
                 // Ramp up
-                new RunCommand(() -> s_Shooter.runShooter(0.7, 0), s_Shooter).withTimeout(1.0),
+                new RunCommand(() -> s_Shooter.runShooter(0.7, 0.7, 0), s_Shooter).withTimeout(1.0),
                 
                 //Shoot
-                new RunCommand(() -> s_Shooter.runShooter(0.7, -0.5), s_Shooter).withTimeout(1)
+                new RunCommand(() -> s_Shooter.runShooter(0.7, 0.7, -0.5), s_Shooter).withTimeout(1)
             )
         );
 
@@ -153,7 +152,7 @@ public class RobotContainer {
 
         NamedCommands.registerCommand("Shoot Stop", 
                 //Shoot
-                new RunCommand(() -> s_Shooter.runShooter(0.0, 0.0), s_Shooter).withTimeout(0.5)
+                new RunCommand(() -> s_Shooter.runShooter(0.0, 0.0, 0.0), s_Shooter).withTimeout(0.5)
         );
 
         NamedCommands.registerCommand("Intake Down", 
@@ -200,16 +199,16 @@ public class RobotContainer {
         driverController.povRight().onTrue(new RunCommand(()-> s_Led.blink(255, 255, 0, 1000), s_Led).withTimeout(10));
         
         // Climb
-        //driverController.x().whileTrue(new RunCommand(() -> s_Climb.runClimb(0,1), s_Climb));
+        driverController.x().whileTrue(new RunCommand(() -> s_Climb.runClimb(0,1), s_Climb));
         driverController.a().whileTrue(new RunCommand(() -> s_Climb.runClimb(-1, -1), s_Climb));
         driverController.y().whileTrue(new RunCommand(() -> s_Climb.runClimb(1, 1), s_Climb));
-        //driverController.b().whileTrue(new RunCommand(() -> s_Climb.runClimb(1, 0), s_Climb));
+        driverController.b().whileTrue(new RunCommand(() -> s_Climb.runClimb(1, 0), s_Climb));
 
         driverController.povUp().onTrue(new InstantCommand(() -> m_slowMode = false));
         driverController.povDown().onTrue(new InstantCommand(() -> m_slowMode = true));
 
-        driverController.x().toggleOnTrue(new RunCommand(() -> s_Shooter.runShooter(0.6, -1), s_Shooter));
-        driverController.b().toggleOnFalse(new RunCommand(() -> s_Intake.bottomPosition(), s_Intake));
+        //driverController.x().toggleOnTrue(new RunCommand(() -> s_Shooter.runShooter(0.6, -1), s_Shooter));
+        //driverController.b().toggleOnFalse(new RunCommand(() -> s_Intake.bottomPosition(), s_Intake));
     }
 
     private void configureOperatorButtonBindings() {
@@ -239,6 +238,17 @@ public class RobotContainer {
                 () -> Math.abs(driverController.getRightX()) > 0.1
             )
         );
+        
+        // Lock on to amp
+        operatorController.x()
+            .and(ampTag)
+            .toggleOnTrue(
+                new RunCommand(() -> s_Shooter.setAngle(50), s_Shooter)
+            .alongWith(
+                new RunCommand(() -> s_Led.setColor(255, 0, 0), s_Led)
+            )
+        );
+
 
         operatorController.povLeft().onTrue(
             new InstantCommand(() -> s_Shooter.setCalibration(), s_Shooter)
@@ -248,28 +258,40 @@ public class RobotContainer {
         );
 
         operatorController.povRight().onTrue(
-            new RunCommand(()->s_Shooter.setAngle(40), s_Shooter)
+            new RunCommand(()->s_Shooter.ampAngle(), s_Shooter)
         );
         
         // Shoot
         operatorController.a().onTrue(
             new SequentialCommandGroup(
-                new RunCommand(() -> s_Shooter.runShooter(-0.2, 0.5), s_Shooter).withTimeout(0.05),
+                new RunCommand(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), s_Shooter).withTimeout(0.05),
                 // Ramp up
-                new RunCommand(() -> s_Shooter.runShooter(0.7, 0), s_Shooter).withTimeout(1.5),
+                new RunCommand(() -> s_Shooter.runShooter(0.85, 1.0, 0), s_Shooter).withTimeout(2.0),
                 
                 //Shoot
-                new RunCommand(() -> s_Shooter.runShooter(0.7, -0.5), s_Shooter).withTimeout(1)
+                new RunCommand(() -> s_Shooter.runShooter(0.85, 1.0, -0.5), s_Shooter).withTimeout(1)
             )
             .andThen(
-                new RunCommand(() -> s_Shooter.runShooter(0, 0), s_Shooter).withTimeout(1)
+                new RunCommand(() -> s_Shooter.runShooter(0, 0, 0), s_Shooter).withTimeout(1)
                 // Blink green to indicate good to go
                 //new RunCommand(() -> s_Led.setColor(0, 255, 0), s_Led).withTimeout(2)
             )
         );
 
         operatorController.b().onTrue(
-            new RunCommand(() -> s_Intake.midPosition(), s_Intake)
+            new SequentialCommandGroup(
+                new RunCommand(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), s_Shooter).withTimeout(0.05),
+                // Ramp up
+                new RunCommand(() -> s_Shooter.runShooter(0.25, 0.75, 0), s_Shooter).withTimeout(1.5),
+                
+                //Shoot
+                new RunCommand(() -> s_Shooter.runShooter(0.25, 0.75, -0.5), s_Shooter).withTimeout(1)
+            )
+            .andThen(
+                new RunCommand(() -> s_Shooter.runShooter(0, 0, 0), s_Shooter).withTimeout(1)
+                // Blink green to indicate good to go
+                //new RunCommand(() -> s_Led.setColor(0, 255, 0), s_Led).withTimeout(2)
+            )
         );
 
         operatorController.start().onTrue(new InstantCommand(() -> s_Shooter.resetEncoders(), s_Shooter));
