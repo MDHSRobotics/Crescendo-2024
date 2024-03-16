@@ -41,8 +41,11 @@ import frc.robot.subsystems.*;
 public class RobotContainer {
     
     /* Controllers */
-    private final CommandXboxController driverController = new CommandXboxController(0); // My joystick
-    private final CommandXboxController operatorController = new CommandXboxController(1); // My joystick
+    // If you don't have both XBOX controllers connected, you can temporarily set one or both 
+    // of the following variables to null. That will avoid being spammed by warnings about a
+    // controller not connected.
+    private final CommandXboxController driverController = new CommandXboxController(0); 
+    private final CommandXboxController operatorController = new CommandXboxController(1);
 
     /* Subsystems */
     public final Swerve s_Swerve = TunerConstants.DriveTrain; // My drivetrain
@@ -74,32 +77,36 @@ public class RobotContainer {
     public RobotContainer() {
 
         /* Default Commands */
-        s_Swerve.setDefaultCommand( // Drivetrain will execute this command periodically
-            s_Swerve.applyRequest(() -> drive.withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with
-                                                                                            // negative Y (forward)
-                .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
-                .withRotationalRate(-driverController.getRightX() * SwerveSpeedConstants.MaxAngularRate * (m_slowMode ? 1.0 : 1.0)) // Drive counterclockwise with negative X (left)
-            ));
+        if (driverController != null) {
+            s_Swerve.setDefaultCommand( // Drivetrain will execute this command periodically
+                s_Swerve.applyRequest(() -> drive.withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with
+                                                                                                // negative Y (forward)
+                    .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
+                    .withRotationalRate(-driverController.getRightX() * SwerveSpeedConstants.MaxAngularRate * (m_slowMode ? 1.0 : 1.0)) // Drive counterclockwise with negative X (left)
+                ));
+        }
+
+        if (operatorController != null) {
+            s_Shooter.setDefaultCommand(
+                new RunCommand(()-> s_Shooter.run(operatorController.getRightY()), s_Shooter)
+            );
+
+            s_Intake.setDefaultCommand(
+                new RunCommand(() -> s_Intake.topPosition(operatorController.getLeftY()), s_Intake)
+            );
+        }
 
         if (Utils.isSimulation()) {
-        s_Swerve.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
+            s_Swerve.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
         }
-        s_Swerve.registerTelemetry(logger::telemeterize);
+            s_Swerve.registerTelemetry(logger::telemeterize);
 
-        s_Led.setDefaultCommand(
-            new RunCommand(()-> s_Led.setColor(100, 250, 100), s_Led)
-        );
-
-        s_Shooter.setDefaultCommand(
-            new RunCommand(()-> s_Shooter.run(operatorController.getRightY()), s_Shooter)
+            s_Led.setDefaultCommand(
+                new RunCommand(()-> s_Led.setColor(100, 250, 100), s_Led)
         );
 
         s_Climb.setDefaultCommand(
             new RunCommand((() -> s_Climb.runClimb(0,0)), s_Climb)
-        );
-
-        s_Intake.setDefaultCommand(
-            new RunCommand(() -> s_Intake.topPosition(operatorController.getLeftY()), s_Intake)
         );
 
         SmartDashboard.putData(s_Shooter);
@@ -176,6 +183,18 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
 
+        if (driverController != null) {
+            configureDriverButtonBindings();
+        }
+
+        if (operatorController != null) {
+            configureOperatorButtonBindings();
+        }
+
+    }
+
+    private void configureDriverButtonBindings() {
+
         /* Driver Buttons */
 
         // Reset the field-centric heading on left bumper press
@@ -193,6 +212,10 @@ public class RobotContainer {
 
         driverController.povUp().onTrue(new InstantCommand(() -> m_slowMode = false));
         driverController.povDown().onTrue(new InstantCommand(() -> m_slowMode = true));
+
+    }
+
+    private void configureOperatorButtonBindings() {
 
         /* Operator Buttons */
 
