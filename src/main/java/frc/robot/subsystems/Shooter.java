@@ -92,7 +92,7 @@ public class Shooter extends SubsystemBase{
 
     public void run(double angleSpeed){     
         if(!m_calibration){
-            setAngle(30);
+            setAngle(26);
         }else{
             angle1.set(angleSpeed);
         }

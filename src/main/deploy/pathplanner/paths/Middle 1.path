@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.774369394892637,
-        "y": 6.90685996756609
+        "x": 2.705300795216977,
+        "y": 5.564955745296107
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.766788431006529,
-        "y": 7.029760157796913
+        "x": 3.6977198313308692,
+        "y": 5.68785593552693
       },
       "isLocked": false,
-      "linkedName": "Top Note Ending Position"
+      "linkedName": "Middle Note Ending Position"
     },
     {
       "anchor": {

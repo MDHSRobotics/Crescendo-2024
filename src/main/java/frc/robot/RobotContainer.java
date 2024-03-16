@@ -114,14 +114,54 @@ public class RobotContainer {
 
         /* Named Auto Commands */
         NamedCommands.registerCommand("Shoot", 
+                //Shoot
+                new RunCommand(() -> s_Shooter.runShooter(0.7, -1), s_Shooter).withTimeout(0.5)
+        );
+
+        NamedCommands.registerCommand("Feeder", 
+                //Shoot
+                new RunCommand(() -> s_Shooter.runShooter(0, -1), s_Shooter).withTimeout(0.5)
+        );
+
+        NamedCommands.registerCommand("Shoot Start",  
             new SequentialCommandGroup(
+                new RunCommand(() -> s_Shooter.runShooter(-0.2, 0.5), s_Shooter).withTimeout(0.05),
                 // Ramp up
-                new RunCommand(() -> s_Shooter.runShooter(1, 0), s_Shooter).withTimeout(2),
+                new RunCommand(() -> s_Shooter.runShooter(0.7, 0), s_Shooter).withTimeout(1.0),
                 
                 //Shoot
-                new RunCommand(() -> s_Shooter.runShooter(1, 1), s_Shooter).withTimeout(2)
+                new RunCommand(() -> s_Shooter.runShooter(0.7, -0.5), s_Shooter).withTimeout(1)
             )
         );
+
+        NamedCommands.registerCommand("Angle", 
+                //Shoot
+                new RunCommand(() -> s_Shooter.setAngle(42), s_Shooter).withTimeout(0.5)
+        );
+
+        NamedCommands.registerCommand("Angle 2", 
+                //Shoot
+                new RunCommand(() -> s_Shooter.setAngle(30), s_Shooter).withTimeout(0.5)
+        );
+
+        NamedCommands.registerCommand("Shoot Stop", 
+                //Shoot
+                new RunCommand(() -> s_Shooter.runShooter(0.0, 0.0), s_Shooter).withTimeout(0.5)
+        );
+
+        NamedCommands.registerCommand("Intake Down", 
+                new RunCommand(() -> s_Intake.bottomPosition(), s_Intake).withTimeout(0.5)
+        );
+
+        NamedCommands.registerCommand("Intake Up", 
+                //Shoot
+                new RunCommand(() -> s_Intake.topPosition(0), s_Intake).withTimeout(0.5)
+        );
+
+        driverController.x().toggleOnTrue(new RunCommand(() -> s_Shooter.runShooter(0.6, -1), s_Shooter));
+        driverController.b().toggleOnFalse(new RunCommand(() -> s_Intake.bottomPosition(), s_Intake));
+
+        
 
         /* Auto Chooser */
         autoChooser = AutoBuilder.buildAutoChooser(); // Default auto will be `Commands.none()`
@@ -146,10 +186,10 @@ public class RobotContainer {
         driverController.povDown().onTrue(new RunCommand(()-> s_Led.blink(255, 255, 0, 1000), s_Led).withTimeout(10));
         
         // Climb
-        driverController.x().whileTrue(new RunCommand(() -> s_Climb.runClimb(0,1), s_Climb));
+        //driverController.x().whileTrue(new RunCommand(() -> s_Climb.runClimb(0,1), s_Climb));
         driverController.a().whileTrue(new RunCommand(() -> s_Climb.runClimb(-1, -1), s_Climb));
         driverController.y().whileTrue(new RunCommand(() -> s_Climb.runClimb(1, 1), s_Climb));
-        driverController.b().whileTrue(new RunCommand(() -> s_Climb.runClimb(1, 0), s_Climb));
+        //driverController.b().whileTrue(new RunCommand(() -> s_Climb.runClimb(1, 0), s_Climb));
 
         driverController.povUp().onTrue(new InstantCommand(() -> m_slowMode = false));
         driverController.povDown().onTrue(new InstantCommand(() -> m_slowMode = true));

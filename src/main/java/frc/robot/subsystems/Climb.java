@@ -36,7 +36,7 @@ public class Climb extends SubsystemBase{
 
     public void runClimb(double climb1Power, double climb2Power){  
         leftClimb.set(-climb1Power);
-        rightClimb.set(climb1Power);
+        rightClimb.set(climb2Power);
 
         /* Logging */
         leftClimbRotations.setDouble(leftClimb.getEncoder().getPosition());

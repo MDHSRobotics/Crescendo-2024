@@ -2,8 +2,8 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.48523866278501937,
-      "y": 7.005529395674177
+      "x": 0.53,
+      "y": 6.95
     },
     "rotation": 0
   },
@@ -60,18 +60,6 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "Mid to Bot"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Bottom Note Pickup"
-          }
-        },
-        {
           "type": "wait",
           "data": {
             "waitTime": 1.0
@@ -80,13 +68,31 @@
         {
           "type": "named",
           "data": {
-            "name": "Intake Up"
+            "name": "Shoot Stop"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Shoot Stop"
+            "name": "Angle 2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Middle 1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot Start"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake Up"
           }
         }
       ]

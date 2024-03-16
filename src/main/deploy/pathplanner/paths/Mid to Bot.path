@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.5410015435415498,
-        "y": 5.4860202028096365
+        "x": 2.705300795216977,
+        "y": 5.564955745296107
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.093550340946837,
-        "y": 4.8545358629178805
+        "x": 1.7679412281901503,
+        "y": 5.367616889079933
       },
       "isLocked": false,
-      "linkedName": "Shoot End"
+      "linkedName": "Middle Note Ending Position"
     },
     {
       "anchor": {
-        "x": 2.1330181121900718,
-        "y": 4.1046482092964185
+        "x": 1.9751470272171325,
+        "y": 4.489458978917958
       },
       "prevControl": {
-        "x": 1.5311346007307414,
-        "y": 4.400656493620679
+        "x": 1.679138742892872,
+        "y": 4.8249350344854545
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Pickup 1"
+      "linkedName": "Bottom Note Starting Position"
     }
   ],
   "rotationTargets": [],
@@ -39,7 +39,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0,
+    "rotation": 155.0,
     "rotateFast": false
   },
   "reversed": false,
