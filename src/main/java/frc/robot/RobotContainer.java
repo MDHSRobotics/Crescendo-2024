@@ -143,7 +143,7 @@ public class RobotContainer {
 
         NamedCommands.registerCommand("Angle", 
                 //Shoot
-                new RunCommand(() -> s_Shooter.setAngle(42), s_Shooter).withTimeout(0.5)
+                new RunCommand(() -> s_Shooter.setAngle(38), s_Shooter).withTimeout(0.5)
         );
 
         NamedCommands.registerCommand("Angle 2", 
@@ -196,8 +196,8 @@ public class RobotContainer {
         driverController.leftBumper().onTrue(s_Swerve.runOnce(() -> s_Swerve.seedFieldRelative()));
 
         // LED communication
-        driverController.povUp().onTrue(new RunCommand(()-> s_Led.blink(0, 0, 255, 1000), s_Led).withTimeout(10));
-        driverController.povDown().onTrue(new RunCommand(()-> s_Led.blink(255, 255, 0, 1000), s_Led).withTimeout(10));
+        driverController.povLeft().onTrue(new RunCommand(()-> s_Led.blink(0, 0, 255, 1000), s_Led).withTimeout(10));
+        driverController.povRight().onTrue(new RunCommand(()-> s_Led.blink(255, 255, 0, 1000), s_Led).withTimeout(10));
         
         // Climb
         //driverController.x().whileTrue(new RunCommand(() -> s_Climb.runClimb(0,1), s_Climb));
@@ -240,28 +240,15 @@ public class RobotContainer {
             )
         );
 
-        // Lock on to amp
-        operatorController.x()
-            .and(ampTag)
-            .toggleOnTrue(
-            s_Swerve.applyRequest(() -> drive.withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed) // Drive forward with // negative Y (forward)
-                .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed) // Drive left with negative X (left)
-                .withRotationalRate(Aiming.getYawTxAdjustment(LimelightHelper.getTX(""))) // Turn at the rate given by limelight
-            )
-            .alongWith(
-                new RunCommand(() -> s_Shooter.setAngle(ShooterConstants.ampAngle), s_Shooter)
-            ).alongWith(
-                new RunCommand(() -> s_Led.setColor(255, 0, 0), s_Led)
-            ).until(
-                () -> Math.abs(driverController.getRightX()) > 0.1
-            )
-        );
-
         operatorController.povLeft().onTrue(
             new InstantCommand(() -> s_Shooter.setCalibration(), s_Shooter)
             .alongWith(
                 new InstantCommand(() -> s_Intake.setCalibration(), s_Intake)
             )
+        );
+
+        operatorController.povRight().onTrue(
+            new RunCommand(()->s_Shooter.setAngle(40), s_Shooter)
         );
         
         // Shoot
@@ -282,19 +269,7 @@ public class RobotContainer {
         );
 
         operatorController.b().onTrue(
-            new SequentialCommandGroup(
-                new RunCommand(() -> s_Shooter.runShooter(-0.2, 0.5), s_Shooter).withTimeout(0.05),
-                // Ramp up
-                new RunCommand(() -> s_Shooter.runShooter(0.145, 0), s_Shooter).withTimeout(1.5),
-                
-                //Shoot
-                new RunCommand(() -> s_Shooter.runShooter(0.145, -0.5), s_Shooter).withTimeout(1)
-            )
-            .andThen(
-                new RunCommand(() -> s_Shooter.runShooter(0, 0), s_Shooter).withTimeout(1)
-                // Blink green to indicate good to go
-                //new RunCommand(() -> s_Led.setColor(0, 255, 0), s_Led).withTimeout(2)
-            )
+            new RunCommand(() -> s_Intake.midPosition(), s_Intake)
         );
 
         operatorController.start().onTrue(new InstantCommand(() -> s_Shooter.resetEncoders(), s_Shooter));

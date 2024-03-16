@@ -27,7 +27,7 @@ public class Intake extends SubsystemBase{
       tab.add("Intake Top Rotations", 0.0)
         .getEntry();
     private GenericEntry intakeBottomRotations =
-      tab.add("Intake Bottom Rotations", -20.0)
+      tab.add("Intake Bottom Rotations", 30.0)
         .getEntry();
     private GenericEntry intakeRotations =
       tab.add("Intake Rotations", -20.0)
@@ -69,6 +69,13 @@ public class Intake extends SubsystemBase{
         
         intake.set(1.0);
         conveyor.set(-0.5);
+
+        /* Logging */
+        intakeRotations.setDouble(rightAngle.getEncoder().getPosition());
+    }
+
+    public void midPosition(){
+        m_pidController.setReference(12, CANSparkMax.ControlType.kPosition);
 
         /* Logging */
         intakeRotations.setDouble(rightAngle.getEncoder().getPosition());
