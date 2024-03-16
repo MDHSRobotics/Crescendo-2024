@@ -165,11 +165,6 @@ public class RobotContainer {
                 new RunCommand(() -> s_Intake.topPosition(0), s_Intake).withTimeout(0.5)
         );
 
-        driverController.x().toggleOnTrue(new RunCommand(() -> s_Shooter.runShooter(0.6, -1), s_Shooter));
-        driverController.b().toggleOnFalse(new RunCommand(() -> s_Intake.bottomPosition(), s_Intake));
-
-        
-
         /* Auto Chooser */
         autoChooser = AutoBuilder.buildAutoChooser(); // Default auto will be `Commands.none()`
         SmartDashboard.putData("Auto Mode", autoChooser);
@@ -213,6 +208,8 @@ public class RobotContainer {
         driverController.povUp().onTrue(new InstantCommand(() -> m_slowMode = false));
         driverController.povDown().onTrue(new InstantCommand(() -> m_slowMode = true));
 
+        driverController.x().toggleOnTrue(new RunCommand(() -> s_Shooter.runShooter(0.6, -1), s_Shooter));
+        driverController.b().toggleOnFalse(new RunCommand(() -> s_Intake.bottomPosition(), s_Intake));
     }
 
     private void configureOperatorButtonBindings() {
