@@ -156,7 +156,7 @@ public class Shooter extends SubsystemBase{
 
     public void setAngle(double angle){
         //Calculate angle to rotations
-        double rotations = rotationsC.getDouble(0.0) * (angle - ShooterConstants.kBottomMeasureAngle + 4.0);
+        double rotations = rotationsC.getDouble(0.0) * (angle - ShooterConstants.kBottomMeasureAngle + 8.0);
 
         //Set the rotations
         if(rotations > -45.8 && rotations < 0){

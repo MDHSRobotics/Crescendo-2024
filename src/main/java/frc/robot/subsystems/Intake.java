@@ -74,7 +74,7 @@ public class Intake extends SubsystemBase{
         m_pidController.setReference(intakeBottomRotations.getDouble(0), CANSparkMax.ControlType.kPosition);
         
         intake.set(1.0);
-        conveyor.set(-0.5);
+        conveyor.set(-1.0);
 
         /* Logging */
         intakeRotations.setDouble(rightAngle.getEncoder().getPosition());

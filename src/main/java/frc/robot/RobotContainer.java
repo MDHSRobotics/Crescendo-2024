@@ -219,7 +219,7 @@ public class RobotContainer {
         Trigger ampTag = new Trigger(() -> LimelightHelper.getFiducialID("") == 5 || LimelightHelper.getFiducialID("") == 6);
 
         // Run intake
-        operatorController.y().toggleOnTrue(new RunCommand(() -> s_Intake.bottomPosition(), s_Intake).alongWith(new RunCommand(() -> s_Shooter.runFeed(0.4), s_Shooter)));
+        operatorController.y().toggleOnTrue(new RunCommand(() -> s_Intake.bottomPosition(), s_Intake).alongWith(new RunCommand(() -> s_Shooter.runFeed(0.7), s_Shooter)));
         operatorController.povDown().toggleOnTrue(new RunCommand(() -> s_Intake.spitOut(), s_Intake).alongWith(new RunCommand(() -> s_Shooter.runFeed(-1.0), s_Shooter)));
 
         // Lock on to speaker
@@ -266,10 +266,10 @@ public class RobotContainer {
             new SequentialCommandGroup(
                 new RunCommand(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), s_Shooter).withTimeout(0.05),
                 // Ramp up
-                new RunCommand(() -> s_Shooter.runShooter(0.85, 1.0, 0), s_Shooter).withTimeout(2.0),
+                new RunCommand(() -> s_Shooter.runShooter(1.0, 1.0, 0), s_Shooter).withTimeout(2.0),
                 
                 //Shoot
-                new RunCommand(() -> s_Shooter.runShooter(0.85, 1.0, -0.5), s_Shooter).withTimeout(1)
+                new RunCommand(() -> s_Shooter.runShooter(1.0, 1.0, -0.5), s_Shooter).withTimeout(1)
             )
             .andThen(
                 new RunCommand(() -> s_Shooter.runShooter(0, 0, 0), s_Shooter).withTimeout(1)
