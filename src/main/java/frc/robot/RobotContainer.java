@@ -191,6 +191,13 @@ public class RobotContainer {
 
         /* Driver Buttons */
 
+        // IMPORTANT Please see the following URL to get a graphical annotation of which xbox buttons 
+        //           trigger what commands on the driver controller:
+        //
+        // https://www.padcrafter.com/index.php?templates=Driver+Controller&leftBumper=Reset+field+oriented+drive&dpadRight=Tell+human+player+to+amplify&dpadLeft=Tell+human+player+to+coopertition&aButton=Climb+down&yButton=Climb+motor1+and+motor2&dpadDown=Slow+mode+ON&dpadUp=Slow+mode+OFF&xButton=Climb+motor2&bButton=Climb+motor1&leftStick=Field+oriented+drive+direction%2Fvelocity&rightStick=Robot+rotation&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF
+        //
+        // Whenever you edit a button binding, please update this URL
+
         // Reset the field-centric heading on left bumper press
         driverController.leftBumper().onTrue(s_Swerve.runOnce(() -> s_Swerve.seedFieldRelative()));
 
@@ -214,6 +221,13 @@ public class RobotContainer {
     private void configureOperatorButtonBindings() {
 
         /* Operator Buttons */
+
+        // IMPORTANT Please see the following URL to get a graphical annotation of which xbox buttons 
+        //           trigger what commands on the operator controller:
+        //
+        // https://www.padcrafter.com/index.php?templates=Operator+Controller&rightStick=Aim+Shooter&leftStick=Aim+Intake&yButton=Intake+note&dpadUp=&xButton=Lock+on+to+April+Tag+%28Speaker+or+Amp%29&aButton=Shoot+into+Speaker&bButton=Shoot+into+Amp&startButton=Reset+shooter&backButton=Reset+Intake&dpadDown=Eject+note&dpadLeft=Calibrate+Shooter+and+Intake&dpadRight=Set+shooter+angle+for+Amp
+        //
+        // Whenever you edit a button binding, please update this URL
 
         Trigger speakerTag = new Trigger(() -> LimelightHelper.getFiducialID("") == 4 || LimelightHelper.getFiducialID("") == 7);
         Trigger ampTag = new Trigger(() -> LimelightHelper.getFiducialID("") == 5 || LimelightHelper.getFiducialID("") == 6);
