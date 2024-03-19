@@ -55,7 +55,7 @@ public final class Constants {
         public static final double kAngleGearRatio = 1920;
 
         // At some angle, measure the angle and rotations and the code will account for it when calculating the rotations
-        public static final double kBottomMeasureAngle = 25.0;
+        public static final double kBottomMeasureAngle = 23.0;
         public static final double kBottomRotations = 0.0;
 
         public static final double ampAngle = 54.0;

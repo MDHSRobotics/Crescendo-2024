@@ -1,6 +1,12 @@
 {
   "version": 1.0,
-  "startingPose": null,
+  "startingPose": {
+    "position": {
+      "x": 0.47537171997421085,
+      "y": 4.09478126648561
+    },
+    "rotation": 0
+  },
   "command": {
     "type": "sequential",
     "data": {
@@ -9,6 +15,30 @@
           "type": "path",
           "data": {
             "pathName": "Speaker Bottom Position"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Angle 45"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot Start"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake Down"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Angle 35"
           }
         },
         {
@@ -24,15 +54,45 @@
           }
         },
         {
-          "type": "path",
+          "type": "wait",
           "data": {
-            "pathName": "Middle Note Pickup"
+            "waitTime": 1.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Angle 25"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot Stop"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Feeder On"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Top Note Pickup"
+            "pathName": "Middle 4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot Start"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake Up"
           }
         }
       ]

@@ -72,6 +72,8 @@ public class RobotContainer {
     /* Swerve Speeds */
     private boolean m_slowMode = false;
 
+    private boolean m_isAmp = false;
+
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
 
@@ -140,14 +142,25 @@ public class RobotContainer {
             )
         );
 
-        NamedCommands.registerCommand("Angle", 
+
+        NamedCommands.registerCommand("Angle 25", 
                 //Shoot
-                new RunCommand(() -> s_Shooter.setAngle(38), s_Shooter).withTimeout(0.5)
+                new RunCommand(() -> s_Shooter.setAngle(40), s_Shooter).withTimeout(0.5)
         );
 
-        NamedCommands.registerCommand("Angle 2", 
+        NamedCommands.registerCommand("Angle 35", 
                 //Shoot
-                new RunCommand(() -> s_Shooter.setAngle(30), s_Shooter).withTimeout(0.5)
+                new RunCommand(() -> s_Shooter.setAngle(35), s_Shooter).withTimeout(0.5)
+        );
+
+        NamedCommands.registerCommand("Angle 45", 
+                //Shoot
+                new RunCommand(() -> s_Shooter.setAngle(45), s_Shooter).withTimeout(0.5)
+        );
+
+        NamedCommands.registerCommand("Feeder On", 
+                //Shoot
+                new RunCommand(() -> s_Shooter.runFeed(1), s_Shooter).withTimeout(0.5)
         );
 
         NamedCommands.registerCommand("Shoot Stop", 
@@ -227,18 +240,16 @@ public class RobotContainer {
         //
         // https://www.padcrafter.com/index.php?templates=Operator+Controller&rightStick=Aim+Shooter&leftStick=Aim+Intake&yButton=Intake+note&dpadUp=&xButton=Lock+on+to+April+Tag+%28Speaker+or+Amp%29&aButton=Shoot+into+Speaker&bButton=Shoot+into+Amp&startButton=Reset+shooter&backButton=Reset+Intake&dpadDown=Eject+note&dpadLeft=Calibrate+Shooter+and+Intake&dpadRight=Set+shooter+angle+for+Amp
         //
+        // https://www.padcrafter.com/?templates=Operator+Controller+New&xButton=Lock+Speaker&bButton=Lock+Amp&yButton=&aButton=Fire&rightStick=Aim+Shooter&leftStickClick=&leftStick=Aim+intake&dpadUp=Shooter+Calibrate&dpadLeft=Calibration+mode&dpadDown=Intake+Calibration&rightTrigger=Deploy+Intake&leftTrigger=Eject+Intake&dpadRight=&leftBumper=Manual+Podium&rightBumper=Manual+Point+Blank
+        //
         // Whenever you edit a button binding, please update this URL
-
-        Trigger speakerTag = new Trigger(() -> LimelightHelper.getFiducialID("") == 4 || LimelightHelper.getFiducialID("") == 7);
-        Trigger ampTag = new Trigger(() -> LimelightHelper.getFiducialID("") == 5 || LimelightHelper.getFiducialID("") == 6);
-
+        
         // Run intake
-        operatorController.y().toggleOnTrue(new RunCommand(() -> s_Intake.bottomPosition(), s_Intake).alongWith(new RunCommand(() -> s_Shooter.runFeed(0.7), s_Shooter)));
-        operatorController.povDown().toggleOnTrue(new RunCommand(() -> s_Intake.spitOut(), s_Intake).alongWith(new RunCommand(() -> s_Shooter.runFeed(-1.0), s_Shooter)));
+        operatorController.rightTrigger().toggleOnTrue(new RunCommand(() -> s_Intake.bottomPosition(), s_Intake).alongWith(new RunCommand(() -> s_Shooter.runFeed(0.7), s_Shooter)));
+        operatorController.leftTrigger().toggleOnTrue(new RunCommand(() -> s_Intake.spitOut(), s_Intake).alongWith(new RunCommand(() -> s_Shooter.runFeed(-1.0), s_Shooter)));
 
         // Lock on to speaker
         operatorController.x()
-            .and(speakerTag)
             .toggleOnTrue(
             s_Swerve.applyRequest(() -> drive.withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed) // Drive forward with // negative Y (forward)
                 .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed) // Drive left with negative X (left)
@@ -252,65 +263,81 @@ public class RobotContainer {
                 () -> Math.abs(driverController.getRightX()) > 0.1
             )
         );
+        operatorController.x().onTrue(new InstantCommand(() -> m_isAmp = false));
         
         // Lock on to amp
-        operatorController.x()
-            .and(ampTag)
+        operatorController.b()
             .toggleOnTrue(
                 new RunCommand(() -> s_Shooter.setAngle(50), s_Shooter)
             .alongWith(
                 new RunCommand(() -> s_Led.setColor(255, 0, 0), s_Led)
             )
         );
+        operatorController.b().onTrue(new InstantCommand(() -> m_isAmp = true));
+       
 
+        // Shoot Speaker
+        operatorController.a()
+            .and(new Trigger(() -> !m_isAmp))
+            .onTrue(
+            new SequentialCommandGroup(
+                new RunCommand(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), s_Shooter).withTimeout(0.05),
+                // Ramp up
+                new RunCommand(() -> s_Shooter.runShooter(0.7, 0.7, 0), s_Shooter).withTimeout(2.0),
+                
+                //Shoot
+                new RunCommand(() -> s_Shooter.runShooter(0.7, 0.7, -0.5), s_Shooter).withTimeout(1)
+            )
+            .andThen(
+                new RunCommand(() -> s_Shooter.runShooter(0, 0, 0), s_Shooter).withTimeout(1)
+                // Blink green to indicate good to go
+                //new RunCommand(() -> s_Led.setColor(0, 255, 0), s_Led).withTimeout(2)
+            )
+        );
 
+        // Shoot Amp
+        operatorController.a()
+            .and(new Trigger(() -> m_isAmp))
+            .onTrue(
+            new SequentialCommandGroup(
+                new RunCommand(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), s_Shooter).withTimeout(0.05),
+                // Ramp up
+                new RunCommand(() -> s_Shooter.runShooter(0.25 * 0.7, 0.75 * 0.7, 0), s_Shooter).withTimeout(2.0),
+                
+                //Shoot
+                new RunCommand(() -> s_Shooter.runShooter(0.25 *0.7, 0.75 * 0.7, -0.5), s_Shooter).withTimeout(1)
+            )
+            .andThen(
+                new RunCommand(() -> s_Shooter.runShooter(0, 0, 0), s_Shooter).withTimeout(1)
+                // Blink green to indicate good to go
+                //new RunCommand(() -> s_Led.setColor(0, 255, 0), s_Led).withTimeout(2)
+            )
+        );
+
+        // Calibration Mode
         operatorController.povLeft().onTrue(
             new InstantCommand(() -> s_Shooter.setCalibration(), s_Shooter)
             .alongWith(
                 new InstantCommand(() -> s_Intake.setCalibration(), s_Intake)
             )
         );
+        operatorController.povUp().onTrue(new InstantCommand(() -> s_Shooter.resetEncoders(), s_Shooter));
+        operatorController.povDown().onTrue(new InstantCommand(() -> s_Intake.resetEncoders(), s_Intake));
 
-        operatorController.povRight().onTrue(
-            new RunCommand(()->s_Shooter.ampAngle(), s_Shooter)
-        );
-        
-        // Shoot
-        operatorController.a().onTrue(
-            new SequentialCommandGroup(
+        // Manual Angle Modes
+        operatorController.y().onTrue(new SequentialCommandGroup(
+                new RunCommand(() -> s_Shooter.setAngle(60), s_Shooter).withTimeout(1),
+
                 new RunCommand(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), s_Shooter).withTimeout(0.05),
                 // Ramp up
-                new RunCommand(() -> s_Shooter.runShooter(1.0, 1.0, 0), s_Shooter).withTimeout(2.0),
+                new RunCommand(() -> s_Shooter.runShooter(0.5, 0.5, 0), s_Shooter).withTimeout(0.9),
                 
                 //Shoot
-                new RunCommand(() -> s_Shooter.runShooter(1.0, 1.0, -0.5), s_Shooter).withTimeout(1)
-            )
-            .andThen(
-                new RunCommand(() -> s_Shooter.runShooter(0, 0, 0), s_Shooter).withTimeout(1)
-                // Blink green to indicate good to go
-                //new RunCommand(() -> s_Led.setColor(0, 255, 0), s_Led).withTimeout(2)
-            )
-        );
+                new RunCommand(() -> s_Shooter.runShooter(0.5, 0.5, -0.5), s_Shooter).withTimeout(1)
+            ));
 
-        operatorController.b().onTrue(
-            new SequentialCommandGroup(
-                new RunCommand(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), s_Shooter).withTimeout(0.05),
-                // Ramp up
-                new RunCommand(() -> s_Shooter.runShooter(0.25, 0.75, 0), s_Shooter).withTimeout(1.5),
-                
-                //Shoot
-                new RunCommand(() -> s_Shooter.runShooter(0.25, 0.75, -0.5), s_Shooter).withTimeout(1)
-            )
-            .andThen(
-                new RunCommand(() -> s_Shooter.runShooter(0, 0, 0), s_Shooter).withTimeout(1)
-                // Blink green to indicate good to go
-                //new RunCommand(() -> s_Led.setColor(0, 255, 0), s_Led).withTimeout(2)
-            )
-        );
-
-        operatorController.start().onTrue(new InstantCommand(() -> s_Shooter.resetEncoders(), s_Shooter));
-        operatorController.back().onTrue(new InstantCommand(() -> s_Intake.resetEncoders(), s_Intake));
-        // Manual Control
+        operatorController.rightBumper().onTrue(new RunCommand(() -> s_Shooter.setAngle(53.9), s_Shooter));
+        operatorController.leftBumper().onTrue(new RunCommand(() -> s_Shooter.setAngle(36), s_Shooter));
     }
 
     public static double roundAvoid(double value, int places) {
