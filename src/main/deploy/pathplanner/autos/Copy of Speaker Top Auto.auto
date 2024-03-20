@@ -20,7 +20,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Angle"
+            "name": "Angle 45"
           }
         },
         {
@@ -38,6 +38,12 @@
         {
           "type": "named",
           "data": {
+            "name": "Angle 35"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "Shoot"
           }
         },
@@ -48,9 +54,27 @@
           }
         },
         {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.4
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "Top to Mid"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Angle 43"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot"
           }
         },
         {
@@ -69,24 +93,6 @@
           "type": "named",
           "data": {
             "name": "Shoot Stop"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Angle 2"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Middle 1"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot Start"
           }
         },
         {

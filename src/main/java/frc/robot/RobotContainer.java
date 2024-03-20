@@ -13,6 +13,8 @@ import frc.math.Aiming;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -43,7 +45,7 @@ public class RobotContainer {
     // If you don't have both XBOX controllers connected, you can temporarily set one or both 
     // of the following variables to null. That will avoid being spammed by warnings about a
     // controller not connected.
-    private final CommandXboxController driverController = new CommandXboxController(0); 
+    private final CommandPS4Controller driverController = new CommandPS4Controller(0); 
     private final CommandXboxController operatorController = new CommandXboxController(1);
 
     /* Subsystems */
@@ -56,6 +58,7 @@ public class RobotContainer {
     /* Limit Switches */
     DigitalInput intakeLimitSwitch = new DigitalInput(1);
     DigitalInput shooterLimitSwitch = new DigitalInput(0);
+    DigitalInput climbLimitSwitch = new DigitalInput(2);
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -158,6 +161,11 @@ public class RobotContainer {
                 new RunCommand(() -> s_Shooter.setAngle(45), s_Shooter).withTimeout(0.5)
         );
 
+        NamedCommands.registerCommand("Angle 43", 
+                //Shoot
+                new RunCommand(() -> s_Shooter.setAngle(43), s_Shooter).withTimeout(0.5)
+        );
+
         NamedCommands.registerCommand("Feeder On", 
                 //Shoot
                 new RunCommand(() -> s_Shooter.runFeed(1), s_Shooter).withTimeout(0.5)
@@ -180,6 +188,7 @@ public class RobotContainer {
         /* Auto Chooser */
         autoChooser = AutoBuilder.buildAutoChooser(); // Default auto will be `Commands.none()`
         SmartDashboard.putData("Auto Mode", autoChooser);
+        Shuffleboard.getTab("Main").add(autoChooser);
     }
 
     /**
@@ -212,17 +221,17 @@ public class RobotContainer {
         // Whenever you edit a button binding, please update this URL
 
         // Reset the field-centric heading on left bumper press
-        driverController.leftBumper().onTrue(s_Swerve.runOnce(() -> s_Swerve.seedFieldRelative()));
+        driverController.L1().onTrue(s_Swerve.runOnce(() -> s_Swerve.seedFieldRelative()));
 
         // LED communication
         driverController.povLeft().onTrue(new RunCommand(()-> s_Led.blink(0, 0, 255, 1000), s_Led).withTimeout(10));
         driverController.povRight().onTrue(new RunCommand(()-> s_Led.blink(255, 255, 0, 1000), s_Led).withTimeout(10));
         
         // Climb
-        driverController.x().whileTrue(new RunCommand(() -> s_Climb.runClimb(0,1), s_Climb));
-        driverController.a().whileTrue(new RunCommand(() -> s_Climb.runClimb(-1, -1), s_Climb));
-        driverController.y().whileTrue(new RunCommand(() -> s_Climb.runClimb(1, 1), s_Climb));
-        driverController.b().whileTrue(new RunCommand(() -> s_Climb.runClimb(1, 0), s_Climb));
+        driverController.square().whileTrue(new RunCommand(() -> s_Climb.runClimb(0,1), s_Climb));
+        driverController.cross().whileTrue(new RunCommand(() -> s_Climb.runClimb(-1, -1), s_Climb));
+        driverController.triangle().whileTrue(new RunCommand(() -> s_Climb.runClimb(1, 1), s_Climb).until(climbLimitSwitch::get));
+        driverController.circle().whileTrue(new RunCommand(() -> s_Climb.runClimb(1, 0), s_Climb));
 
         driverController.povUp().onTrue(new InstantCommand(() -> m_slowMode = false));
         driverController.povDown().onTrue(new InstantCommand(() -> m_slowMode = true));
@@ -240,8 +249,7 @@ public class RobotContainer {
         //
         // https://www.padcrafter.com/index.php?templates=Operator+Controller&rightStick=Aim+Shooter&leftStick=Aim+Intake&yButton=Intake+note&dpadUp=&xButton=Lock+on+to+April+Tag+%28Speaker+or+Amp%29&aButton=Shoot+into+Speaker&bButton=Shoot+into+Amp&startButton=Reset+shooter&backButton=Reset+Intake&dpadDown=Eject+note&dpadLeft=Calibrate+Shooter+and+Intake&dpadRight=Set+shooter+angle+for+Amp
         //
-        // https://www.padcrafter.com/?templates=Operator+Controller+New&xButton=Lock+Speaker&bButton=Lock+Amp&yButton=&aButton=Fire&rightStick=Aim+Shooter&leftStickClick=&leftStick=Aim+intake&dpadUp=Shooter+Calibrate&dpadLeft=Calibration+mode&dpadDown=Intake+Calibration&rightTrigger=Deploy+Intake&leftTrigger=Eject+Intake&dpadRight=&leftBumper=Manual+Podium&rightBumper=Manual+Point+Blank
-        //
+        // https://www.padcrafter.com/?templates=Operator+Controller+New&xButton=Lock+Speaker&bButton=Lock+Amp&yButton=Toss&aButton=Fire&rightStick=Aim+Shooter&leftStickClick=&leftStick=Aim+intake&dpadUp=Shooter+Calibrate&dpadLeft=Calibration+mode&dpadDown=Intake+Calibration&rightTrigger=Deploy+Intake&leftTrigger=Eject+Intake&dpadRight=&leftBumper=Manual+Podium&rightBumper=Manual+Point+Blank#        //
         // Whenever you edit a button binding, please update this URL
         
         // Run intake
@@ -302,10 +310,10 @@ public class RobotContainer {
             new SequentialCommandGroup(
                 new RunCommand(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), s_Shooter).withTimeout(0.05),
                 // Ramp up
-                new RunCommand(() -> s_Shooter.runShooter(0.25 * 0.7, 0.75 * 0.7, 0), s_Shooter).withTimeout(2.0),
+                new RunCommand(() -> s_Shooter.runShooter(0.25 * 0.7, 0.75 * 0.7, 0), s_Shooter).withTimeout(1.0),
                 
                 //Shoot
-                new RunCommand(() -> s_Shooter.runShooter(0.25 *0.7, 0.75 * 0.7, -0.5), s_Shooter).withTimeout(1)
+                new RunCommand(() -> s_Shooter.runShooter(0.25 * 0.7, 0.75 * 0.7, -0.5), s_Shooter).withTimeout(1)
             )
             .andThen(
                 new RunCommand(() -> s_Shooter.runShooter(0, 0, 0), s_Shooter).withTimeout(1)
