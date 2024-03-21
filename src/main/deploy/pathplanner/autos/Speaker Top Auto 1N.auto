@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.47537171997421085,
-      "y": 4.09478126648561
+      "x": 0.48523866278501937,
+      "y": 7.005529395674177
     },
-    "rotation": 0
+    "rotation": 180.0
   },
   "command": {
     "type": "sequential",
@@ -14,7 +14,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Speaker Bottom Position"
+            "pathName": "Speaker Top Position"
           }
         },
         {
@@ -38,19 +38,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Angle 35"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
             "name": "Shoot"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Bottom Note Pickup"
           }
         },
         {
@@ -62,37 +50,13 @@
         {
           "type": "named",
           "data": {
-            "name": "Angle 25"
+            "name": "Intake Up"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "Shoot Stop"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Feeder On"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Middle 4"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot Start"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Intake Up"
           }
         }
       ]

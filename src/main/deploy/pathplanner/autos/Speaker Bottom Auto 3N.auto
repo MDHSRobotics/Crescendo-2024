@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.48523866278501937,
-      "y": 7.005529395674177
+      "x": 0.47537171997421085,
+      "y": 4.09478126648561
     },
-    "rotation": 180.0
+    "rotation": 0
   },
   "command": {
     "type": "sequential",
@@ -14,13 +14,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Speaker Top Position"
+            "pathName": "Speaker Bottom Position"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Angle"
+            "name": "Angle 45"
           }
         },
         {
@@ -38,7 +38,19 @@
         {
           "type": "named",
           "data": {
+            "name": "Angle 35"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "Shoot"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Bottom Note Pickup"
           }
         },
         {
@@ -50,13 +62,13 @@
         {
           "type": "named",
           "data": {
-            "name": "Intake Up"
+            "name": "Shoot Stop"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Shoot Stop"
+            "name": "Intake Up"
           }
         }
       ]
