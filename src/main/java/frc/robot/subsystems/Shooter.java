@@ -68,6 +68,9 @@ public class Shooter extends SubsystemBase{
   private GenericEntry movingAngle =
     tab.add("Moving angle motors", false)
       .getEntry();
+  private GenericEntry adjustment = Shuffleboard.getTab("Main")
+    .add("Adjustment Angle", 2)
+    .getEntry();
   
   private boolean m_calibration = false;
 
@@ -104,7 +107,7 @@ public class Shooter extends SubsystemBase{
 
   public void run(double angleSpeed){     
     if(!m_calibration){
-      setAngle(23);
+      setAngle(23 - 3.5);
     }else{
       angle1.set(angleSpeed);
     }
@@ -138,7 +141,7 @@ public class Shooter extends SubsystemBase{
 
     double angle = Aiming.getPitch(adjustedDistance, heightDifference);
 
-    setAngle(Math.toDegrees(angle) + 4);
+    setAngle(Math.toDegrees(angle) + adjustment.getDouble(4));
 
     /* Logging */
     calculatedDistance.setDouble(horizontalDistance);

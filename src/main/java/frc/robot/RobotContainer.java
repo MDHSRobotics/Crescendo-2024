@@ -188,7 +188,7 @@ public class RobotContainer {
         /* Auto Chooser */
         autoChooser = AutoBuilder.buildAutoChooser(); // Default auto will be `Commands.none()`
         SmartDashboard.putData("Auto Mode", autoChooser);
-        Shuffleboard.getTab("Main").add(autoChooser);
+        Shuffleboard.getTab("Main").add(autoChooser).withSize(2, 1);
     }
 
     /**
@@ -233,8 +233,8 @@ public class RobotContainer {
         driverController.triangle().whileTrue(new RunCommand(() -> s_Climb.runClimb(1, 1), s_Climb).until(climbLimitSwitch::get));
         driverController.circle().whileTrue(new RunCommand(() -> s_Climb.runClimb(1, 0), s_Climb));
 
-        driverController.povUp().onTrue(new InstantCommand(() -> m_slowMode = false));
-        driverController.povDown().onTrue(new InstantCommand(() -> m_slowMode = true));
+        driverController.R2().onTrue(new InstantCommand(() -> m_slowMode = false));
+        driverController.L2().onTrue(new InstantCommand(() -> m_slowMode = true));
 
         //driverController.x().toggleOnTrue(new RunCommand(() -> s_Shooter.runShooter(0.6, -1), s_Shooter));
         //driverController.b().toggleOnFalse(new RunCommand(() -> s_Intake.bottomPosition(), s_Intake));
@@ -291,13 +291,13 @@ public class RobotContainer {
             new SequentialCommandGroup(
                 new RunCommand(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), s_Shooter).withTimeout(0.05),
                 // Ramp up
-                new RunCommand(() -> s_Shooter.runShooter(0.7, 0.7, 0), s_Shooter).withTimeout(2.0),
+                new RunCommand(() -> s_Shooter.runShooter(0.7, 0.7, 0), s_Shooter).withTimeout(1.0),
                 
                 //Shoot
-                new RunCommand(() -> s_Shooter.runShooter(0.7, 0.7, -0.5), s_Shooter).withTimeout(1)
+                new RunCommand(() -> s_Shooter.runShooter(0.7, 0.7, -0.5), s_Shooter).withTimeout(0.5)
             )
             .andThen(
-                new RunCommand(() -> s_Shooter.runShooter(0, 0, 0), s_Shooter).withTimeout(1)
+                new RunCommand(() -> s_Shooter.runShooter(0, 0, 0), s_Shooter).withTimeout(0.1)
                 // Blink green to indicate good to go
                 //new RunCommand(() -> s_Led.setColor(0, 255, 0), s_Led).withTimeout(2)
             )
@@ -344,7 +344,7 @@ public class RobotContainer {
                 new RunCommand(() -> s_Shooter.runShooter(0.5, 0.5, -0.5), s_Shooter).withTimeout(1)
             ));
 
-        operatorController.rightBumper().onTrue(new RunCommand(() -> s_Shooter.setAngle(53.9), s_Shooter));
+        operatorController.rightBumper().onTrue(new RunCommand(() -> s_Shooter.setAngle(51), s_Shooter));
         operatorController.leftBumper().onTrue(new RunCommand(() -> s_Shooter.setAngle(36), s_Shooter));
     }
 
