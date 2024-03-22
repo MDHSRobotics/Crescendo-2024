@@ -52,7 +52,7 @@ public class RobotContainer {
     public final Swerve s_Swerve = TunerConstants.DriveTrain; // My drivetrain
     private final Shooter s_Shooter = new Shooter();
     private final Intake s_Intake = new Intake();
-    private final Climb s_Climb = new Climb();
+    //private final Climb s_Climb = new Climb();
     private final LED s_Led = new LED();
     
     /* Limit Switches */
@@ -109,13 +109,13 @@ public class RobotContainer {
                 new RunCommand(()-> s_Led.setColor(100, 250, 100), s_Led)
         );
 
-        s_Climb.setDefaultCommand(
+        /*s_Climb.setDefaultCommand(
             new RunCommand((() -> s_Climb.runClimb(0,0)), s_Climb)
-        );
+        );*/
 
         SmartDashboard.putData(s_Shooter);
         SmartDashboard.putData(s_Led);
-        SmartDashboard.putData(s_Climb);
+        //SmartDashboard.putData(s_Climb);
         SmartDashboard.putData(s_Intake);
 
         new Trigger(intakeLimitSwitch::get).onTrue(new RunCommand(() -> s_Led.setColor(240, 161, 26), s_Led));
@@ -217,6 +217,7 @@ public class RobotContainer {
         //           trigger what commands on the driver controller:
         //
         // https://www.padcrafter.com/index.php?templates=Driver+Controller&leftBumper=Reset+field+oriented+drive&dpadRight=Tell+human+player+to+amplify&dpadLeft=Tell+human+player+to+coopertition&aButton=Climb+down&yButton=Climb+motor1+and+motor2&dpadDown=&dpadUp=&xButton=Climb+motor2&bButton=Climb+motor1&leftStick=Field+oriented+drive+direction%2Fvelocity&rightStick=Robot+rotation&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&rightTrigger=Fast+mode&leftTrigger=Slow+mode
+
         //
         // Whenever you edit a button binding, please update this URL
 
@@ -228,11 +229,11 @@ public class RobotContainer {
         driverController.povRight().onTrue(new RunCommand(()-> s_Led.blink(255, 255, 0, 1000), s_Led).withTimeout(10));
         
         // Climb
-        driverController.square().whileTrue(new RunCommand(() -> s_Climb.runClimb(0,1), s_Climb));
-        driverController.cross().whileTrue(new RunCommand(() -> s_Climb.runClimb(-1, -1), s_Climb));
-        driverController.triangle().whileTrue(new RunCommand(() -> s_Climb.runClimb(1, 1), s_Climb).until(climbLimitSwitch::get));
+        /*driverController.square().whileTrue(new RunCommand(() -> s_Climb.runClimb(0,1), s_Climb));
+        driverController.cross().whileTrue(new RunCommand(() -> s_Climb.runClimb(-1, -1), s_Climb).until(climbLimitSwitch::get));
+        driverController.triangle().whileTrue(new RunCommand(() -> s_Climb.runClimb(1, 1), s_Climb));
         driverController.circle().whileTrue(new RunCommand(() -> s_Climb.runClimb(1, 0), s_Climb));
-
+        */
         driverController.R2().onTrue(new InstantCommand(() -> m_slowMode = false));
         driverController.L2().onTrue(new InstantCommand(() -> m_slowMode = true));
 
