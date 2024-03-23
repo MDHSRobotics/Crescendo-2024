@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.SparkPIDController;
+import com.revrobotics.CANSparkBase.IdleMode;
 
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
@@ -16,6 +17,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 
 import frc.math.Aiming;
 import frc.robot.LimelightHelper;
@@ -83,6 +85,15 @@ public class Shooter extends SubsystemBase{
 
     m_pidController = angle1.getPIDController();
     m_pidController.setP(0.1);
+
+    topShooter.setIdleMode(IdleMode.kBrake);
+    bottomShooter.setIdleMode(IdleMode.kBrake);
+
+    topShooter.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
+    bottomShooter.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
+    angle1.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
+    angle2.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
+    feeder.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
     
     angle2.follow(angle1);
     SmartDashboard.putNumber("Angle 1 rotations", angle1.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition());
@@ -163,7 +174,7 @@ public class Shooter extends SubsystemBase{
     //System.out.println(rotations);
 
     /* Logging */
-    calculatedAngle.setDouble(angle);
+    calculatedAngle.setDouble(angle + 4);
     locked.setBoolean(Aiming.approximatelyEqual(rotations, angle1.getEncoder().getPosition(), 1.0));
     angle1Rotations.setDouble(angle1.getEncoder().getPosition());
     angle2Rotations.setDouble(angle2.getEncoder().getPosition());

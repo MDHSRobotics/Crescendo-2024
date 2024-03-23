@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.IdleMode;
@@ -52,6 +53,11 @@ public class Intake extends SubsystemBase{
         
         m_pidController = rightAngle.getPIDController();
         m_pidController.setP(0.03);
+
+        leftAngle.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
+        rightAngle.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
+        intake.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
+        conveyor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
 
         leftAngle.follow(rightAngle, true);
     }

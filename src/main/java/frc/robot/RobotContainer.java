@@ -161,9 +161,9 @@ public class RobotContainer {
                 new RunCommand(() -> s_Shooter.setAngle(45), s_Shooter).withTimeout(0.5)
         );
 
-        NamedCommands.registerCommand("Angle 43", 
+        NamedCommands.registerCommand("Angle 42", 
                 //Shoot
-                new RunCommand(() -> s_Shooter.setAngle(43), s_Shooter).withTimeout(0.5)
+                new RunCommand(() -> s_Shooter.setAngle(42), s_Shooter).withTimeout(0.5)
         );
 
         NamedCommands.registerCommand("Feeder On", 
@@ -184,6 +184,8 @@ public class RobotContainer {
                 //Shoot
                 new RunCommand(() -> s_Intake.topPosition(0), s_Intake).withTimeout(0.5)
         );
+
+        
 
         /* Auto Chooser */
         autoChooser = AutoBuilder.buildAutoChooser(); // Default auto will be `Commands.none()`

@@ -1,0 +1,49 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 0.48,
+      "y": 4.05
+    },
+    "rotation": 180.0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Backwards speaker bot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Angle 45"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot Start"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot Stop"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Drive out"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}

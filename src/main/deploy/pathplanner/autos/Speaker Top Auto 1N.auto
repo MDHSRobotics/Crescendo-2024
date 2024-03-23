@@ -5,7 +5,7 @@
       "x": 0.48523866278501937,
       "y": 7.005529395674177
     },
-    "rotation": 180.0
+    "rotation": 0.0
   },
   "command": {
     "type": "sequential",
@@ -20,7 +20,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Angle 45"
+            "name": "Angle 42"
           }
         },
         {
@@ -38,7 +38,19 @@
         {
           "type": "named",
           "data": {
+            "name": "Angle 35"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "Shoot"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Top Note Pickup"
           }
         },
         {
@@ -50,13 +62,13 @@
         {
           "type": "named",
           "data": {
-            "name": "Intake Up"
+            "name": "Shoot Stop"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Shoot Stop"
+            "name": "Intake Up"
           }
         }
       ]
