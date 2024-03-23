@@ -55,6 +55,9 @@ public class Shooter extends SubsystemBase{
   private GenericEntry limelightTY =
     tab.add("limelight TY", 0.0)
       .getEntry();
+  private GenericEntry limelightTX =
+    tab.add("limelight TX", 0.0)
+      .getEntry();
   private GenericEntry calculatedDistance =
     tab.add("calculated distance", 0.0)
       .getEntry();
@@ -157,6 +160,7 @@ public class Shooter extends SubsystemBase{
     /* Logging */
     calculatedDistance.setDouble(horizontalDistance);
     
+    limelightTX.setDouble(LimelightHelper.getTX(""));
     limelightTY.setDouble(LimelightHelper.getTY(""));
   }
 
