@@ -176,6 +176,11 @@ public class RobotContainer {
                 new RunCommand(() -> s_Shooter.setAngle(45), s_Shooter).withTimeout(0.5)
         );
 
+        NamedCommands.registerCommand("Angle 51", 
+                //Shoot
+                new RunCommand(() -> s_Shooter.setAngle(51), s_Shooter).withTimeout(0.5)
+        );
+
         NamedCommands.registerCommand("Angle 42", 
                 //Shoot
                 new RunCommand(() -> s_Shooter.setAngle(42), s_Shooter).withTimeout(0.5)
