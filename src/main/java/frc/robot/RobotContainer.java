@@ -299,7 +299,7 @@ public class RobotContainer {
         // Lock on to amp
         operatorController.b()
             .toggleOnTrue(
-                new RunCommand(() -> s_Shooter.setAngle(50), s_Shooter)
+                new RunCommand(() -> s_Shooter.setAngle(50.0), s_Shooter)
             .alongWith(
                 new RunCommand(() -> s_Led.setColor(255, 0, 0), s_Led)
             )

@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.49,
-      "y": 7.01
+      "x": 0.48,
+      "y": 4.09
     },
-    "rotation": 0.0
+    "rotation": 0
   },
   "command": {
     "type": "sequential",
@@ -14,7 +14,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Speaker Top Position"
+            "pathName": "Speaker Bottom Position"
           }
         },
         {
@@ -50,7 +50,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Top Note Pickup"
+            "pathName": "Bottom Note Pickup"
           }
         },
         {
