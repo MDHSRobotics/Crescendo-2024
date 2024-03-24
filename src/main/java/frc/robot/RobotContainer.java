@@ -151,9 +151,24 @@ public class RobotContainer {
                 new RunCommand(() -> s_Shooter.setAngle(40), s_Shooter).withTimeout(0.5)
         );
 
+        NamedCommands.registerCommand("Angle 30", 
+                //Shoot
+                new RunCommand(() -> s_Shooter.setAngle(30), s_Shooter).withTimeout(0.5)
+        );
+
+        NamedCommands.registerCommand("Angle 32", 
+                //Shoot
+                new RunCommand(() -> s_Shooter.setAngle(32), s_Shooter).withTimeout(0.5)
+        );
+
         NamedCommands.registerCommand("Angle 35", 
                 //Shoot
                 new RunCommand(() -> s_Shooter.setAngle(35), s_Shooter).withTimeout(0.5)
+        );
+
+        NamedCommands.registerCommand("Angle 37", 
+                //Shoot
+                new RunCommand(() -> s_Shooter.setAngle(37), s_Shooter).withTimeout(0.5)
         );
 
         NamedCommands.registerCommand("Angle 45", 
@@ -164,6 +179,11 @@ public class RobotContainer {
         NamedCommands.registerCommand("Angle 42", 
                 //Shoot
                 new RunCommand(() -> s_Shooter.setAngle(42), s_Shooter).withTimeout(0.5)
+        );
+
+        NamedCommands.registerCommand("Angle 40", 
+                //Shoot
+                new RunCommand(() -> s_Shooter.setAngle(40), s_Shooter).withTimeout(0.5)
         );
 
         NamedCommands.registerCommand("Feeder On", 

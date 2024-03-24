@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.48523866278501937,
-      "y": 7.005529395674177
+      "x": 1.34,
+      "y": 5.53
     },
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "command": {
     "type": "sequential",
@@ -14,7 +14,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Speaker Top Position"
+            "pathName": "Mid Start"
           }
         },
         {
@@ -38,7 +38,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Angle 35"
+            "name": "Angle 32"
           }
         },
         {
@@ -50,43 +50,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Top Note Pickup"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.5
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Top to Mid"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
             "pathName": "Middle Note Pickup"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.5
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot Stop"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "Intake Up"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot Stop"
           }
         }
       ]

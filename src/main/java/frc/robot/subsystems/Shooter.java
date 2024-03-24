@@ -74,7 +74,7 @@ public class Shooter extends SubsystemBase{
     tab.add("Moving angle motors", false)
       .getEntry();
   private GenericEntry adjustment = Shuffleboard.getTab("Main")
-    .add("Adjustment Angle", 2)
+    .add("Adjustment Angle", 0)
     .getEntry();
   
   private boolean m_calibration = false;
@@ -97,6 +97,12 @@ public class Shooter extends SubsystemBase{
     angle1.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
     angle2.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
     feeder.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
+
+    topShooter.setOpenLoopRampRate(0.1);
+    bottomShooter.setOpenLoopRampRate(0.1);
+    angle1.setOpenLoopRampRate(0.1);
+    angle2.setOpenLoopRampRate(0.1);
+    feeder.setOpenLoopRampRate(0.1);
     
     angle2.follow(angle1);
     SmartDashboard.putNumber("Angle 1 rotations", angle1.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition());
@@ -105,7 +111,6 @@ public class Shooter extends SubsystemBase{
   }
 
   public void runShooter(double topPower, double bottomPower, double feed){
-    //System.out.println("Run Shooter " + power + " " + feed);
     topShooter.set(-topPower * shootSpeedTop.getDouble(1.0));
     bottomShooter.set(bottomPower * shootSpeedBot.getDouble(1.0));
     SmartDashboard.putNumber("Shooter Power", bottomPower);
