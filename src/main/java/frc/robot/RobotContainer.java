@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -28,6 +29,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
+import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.SwerveSpeedConstants;
 import frc.robot.generated.TunerConstants;
 
@@ -287,15 +289,20 @@ public class RobotContainer {
         // Lock on to speaker
         operatorController.x()
             .toggleOnTrue(
-            s_Swerve.applyRequest(() -> drive.withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed) // Drive forward with // negative Y (forward)
-                .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed) // Drive left with negative X (left)
-                .withRotationalRate(Aiming.getYawTxAdjustment(LimelightHelper.getTX(""))) // Turn at the rate given by limelight
+            new SequentialCommandGroup(
+                new RunCommand(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), s_Shooter).withTimeout(0.05),
+
+                new ParallelCommandGroup(
+                    s_Swerve.applyRequest(() -> drive.withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed) // Drive forward with // negative Y (forward)
+                        .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed) // Drive left with negative X (left)
+                        .withRotationalRate(Aiming.getYawTxAdjustment(LimelightHelper.getTX("")))), // Turn at the rate given by limelight
+                        
+                    new RunCommand(() -> s_Shooter.setAngleFromLimelight(), s_Shooter),
+
+                    new RunCommand(() -> s_Led.setColor(255, 0, 0), s_Led)
+                )
             )
-            .alongWith(
-                new RunCommand(() -> s_Shooter.setAngleFromLimelight(), s_Shooter)
-            ).alongWith(
-                new RunCommand(() -> s_Led.setColor(255, 0, 0), s_Led)
-            ).until(
+            .until(
                 () -> Math.abs(driverController.getRightX()) > 0.1
             )
         );
@@ -316,14 +323,7 @@ public class RobotContainer {
         operatorController.a()
             .and(new Trigger(() -> !m_isAmp))
             .onTrue(
-            new SequentialCommandGroup(
-                new RunCommand(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), s_Shooter).withTimeout(0.05),
-                // Ramp up
-                new RunCommand(() -> s_Shooter.runShooter(0.7, 0.7, 0), s_Shooter).withTimeout(1.0),
-                
-                //Shoot
-                new RunCommand(() -> s_Shooter.runShooter(0.7, 0.7, -0.5), s_Shooter).withTimeout(0.5)
-            )
+            new RunCommand(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.5), s_Shooter).withTimeout(0.5)
             .andThen(
                 new RunCommand(() -> s_Shooter.runShooter(0, 0, 0), s_Shooter).withTimeout(0.1)
                 // Blink green to indicate good to go
@@ -338,10 +338,9 @@ public class RobotContainer {
             new SequentialCommandGroup(
                 new RunCommand(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), s_Shooter).withTimeout(0.05),
                 // Ramp up
-                new RunCommand(() -> s_Shooter.runShooter(0.25 * 0.7, 0.75 * 0.7, 0), s_Shooter).withTimeout(1.0),
-                
+                new RunCommand(() -> s_Shooter.runShooter(ShooterConstants.ampTopSpeed, ShooterConstants.ampBottomSpeed, 0), s_Shooter).withTimeout(1.0),
                 //Shoot
-                new RunCommand(() -> s_Shooter.runShooter(0.25 * 0.7, 0.75 * 0.7, -0.5), s_Shooter).withTimeout(1)
+                new RunCommand(() -> s_Shooter.runShooter(ShooterConstants.ampTopSpeed, ShooterConstants.ampBottomSpeed, -0.5), s_Shooter).withTimeout(0.2)
             )
             .andThen(
                 new RunCommand(() -> s_Shooter.runShooter(0, 0, 0), s_Shooter).withTimeout(1)

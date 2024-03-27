@@ -28,8 +28,7 @@ public class Shooter extends SubsystemBase{
 
   private CANSparkFlex topShooter;
   private CANSparkFlex bottomShooter;
-  private CANSparkFlex angle1;
-  private CANSparkFlex angle2;
+  private CANSparkFlex angle;
   private CANSparkMax feeder;
 
   private SparkPIDController m_pidController;
@@ -67,14 +66,19 @@ public class Shooter extends SubsystemBase{
   private GenericEntry rotationsC =
     tab.add("Rotations", -0.5839)
       .getEntry();
-  private GenericEntry locked =
-    tab.add("locked", false)
-      .getEntry();
   private GenericEntry movingAngle =
     tab.add("Moving angle motors", false)
       .getEntry();
   private GenericEntry adjustment = Shuffleboard.getTab("Main")
     .add("Adjustment Angle", 0)
+    .getEntry();
+  private GenericEntry atSpeed = Shuffleboard.getTab("Main")
+    .add("At Speed", false)
+    .withSize(2, 2)
+    .getEntry();
+  private GenericEntry locked = Shuffleboard.getTab("Main")
+    .add("Locked", false)
+    .withSize(2, 2)
     .getEntry();
   
   private boolean m_calibration = false;
@@ -82,11 +86,10 @@ public class Shooter extends SubsystemBase{
   public Shooter(){
     topShooter = new CANSparkFlex(ShooterConstants.kTopID, MotorType.kBrushless);
     bottomShooter = new CANSparkFlex(ShooterConstants.kBottomID, MotorType.kBrushless);
-    angle1 = new CANSparkFlex(ShooterConstants.kAngleLeftID, MotorType.kBrushless);
-    angle2 = new CANSparkFlex(ShooterConstants.kAngleRightID, MotorType.kBrushless);
+    angle = new CANSparkFlex(ShooterConstants.kAngleRightID, MotorType.kBrushless);
     feeder = new CANSparkMax(ShooterConstants.kFeederID, MotorType.kBrushless);
 
-    m_pidController = angle1.getPIDController();
+    m_pidController = angle.getPIDController();
     m_pidController.setP(0.1);
 
     topShooter.setIdleMode(IdleMode.kBrake);
@@ -94,19 +97,16 @@ public class Shooter extends SubsystemBase{
 
     topShooter.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
     bottomShooter.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
-    angle1.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
-    angle2.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
+    angle.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
     feeder.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
 
     topShooter.setOpenLoopRampRate(0.1);
     bottomShooter.setOpenLoopRampRate(0.1);
-    angle1.setOpenLoopRampRate(0.1);
-    angle2.setOpenLoopRampRate(0.1);
+    angle.setOpenLoopRampRate(0.1);
     feeder.setOpenLoopRampRate(0.1);
     
-    angle2.follow(angle1);
-    SmartDashboard.putNumber("Angle 1 rotations", angle1.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition());
-    SmartDashboard.putNumber("Angle 2 rotations", angle1.getEncoder().getPosition());
+    SmartDashboard.putNumber("Angle 1 rotations", angle.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition());
+    SmartDashboard.putNumber("Angle 2 rotations", angle.getEncoder().getPosition());
     //shooter2.setIdleMode(IdleMode.kCoast);
   }
 
@@ -128,7 +128,7 @@ public class Shooter extends SubsystemBase{
     if(!m_calibration){
       setAngle(23 - 3.5);
     }else{
-      angle1.set(angleSpeed);
+      angle.set(angleSpeed);
     }
     
     feeder.set(0);
@@ -136,8 +136,7 @@ public class Shooter extends SubsystemBase{
     bottomShooter.set(0);
 
     /* Logging */
-    angle1Rotations.setDouble(angle1.getEncoder().getPosition());
-    angle2Rotations.setDouble(angle2.getEncoder().getPosition());
+    angle1Rotations.setDouble(angle.getEncoder().getPosition());
     locked.setBoolean(false);
     limelightTY.setDouble(LimelightHelper.getTY(""));
       
@@ -161,17 +160,19 @@ public class Shooter extends SubsystemBase{
     double angle = Aiming.getPitch(adjustedDistance, heightDifference);
 
     setAngle(Math.toDegrees(angle) + adjustment.getDouble(4));
+    runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, 0);
 
     /* Logging */
     calculatedDistance.setDouble(horizontalDistance);
     
+    atSpeed.setBoolean(Aiming.approximatelyEqual(topShooter.getEncoder().getVelocity(), ShooterConstants.speakerSpeed, 0.05));
     limelightTX.setDouble(LimelightHelper.getTX(""));
     limelightTY.setDouble(LimelightHelper.getTY(""));
   }
 
-  public void setAngle(double angle){
+  public void setAngle(double targetAngle){
     //Calculate angle to rotations
-    double rotations = rotationsC.getDouble(0.0) * (angle - ShooterConstants.kBottomMeasureAngle + 4.0);
+    double rotations = rotationsC.getDouble(0.0) * (targetAngle - ShooterConstants.kBottomMeasureAngle + 4.0);
 
     //Set the rotations
     if(rotations > -45.8 && rotations < 0){
@@ -183,19 +184,17 @@ public class Shooter extends SubsystemBase{
     //System.out.println(rotations);
 
     /* Logging */
-    calculatedAngle.setDouble(angle + 4);
-    locked.setBoolean(Aiming.approximatelyEqual(rotations, angle1.getEncoder().getPosition(), 1.0));
-    angle1Rotations.setDouble(angle1.getEncoder().getPosition());
-    angle2Rotations.setDouble(angle2.getEncoder().getPosition());
+    calculatedAngle.setDouble(targetAngle + 4);
+    locked.setBoolean(Aiming.approximatelyEqual(rotations, angle.getEncoder().getPosition(), 1.0));
+    angle1Rotations.setDouble(angle.getEncoder().getPosition());
   }
 
   public void resetEncoders(){
-    angle1.getEncoder().setPosition(0);
-    angle2.getEncoder().setPosition(0);
+    angle.getEncoder().setPosition(0);
   }
 
   public void setCalibration(){
-      m_calibration = !m_calibration;
+    m_calibration = !m_calibration;
   }
 
 }

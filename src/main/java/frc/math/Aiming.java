@@ -2,9 +2,12 @@ package frc.math;
 
 import java.lang.Math;
 
+import edu.wpi.first.math.controller.PIDController;
 import frc.robot.Constants.SwerveSpeedConstants;
 
 public class Aiming {
+
+    private static PIDController yawPID = new PIDController(0.15, 0, 0);
     
     /**
      * @param lensHeight The height of the limelight in inches
@@ -35,8 +38,10 @@ public class Aiming {
      * @return The output turning power
      */
     public static double getYawTxAdjustment(double tx){
-        double value = Math.max(-SwerveSpeedConstants.MaxAngularRate, Math.min(SwerveSpeedConstants.MaxAngularRate, tx * -0.15));
-        //System.out.println(value);
+        //double value = Math.max(-SwerveSpeedConstants.MaxAngularRate, Math.min(SwerveSpeedConstants.MaxAngularRate, tx * -0.12));
+        
+        double value = yawPID.calculate(tx, 0);
+        System.out.println(value);
         return value;
     }
 

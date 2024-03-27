@@ -58,7 +58,11 @@ public final class Constants {
         public static final double kBottomMeasureAngle = 23.0;
         public static final double kBottomRotations = 0.0;
 
-        public static final double ampAngle = 54.0;
+        public static final double ampAngle = 50.0;
+
+        public static final double ampTopSpeed = 0.175;
+        public static final double ampBottomSpeed = 0.525;
+        public static final double speakerSpeed = 0.7;
     }
 
     public class IntakeConstants {

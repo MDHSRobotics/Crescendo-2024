@@ -52,7 +52,7 @@ public class Intake extends SubsystemBase{
         leftAngle.setIdleMode(IdleMode.kBrake);
         
         m_pidController = rightAngle.getPIDController();
-        m_pidController.setP(0.03);
+        m_pidController.setP(0.1);
 
         leftAngle.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
         rightAngle.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
