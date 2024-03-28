@@ -41,7 +41,7 @@ public class Aiming {
         //double value = Math.max(-SwerveSpeedConstants.MaxAngularRate, Math.min(SwerveSpeedConstants.MaxAngularRate, tx * -0.12));
         
         double value = yawPID.calculate(tx, 0);
-        System.out.println(value);
+        //System.out.println(value);
         return value;
     }
 

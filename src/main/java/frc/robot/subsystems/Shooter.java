@@ -164,8 +164,8 @@ public class Shooter extends SubsystemBase{
 
     /* Logging */
     calculatedDistance.setDouble(horizontalDistance);
-    
-    atSpeed.setBoolean(Aiming.approximatelyEqual(topShooter.getEncoder().getVelocity(), ShooterConstants.speakerSpeed, 0.05));
+    //System.out.println((topShooter.getEncoder().getVelocity()));
+    atSpeed.setBoolean(Aiming.approximatelyEqual(topShooter.getEncoder().getVelocity(), -4005, 20));
     limelightTX.setDouble(LimelightHelper.getTX(""));
     limelightTY.setDouble(LimelightHelper.getTY(""));
   }

@@ -89,7 +89,7 @@ public final class Constants {
 
     public class LEDConstants {
 
-        public static final int kStripLength = 300;
+        public static final int kStripLength = 35;
 
         public static final int kStrobeLength = 40;
     }

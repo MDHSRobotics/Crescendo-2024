@@ -58,7 +58,6 @@ public class RobotContainer {
     private final LED s_Led = new LED();
     
     /* Limit Switches */
-    DigitalInput intakeLimitSwitch = new DigitalInput(1);
     DigitalInput shooterLimitSwitch = new DigitalInput(0);
     DigitalInput climbLimitSwitch = new DigitalInput(2);
 
@@ -107,8 +106,8 @@ public class RobotContainer {
         }
             s_Swerve.registerTelemetry(logger::telemeterize);
 
-            s_Led.setDefaultCommand(
-                new RunCommand(()-> s_Led.setColor(100, 250, 100), s_Led)
+        s_Led.setDefaultCommand(
+            new RunCommand(()-> s_Led.rainbow(), s_Led)
         );
 
         /*s_Climb.setDefaultCommand(
@@ -120,7 +119,7 @@ public class RobotContainer {
         //SmartDashboard.putData(s_Climb);
         SmartDashboard.putData(s_Intake);
 
-        new Trigger(intakeLimitSwitch::get).onTrue(new RunCommand(() -> s_Led.setColor(240, 161, 26), s_Led));
+        new Trigger(shooterLimitSwitch::get).onTrue(new RunCommand(() -> s_Led.setColor(255, 120, 0), s_Led).withTimeout(3));
 
         // Configure the button bindings
         configureButtonBindings();
@@ -254,8 +253,8 @@ public class RobotContainer {
         driverController.L1().onTrue(s_Swerve.runOnce(() -> s_Swerve.seedFieldRelative()));
 
         // LED communication
-        driverController.povLeft().onTrue(new RunCommand(()-> s_Led.blink(0, 0, 255, 1000), s_Led).withTimeout(10));
-        driverController.povRight().onTrue(new RunCommand(()-> s_Led.blink(255, 255, 0, 1000), s_Led).withTimeout(10));
+        driverController.R1().onTrue(new RunCommand(()-> s_Led.blink(0, 0, 255, 400), s_Led).withTimeout(5));
+        driverController.povRight().onTrue(new RunCommand(()-> s_Led.blink(255, 255, 0, 1000), s_Led).withTimeout(5));
         
         // Climb
         /*driverController.square().whileTrue(new RunCommand(() -> s_Climb.runClimb(0,1), s_Climb));
@@ -297,9 +296,7 @@ public class RobotContainer {
                         .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed) // Drive left with negative X (left)
                         .withRotationalRate(Aiming.getYawTxAdjustment(LimelightHelper.getTX("")))), // Turn at the rate given by limelight
                         
-                    new RunCommand(() -> s_Shooter.setAngleFromLimelight(), s_Shooter),
-
-                    new RunCommand(() -> s_Led.setColor(255, 0, 0), s_Led)
+                    new RunCommand(() -> s_Shooter.setAngleFromLimelight(), s_Shooter)
                 )
             )
             .until(
