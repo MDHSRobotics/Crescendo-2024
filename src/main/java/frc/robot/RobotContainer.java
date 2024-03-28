@@ -54,7 +54,7 @@ public class RobotContainer {
     public final Swerve s_Swerve = TunerConstants.DriveTrain; // My drivetrain
     private final Shooter s_Shooter = new Shooter();
     private final Intake s_Intake = new Intake();
-    //private final Climb s_Climb = new Climb();
+    private final Climb s_Climb = new Climb();
     private final LED s_Led = new LED();
     
     /* Limit Switches */
@@ -110,9 +110,9 @@ public class RobotContainer {
             new RunCommand(()-> s_Led.rainbow(), s_Led)
         );
 
-        /*s_Climb.setDefaultCommand(
+        s_Climb.setDefaultCommand(
             new RunCommand((() -> s_Climb.runClimb(0,0)), s_Climb)
-        );*/
+        );
 
         SmartDashboard.putData(s_Shooter);
         SmartDashboard.putData(s_Led);
@@ -257,11 +257,11 @@ public class RobotContainer {
         driverController.povRight().onTrue(new RunCommand(()-> s_Led.blink(255, 255, 0, 1000), s_Led).withTimeout(5));
         
         // Climb
-        /*driverController.square().whileTrue(new RunCommand(() -> s_Climb.runClimb(0,1), s_Climb));
-        driverController.cross().whileTrue(new RunCommand(() -> s_Climb.runClimb(-1, -1), s_Climb).until(climbLimitSwitch::get));
-        driverController.triangle().whileTrue(new RunCommand(() -> s_Climb.runClimb(1, 1), s_Climb));
-        driverController.circle().whileTrue(new RunCommand(() -> s_Climb.runClimb(1, 0), s_Climb));
-        */
+        driverController.povLeft().whileTrue(new RunCommand(() -> s_Climb.runClimb(0,1), s_Climb));
+        driverController.povDown().whileTrue(new RunCommand(() -> s_Climb.runClimb(-1, -1), s_Climb).until(climbLimitSwitch::get));
+        driverController.povUp().whileTrue(new RunCommand(() -> s_Climb.runClimb(1, 1), s_Climb));
+        driverController.povRight().whileTrue(new RunCommand(() -> s_Climb.runClimb(1, 0), s_Climb));
+        
         driverController.R2().onTrue(new InstantCommand(() -> m_slowMode = false));
         driverController.L2().onTrue(new InstantCommand(() -> m_slowMode = true));
 

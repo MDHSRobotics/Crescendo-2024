@@ -48,9 +48,6 @@ public class Shooter extends SubsystemBase{
   private GenericEntry angle1Rotations =
     tab.add("Left Motor Rotations", 0.0)
       .getEntry();
-  private GenericEntry angle2Rotations =
-    tab.add("Right Motor Rotations", 0.0)
-      .getEntry();
   private GenericEntry limelightTY =
     tab.add("limelight TY", 0.0)
       .getEntry();
