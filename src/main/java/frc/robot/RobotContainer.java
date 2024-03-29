@@ -384,6 +384,8 @@ public class RobotContainer {
 
         operatorController.rightBumper().onTrue(new RunCommand(() -> s_Shooter.setAngle(51), s_Shooter));
         operatorController.leftBumper().onTrue(new RunCommand(() -> s_Shooter.setAngle(36), s_Shooter));
+
+        operatorController.start().toggleOnTrue(new RunCommand(() -> s_Shooter.runShooter(-1,-1,1), s_Shooter));
     }
 
     public static double roundAvoid(double value, int places) {

@@ -85,6 +85,10 @@ public class Shooter extends SubsystemBase{
     .add("TX Correct", false)
     .withSize(2, 2)
     .getEntry();
+  private GenericEntry ready = Shuffleboard.getTab("Main")
+    .add("Ready", false)
+    .withSize(4, 4)
+    .getEntry();
   
   private boolean m_calibration = false;
   private boolean m_isAtAngle = false;
@@ -197,7 +201,7 @@ public class Shooter extends SubsystemBase{
   }
 
   public boolean isReady(){
-    return (LimelightHelper.getFiducialID("") == 4 || LimelightHelper.getFiducialID("") == 7) && topShooter.getEncoder().getVelocity() < -3800 && m_isAtAngle;
+    return tagInSight() && atSpeed.getBoolean(false) && isAtAngle.getBoolean(false) && txCorrect.getBoolean(false);
   }
 
   public boolean tagInSight(){
