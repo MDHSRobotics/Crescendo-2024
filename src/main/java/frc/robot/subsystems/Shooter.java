@@ -79,6 +79,7 @@ public class Shooter extends SubsystemBase{
     .getEntry();
   
   private boolean m_calibration = false;
+  private boolean m_isAtAngle = false;
 
   public Shooter(){
     topShooter = new CANSparkFlex(ShooterConstants.kTopID, MotorType.kBrushless);
@@ -132,8 +133,11 @@ public class Shooter extends SubsystemBase{
     topShooter.set(0);
     bottomShooter.set(0);
 
+    m_isAtAngle = false;
+
     /* Logging */
     angle1Rotations.setDouble(angle.getEncoder().getPosition());
+    atSpeed.setBoolean(false);
     locked.setBoolean(false);
     limelightTY.setDouble(LimelightHelper.getTY(""));
       
@@ -182,7 +186,8 @@ public class Shooter extends SubsystemBase{
 
     /* Logging */
     calculatedAngle.setDouble(targetAngle + 4);
-    locked.setBoolean(Aiming.approximatelyEqual(rotations, angle.getEncoder().getPosition(), 1.0));
+    m_isAtAngle = Aiming.approximatelyEqual(rotations, angle.getEncoder().getPosition(), 1.0);
+    locked.setBoolean(m_isAtAngle);
     angle1Rotations.setDouble(angle.getEncoder().getPosition());
   }
 
@@ -192,6 +197,11 @@ public class Shooter extends SubsystemBase{
 
   public void setCalibration(){
     m_calibration = !m_calibration;
+  }
+
+  public boolean isReady(){
+    return (LimelightHelper.getFiducialID("") == 4 || LimelightHelper.getFiducialID("") == 7) && Aiming.approximatelyEqual(topShooter.getEncoder().getVelocity(), -4005, 20) && m_isAtAngle;
+    
   }
 
 }

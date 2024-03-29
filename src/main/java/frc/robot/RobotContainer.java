@@ -32,6 +32,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.SwerveSpeedConstants;
 import frc.robot.generated.TunerConstants;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 import frc.robot.subsystems.*;
 
@@ -77,6 +78,9 @@ public class RobotContainer {
     private boolean m_slowMode = false;
 
     private boolean m_isAmp = false;
+    private boolean m_autoshoot = false;
+
+    public static Alliance kAlliance;
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
@@ -119,7 +123,7 @@ public class RobotContainer {
         //SmartDashboard.putData(s_Climb);
         SmartDashboard.putData(s_Intake);
 
-        new Trigger(shooterLimitSwitch::get).onTrue(new RunCommand(() -> s_Led.setColor(255, 120, 0), s_Led).withTimeout(3));
+        new Trigger(shooterLimitSwitch::get).onTrue(new RunCommand(() -> s_Led.setColor(255, 0, 0), s_Led).withTimeout(3));
 
         // Configure the button bindings
         configureButtonBindings();
@@ -323,10 +327,19 @@ public class RobotContainer {
             new RunCommand(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.5), s_Shooter).withTimeout(0.5)
             .andThen(
                 new RunCommand(() -> s_Shooter.runShooter(0, 0, 0), s_Shooter).withTimeout(0.1)
-                // Blink green to indicate good to go
-                //new RunCommand(() -> s_Led.setColor(0, 255, 0), s_Led).withTimeout(2)
             )
         );
+
+        new Trigger(s_Shooter::isReady)
+            .and(() -> m_autoshoot)
+            .onTrue(
+                new RunCommand(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.5), s_Shooter).withTimeout(0.5)
+            .andThen(
+                new RunCommand(() -> s_Shooter.runShooter(0, 0, 0), s_Shooter).withTimeout(0.1)
+            )
+        );
+
+        new Trigger(s_Shooter::isReady).onTrue(new RunCommand(() -> s_Led.setColor(0, 255, 0), s_Led).until(() -> !s_Shooter.isReady()));
 
         // Shoot Amp
         operatorController.a()
