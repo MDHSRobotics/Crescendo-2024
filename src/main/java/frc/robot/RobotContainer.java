@@ -263,9 +263,9 @@ public class RobotContainer {
         // Climb
         driverController.povLeft().whileTrue(new RunCommand(() -> s_Climb.runClimb(0,1), s_Climb));
         driverController.povDown().whileTrue(new RunCommand(() -> s_Climb.runClimb(-1, -1), s_Climb).until(climbLimitSwitch::get));
-        driverController.povUp().whileTrue(new RunCommand(() -> s_Climb.runClimb(1, 1), s_Climb));
+        driverController.R3().whileTrue(new RunCommand(() -> s_Climb.runClimb(1, 1), s_Climb));
         driverController.povRight().whileTrue(new RunCommand(() -> s_Climb.runClimb(1, 0), s_Climb));
-        
+
         driverController.R2().onTrue(new InstantCommand(() -> m_slowMode = false));
         driverController.L2().onTrue(new InstantCommand(() -> m_slowMode = true));
 
