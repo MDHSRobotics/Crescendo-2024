@@ -45,8 +45,8 @@ public class Shooter extends SubsystemBase{
       .withWidget(BuiltInWidgets.kNumberSlider)
       .withProperties(Map.of("min", 0, "max", 1)) // specify widget properties here
       .getEntry();
-  private GenericEntry angle1Rotations =
-    tab.add("Left Motor Rotations", 0.0)
+  private GenericEntry angleRotations =
+    tab.add("Angle Rotations", 0.0)
       .getEntry();
   private GenericEntry limelightTY =
     tab.add("limelight TY", 0.0)
@@ -73,8 +73,16 @@ public class Shooter extends SubsystemBase{
     .add("At Speed", false)
     .withSize(2, 2)
     .getEntry();
-  private GenericEntry locked = Shuffleboard.getTab("Main")
-    .add("Locked", false)
+  private GenericEntry isAtAngle = Shuffleboard.getTab("Main")
+    .add("At Angle", false)
+    .withSize(2, 2)
+    .getEntry();
+  private GenericEntry seeTag = Shuffleboard.getTab("Main")
+    .add("Sees Tag ", false)
+    .withSize(2, 2)
+    .getEntry();
+  private GenericEntry txCorrect = Shuffleboard.getTab("Main")
+    .add("TX Correct", false)
     .withSize(2, 2)
     .getEntry();
   
@@ -134,13 +142,6 @@ public class Shooter extends SubsystemBase{
     bottomShooter.set(0);
 
     m_isAtAngle = false;
-
-    /* Logging */
-    angle1Rotations.setDouble(angle.getEncoder().getPosition());
-    atSpeed.setBoolean(false);
-    locked.setBoolean(false);
-    limelightTY.setDouble(LimelightHelper.getTY(""));
-      
   }
 
   public void runFeed(double power){
@@ -166,9 +167,7 @@ public class Shooter extends SubsystemBase{
     /* Logging */
     calculatedDistance.setDouble(horizontalDistance);
     //System.out.println((topShooter.getEncoder().getVelocity()));
-    atSpeed.setBoolean(Aiming.approximatelyEqual(topShooter.getEncoder().getVelocity(), -4005, 20));
-    limelightTX.setDouble(LimelightHelper.getTX(""));
-    limelightTY.setDouble(LimelightHelper.getTY(""));
+    
   }
 
   public void setAngle(double targetAngle){
@@ -187,8 +186,6 @@ public class Shooter extends SubsystemBase{
     /* Logging */
     calculatedAngle.setDouble(targetAngle + 4);
     m_isAtAngle = Aiming.approximatelyEqual(rotations, angle.getEncoder().getPosition(), 1.0);
-    locked.setBoolean(m_isAtAngle);
-    angle1Rotations.setDouble(angle.getEncoder().getPosition());
   }
 
   public void resetEncoders(){
@@ -200,11 +197,21 @@ public class Shooter extends SubsystemBase{
   }
 
   public boolean isReady(){
-    return (LimelightHelper.getFiducialID("") == 4 || LimelightHelper.getFiducialID("") == 7) && topShooter.getEncoder().getVelocity() < -4005 && m_isAtAngle;
+    return (LimelightHelper.getFiducialID("") == 4 || LimelightHelper.getFiducialID("") == 7) && topShooter.getEncoder().getVelocity() < -3800 && m_isAtAngle;
   }
 
   public boolean tagInSight(){
     return (LimelightHelper.getFiducialID("") == 4 || LimelightHelper.getFiducialID("") == 7);
+  }
+
+  public void logShuffleboard(){
+    angleRotations.setDouble(angle.getEncoder().getPosition());
+    limelightTY.setDouble(LimelightHelper.getTY(""));
+    limelightTX.setDouble(LimelightHelper.getTX(""));
+    atSpeed.setBoolean(topShooter.getEncoder().getVelocity() < -3800);
+    isAtAngle.setBoolean(m_isAtAngle);
+    seeTag.setBoolean(tagInSight());
+    txCorrect.setBoolean(Aiming.approximatelyEqual(LimelightHelper.getTX(""), 0, 2.5));
   }
 
 }

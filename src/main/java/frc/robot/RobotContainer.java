@@ -53,7 +53,7 @@ public class RobotContainer {
 
     /* Subsystems */
     public final Swerve s_Swerve = TunerConstants.DriveTrain; // My drivetrain
-    private final Shooter s_Shooter = new Shooter();
+    public final Shooter s_Shooter = new Shooter();
     private final Intake s_Intake = new Intake();
     private final Climb s_Climb = new Climb();
     private final LED s_Led = new LED();
