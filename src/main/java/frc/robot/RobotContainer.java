@@ -340,6 +340,7 @@ public class RobotContainer {
         );
 
         new Trigger(s_Shooter::isReady).onTrue(new RunCommand(() -> s_Led.setColor(0, 255, 0), s_Led).until(() -> !s_Shooter.isReady()));
+        new Trigger(() -> s_Shooter.tagInSight() && !s_Shooter.isReady()).onTrue(new RunCommand(() -> s_Led.blink(255, 0, 0, 300), s_Led).until(() -> !s_Shooter.tagInSight()));
 
         // Shoot Amp
         operatorController.a()

@@ -200,8 +200,11 @@ public class Shooter extends SubsystemBase{
   }
 
   public boolean isReady(){
-    return (LimelightHelper.getFiducialID("") == 4 || LimelightHelper.getFiducialID("") == 7) && Aiming.approximatelyEqual(topShooter.getEncoder().getVelocity(), -4005, 50) && m_isAtAngle;
-    
+    return (LimelightHelper.getFiducialID("") == 4 || LimelightHelper.getFiducialID("") == 7) && topShooter.getEncoder().getVelocity() < -4005 && m_isAtAngle;
+  }
+
+  public boolean tagInSight(){
+    return (LimelightHelper.getFiducialID("") == 4 || LimelightHelper.getFiducialID("") == 7);
   }
 
 }

@@ -20,7 +20,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Angle 45"
+            "name": "Angle 37"
           }
         },
         {
@@ -38,7 +38,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Angle 35"
+            "name": "Angle 30"
           }
         },
         {
@@ -63,12 +63,6 @@
           "type": "path",
           "data": {
             "pathName": "Top to Mid"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Angle 42"
           }
         },
         {
