@@ -93,6 +93,8 @@ public class Shooter extends SubsystemBase{
   private boolean m_calibration = false;
   private boolean m_isAtAngle = false;
 
+  private double m_lastAngle = 23;
+
   public Shooter(){
     topShooter = new CANSparkFlex(ShooterConstants.kTopID, MotorType.kBrushless);
     bottomShooter = new CANSparkFlex(ShooterConstants.kBottomID, MotorType.kBrushless);
@@ -154,22 +156,33 @@ public class Shooter extends SubsystemBase{
 
   //adjust the angle of the shooter
   public void setAngleFromLimelight(){
-    double horizontalDistance = Aiming.calculateDistance(
-        LimelightConstants.kLimelightLensHeightInches, 
-        LimelightConstants.kSpeakerTagHeight,
-        LimelightConstants.kLimelightMountAngleDegrees,
-        LimelightHelper.getTY(""));
-    
-    double adjustedDistance = horizontalDistance + LimelightConstants.kLimelightPivotHorizontalDistance - LimelightConstants.kSpeakerHorizontal;
-    double heightDifference = LimelightConstants.kSpeakerHeight - ShooterConstants.kPivotHeight;
+    if(tagInSight()){
+      // calculate the distance
+      double horizontalDistance = Aiming.calculateDistance(
+          LimelightConstants.kLimelightLensHeightInches, 
+          LimelightConstants.kSpeakerTagHeight,
+          LimelightConstants.kLimelightMountAngleDegrees,
+          LimelightHelper.getTY(""));
+      
+      // adjust the distances
+      double adjustedDistance = horizontalDistance + LimelightConstants.kLimelightPivotHorizontalDistance - LimelightConstants.kSpeakerHorizontal;
+      double heightDifference = LimelightConstants.kSpeakerHeight - ShooterConstants.kPivotHeight;
 
-    double angle = Aiming.getPitch(adjustedDistance, heightDifference);
+      // calculate the angle
+      double angle = Aiming.getPitch(adjustedDistance, heightDifference);
 
-    setAngle(Math.toDegrees(angle) + adjustment.getDouble(4));
+      // set the angle
+      setAngle(Math.toDegrees(angle) + adjustment.getDouble(4));
+      m_lastAngle = Math.toDegrees(Math.toDegrees(angle) + adjustment.getDouble(4));
+      
+      calculatedDistance.setDouble(horizontalDistance);
+    }else{
+      setAngle(m_lastAngle);
+    }
     runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, 0);
 
     /* Logging */
-    calculatedDistance.setDouble(horizontalDistance);
+    
     //System.out.println((topShooter.getEncoder().getVelocity()));
     
   }
@@ -216,6 +229,7 @@ public class Shooter extends SubsystemBase{
     isAtAngle.setBoolean(m_isAtAngle);
     seeTag.setBoolean(tagInSight());
     txCorrect.setBoolean(Aiming.approximatelyEqual(LimelightHelper.getTX(""), 0, 2.5));
+    ready.setBoolean(isReady());
   }
 
 }

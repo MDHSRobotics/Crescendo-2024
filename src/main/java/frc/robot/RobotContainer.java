@@ -386,6 +386,18 @@ public class RobotContainer {
         operatorController.leftBumper().onTrue(new RunCommand(() -> s_Shooter.setAngle(36), s_Shooter));
 
         operatorController.start().toggleOnTrue(new RunCommand(() -> s_Shooter.runShooter(-1,-1,1), s_Shooter));
+        operatorController.back().onTrue(
+            new SequentialCommandGroup(
+                new RunCommand(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), s_Shooter).withTimeout(0.05),
+                // Ramp up
+                new RunCommand(() -> s_Shooter.runShooter(0.5, 0.5, 0), s_Shooter).withTimeout(1.0),
+                //Shoot
+                new RunCommand(() -> s_Shooter.runShooter(0.5, 0.5, -0.5), s_Shooter).withTimeout(0.5)
+            )
+            .andThen(
+                new RunCommand(() -> s_Shooter.runShooter(0, 0, 0), s_Shooter).withTimeout(0.5)
+            )
+        );
     }
 
     public static double roundAvoid(double value, int places) {
