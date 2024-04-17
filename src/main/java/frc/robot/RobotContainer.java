@@ -282,7 +282,7 @@ public class RobotContainer {
         //
         // https://www.padcrafter.com/index.php?templates=Operator+Controller&rightStick=Aim+Shooter&leftStick=Aim+Intake&yButton=Intake+note&dpadUp=&xButton=Lock+on+to+April+Tag+%28Speaker+or+Amp%29&aButton=Shoot+into+Speaker&bButton=Shoot+into+Amp&startButton=Reset+shooter&backButton=Reset+Intake&dpadDown=Eject+note&dpadLeft=Calibrate+Shooter+and+Intake&dpadRight=Set+shooter+angle+for+Amp
         //
-        // https://www.padcrafter.com/?templates=Operator+Controller+New&xButton=Lock+Speaker&bButton=Lock+Amp&yButton=Toss&aButton=Fire&rightStick=Aim+Shooter&leftStickClick=&leftStick=Aim+intake&dpadUp=Shooter+Calibrate&dpadLeft=Calibration+mode&dpadDown=Intake+Calibration&rightTrigger=Deploy+Intake&leftTrigger=Eject+Intake&dpadRight=&leftBumper=Manual+Podium&rightBumper=Manual+Point+Blank#        //
+        // https://www.padcrafter.com/?backButton=Eject+Intake&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29#?templates=Operator+Controller+New&xButton=Lock+Speaker&bButton=Lock+Amp&yButton=Toss&aButton=Fire&rightStick=Aim+Shooter&leftStickClick&leftStick=Aim+intake&dpadUp=Shooter+Calibrate&dpadLeft=Calibration+mode&dpadDown=Intake+Calibration&rightTrigger=Deploy+Intake&leftTrigger=Eject+Intake&dpadRight&leftBumper=Manual+Podium&rightBumper=Manual+Point+Blank&backButton=E
         // Whenever you edit a button binding, please update this URL
         
         // Run intake
