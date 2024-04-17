@@ -34,7 +34,7 @@ public class Intake extends SubsystemBase{
       tab.add("Intake Rotations", -20.0)
         .getEntry();
     private GenericEntry mid =
-      tab.add("Mid Rotations", 5.0)
+      tab.add("Mid Rotations", 30.0)
         .getEntry();
     private GenericEntry midP =
       tab.add("Mid Power", -1.0)
