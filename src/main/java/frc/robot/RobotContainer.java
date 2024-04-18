@@ -123,7 +123,7 @@ public class RobotContainer {
         //SmartDashboard.putData(s_Climb);
         SmartDashboard.putData(s_Intake);
 
-        new Trigger(shooterLimitSwitch::get).onTrue(new RunCommand(() -> s_Led.setColor(255, 0, 0), s_Led).withTimeout(3));
+        new Trigger(shooterLimitSwitch::get).onTrue(new RunCommand(() -> s_Led.setColor(255, 20, 0), s_Led).withTimeout(3));
 
         // Configure the button bindings
         configureButtonBindings();
@@ -313,7 +313,7 @@ public class RobotContainer {
         // Lock on to amp
         operatorController.b()
             .toggleOnTrue(
-                new RunCommand(() -> s_Shooter.setAngle(50.0), s_Shooter)
+                new RunCommand(() -> s_Shooter.setAngle(52.0), s_Shooter)
             .alongWith(
                 new RunCommand(() -> s_Led.setColor(255, 0, 0), s_Led)
             )

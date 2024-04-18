@@ -5,6 +5,7 @@ import java.util.Map;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -24,6 +25,21 @@ public class LED extends SubsystemBase{
     private GenericEntry color =
       tab.add("Color", false)
         .withProperties(Map.of("colorWhenFalse", "black"))
+        .getEntry();
+    private GenericEntry tRed = 
+      tab.add("tRed", 1)
+        .withWidget(BuiltInWidgets.kNumberSlider)
+        .withProperties(Map.of("min", 0, "max", 255)) // specify widget properties here
+        .getEntry();
+    private GenericEntry tGreen = 
+      tab.add("tGreen", 1)
+        .withWidget(BuiltInWidgets.kNumberSlider)
+        .withProperties(Map.of("min", 0, "max", 255)) // specify widget properties here
+        .getEntry();
+    private GenericEntry tBlue = 
+      tab.add("tBlue", 1)
+        .withWidget(BuiltInWidgets.kNumberSlider)
+        .withProperties(Map.of("min", 0, "max", 255)) // specify widget properties here
         .getEntry();
 
     public LED(){
@@ -104,5 +120,10 @@ public class LED extends SubsystemBase{
         m_led.setData(m_ledBuffer);
         m_led.start();
     }
+
+    public void colorTest(){
+        setColor((int) tRed.getInteger(0), (int) tGreen.getInteger(0), (int) tBlue.getInteger(0));
+    }
+
     
 }
