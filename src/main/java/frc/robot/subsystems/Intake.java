@@ -33,11 +33,11 @@ public class Intake extends SubsystemBase{
     private GenericEntry intakeRotations =
       tab.add("Intake Rotations", -20.0)
         .getEntry();
-    private GenericEntry mid =
-      tab.add("Mid Rotations", 30.0)
+    private GenericEntry intakeMidPositions =
+      tab.add("Intake Mid Rotations", 30.0)
         .getEntry();
-    private GenericEntry midP =
-      tab.add("Mid Power", -1.0)
+    private GenericEntry spitPower =
+      tab.add("Spit Power", -1.0)
         .getEntry();
 
     private boolean m_calibration = false;
@@ -94,14 +94,17 @@ public class Intake extends SubsystemBase{
     }
 
     public void midPosition(){
-        m_pidController.setReference(mid.getDouble(0), CANSparkMax.ControlType.kPosition);
+        m_pidController.setReference(intakeMidPositions.getDouble(0), CANSparkMax.ControlType.kPosition);
 
+        intake.set(1.0);
+        conveyor.set(-1.0);
+        
         /* Logging */
         intakeRotations.setDouble(rightAngle.getEncoder().getPosition());
     }
 
     public void spitOut(){
-        intake.set(midP.getDouble(-1));
+        intake.set(spitPower.getDouble(-1));
         conveyor.set(1);
     }
     
