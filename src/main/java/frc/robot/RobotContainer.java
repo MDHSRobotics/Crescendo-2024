@@ -256,7 +256,7 @@ public class RobotContainer {
         //
         // Whenever you edit a button binding, please update this URL
 
-        // Reset the field-centric heading on left bumper press
+        // Reset the field-centric heading on left bumper press. This will break pose estimation.
         driverController.L1().onTrue(s_Swerve.runOnce(() -> s_Swerve.seedFieldRelative()));
 
         // LED communication
