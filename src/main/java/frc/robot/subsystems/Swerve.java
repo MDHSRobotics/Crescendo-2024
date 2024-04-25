@@ -149,6 +149,12 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
 
     @Override
     public void periodic() {
+        // Update yaw for Limelight Megatag2
+        double yaw = m_odometry.getEstimatedPosition().getRotation().getDegrees();
+        double yawRate = Math.toDegrees(getRobotRelativeSpeeds().omegaRadiansPerSecond);
+        LimelightHelpers.SetRobotOrientation("", yaw, yawRate, 0.0, 0.0, 0.0, 0.0);
+        
+        /* Add Limelight Bot Pose to Pose Estimation */
         LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("");
         if(limelightMeasurement.tagCount >= 2) {
             setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
