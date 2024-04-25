@@ -11,12 +11,14 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.*;
 import com.pathplanner.lib.util.*;
 
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.LimelightHelpers;
 import frc.robot.generated.TunerConstants;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -143,5 +145,14 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     public double getAngle(){
         System.out.println(m_odometry.getEstimatedPosition().getRotation().getDegrees());
         return m_odometry.getEstimatedPosition().getRotation().getDegrees();
+    }
+
+    @Override
+    public void periodic() {
+        LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("");
+        if(limelightMeasurement.tagCount >= 2) {
+            setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
+            addVisionMeasurement(limelightMeasurement.pose, limelightMeasurement.timestampSeconds);
+        }
     }
 }

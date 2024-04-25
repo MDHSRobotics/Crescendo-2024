@@ -117,7 +117,7 @@ public class Robot extends TimedRobot {
         //BotSubsystems.setTeleopDefaultCommands();
         RobotContainer.kAlliance = DriverStation.getAlliance().orElse(Alliance.Blue);
 
-        LimelightHelper.setPipelineIndex("", RobotContainer.kAlliance == Alliance.Blue ? 1 : 0);
+        LimelightHelpers.setPipelineIndex("", RobotContainer.kAlliance == Alliance.Blue ? 1 : 0);
 
         CommandScheduler.getInstance().cancelAll();
     }

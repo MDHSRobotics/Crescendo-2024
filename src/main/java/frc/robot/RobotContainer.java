@@ -4,11 +4,10 @@ import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-
-import frc.math.Aiming;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -17,6 +16,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -88,11 +88,14 @@ public class RobotContainer {
         /* Default Commands */
         if (driverController != null) {
             s_Swerve.setDefaultCommand( // Drivetrain will execute this command periodically
-                s_Swerve.applyRequest(() -> drive.withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with
-                                                                                                // negative Y (forward)
-                    .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
-                    .withRotationalRate(-driverController.getRightX() * SwerveSpeedConstants.MaxAngularRate * (m_slowMode ? 1.0 : 1.0)) // Drive counterclockwise with negative X (left)
-                ));
+                new ConditionalCommand(
+                    s_Swerve.applyRequest(() -> new SwerveRequest.SwerveDriveBrake()),
+                    s_Swerve.applyRequest(() -> drive.withVelocityX(-driverController
+                        .getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0))
+                        .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
+                        .withRotationalRate(-driverController.getRightX() * SwerveSpeedConstants.MaxAngularRate * (m_slowMode ? 1.0 : 1.0))),
+                    (() -> (driverController.getLeftX() > -0.05 && driverController.getLeftX() < 0.05) && (driverController.getLeftY() > -0.05 && driverController.getLeftY() < 0.05)))
+            );
         }
 
         if (operatorController != null) {
@@ -297,9 +300,9 @@ public class RobotContainer {
                 new RunCommand(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), s_Shooter).withTimeout(0.05),
 
                 new ParallelCommandGroup(
-                    s_Swerve.applyRequest(() -> drive.withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed) // Drive forward with // negative Y (forward)
+                    s_Swerve.applyRequest(() -> new SwerveRequest.FieldCentricFacingAngle().withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed) // Drive forward with // negative Y (forward)
                         .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed) // Drive left with negative X (left)
-                        .withRotationalRate(Aiming.getYawTxAdjustment(LimelightHelper.getTX("")))), // Turn at the rate given by limelight
+                        .withTargetDirection(new Rotation2d(s_Swerve.getAngle() - LimelightHelpers.getTX("")))),
                         
                     new RunCommand(() -> s_Shooter.setAngleFromLimelight(), s_Shooter)
                 )

@@ -20,7 +20,7 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 
 import frc.math.Aiming;
-import frc.robot.LimelightHelper;
+import frc.robot.LimelightHelpers;
 import frc.robot.Constants.LimelightConstants;
 import frc.robot.Constants.ShooterConstants;
 
@@ -162,7 +162,7 @@ public class Shooter extends SubsystemBase{
           LimelightConstants.kLimelightLensHeightInches, 
           LimelightConstants.kSpeakerTagHeight,
           LimelightConstants.kLimelightMountAngleDegrees,
-          LimelightHelper.getTY(""));
+          LimelightHelpers.getTY(""));
       
       // adjust the distances
       double adjustedDistance = horizontalDistance + LimelightConstants.kLimelightPivotHorizontalDistance - LimelightConstants.kSpeakerHorizontal;
@@ -218,17 +218,17 @@ public class Shooter extends SubsystemBase{
   }
 
   public boolean tagInSight(){
-    return (LimelightHelper.getFiducialID("") == 4 || LimelightHelper.getFiducialID("") == 7);
+    return (LimelightHelpers.getFiducialID("") == 4 || LimelightHelpers.getFiducialID("") == 7);
   }
 
   public void logShuffleboard(){
     angleRotations.setDouble(angle.getEncoder().getPosition());
-    limelightTY.setDouble(LimelightHelper.getTY(""));
-    limelightTX.setDouble(LimelightHelper.getTX(""));
+    limelightTY.setDouble(LimelightHelpers.getTY(""));
+    limelightTX.setDouble(LimelightHelpers.getTX(""));
     atSpeed.setBoolean(topShooter.getEncoder().getVelocity() < -3800);
     isAtAngle.setBoolean(m_isAtAngle);
     seeTag.setBoolean(tagInSight());
-    txCorrect.setBoolean(Aiming.approximatelyEqual(LimelightHelper.getTX(""), 0, 2.5));
+    txCorrect.setBoolean(Aiming.approximatelyEqual(LimelightHelpers.getTX(""), 0, 2.5));
     ready.setBoolean(isReady());
   }
 
