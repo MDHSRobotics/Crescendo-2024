@@ -155,8 +155,8 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         LimelightHelpers.SetRobotOrientation("", yaw, yawRate, 0.0, 0.0, 0.0, 0.0);
         
         /* Add Limelight Bot Pose to Pose Estimation */
-        LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("");
-        if(limelightMeasurement.tagCount >= 2) {
+        LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("");
+        if((limelightMeasurement.tagCount >= 1) && (Math.abs(yawRate) < 720)) { // if our angular velocity is greater than 720 degrees per second, ignore vision updates
             setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
             addVisionMeasurement(limelightMeasurement.pose, limelightMeasurement.timestampSeconds);
         }

@@ -1,5 +1,7 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -137,6 +139,12 @@ public class Robot extends TimedRobot {
     public void testInit() {
         //Logger.setup("Initializing Test Mode...");
 
+        RobotContainer.kAlliance = DriverStation.getAlliance().orElse(Alliance.Blue);
+        LimelightHelpers.setPipelineIndex("", RobotContainer.kAlliance == Alliance.Blue ? 1 : 0);
+
+        // Sets a starting pose for pose estimation to right below the Speaker. Open this project in PathPlanner for more starting positions.
+        m_robotContainer.s_Swerve.seedFieldRelative(new Pose2d(0.48, 4.09, new Rotation2d()));
+
         CommandScheduler.getInstance().cancelAll();
 
         // Re-enable the scheduler
@@ -148,6 +156,7 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void testPeriodic() {
+        m_robotContainer.s_Shooter.logShuffleboard();
     }
 
 }
