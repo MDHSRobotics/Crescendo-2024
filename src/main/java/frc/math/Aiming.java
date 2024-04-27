@@ -2,13 +2,28 @@ package frc.math;
 
 import java.lang.Math;
 
-import edu.wpi.first.math.controller.PIDController;
-import frc.robot.Constants.SwerveSpeedConstants;
+import edu.wpi.first.math.Vector;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation3d;
+import frc.robot.Constants;
+import edu.wpi.first.math.numbers.N3;
 
 public class Aiming {
 
-    private static PIDController yawPID = new PIDController(0.15, 0, 0);
+    private static Translation3d m_BlueSpeakerPosition = new Translation3d(0.25, 5.55, 77.4375);
+
+    private static Rotation3d getRobotRotation3d(Pose2d robotPose) {
+        Translation3d robotTranslation = new Translation3d(
+            m_BlueSpeakerPosition.getX() - robotPose.getX(),
+            m_BlueSpeakerPosition.getY() - robotPose.getY(),
+            m_BlueSpeakerPosition.getZ() - Constants.ShooterConstants.kPivotHeight); // The x, y, and z distance to the speaker
+        Vector<N3> facingSpeakerVector = robotTranslation.toVector();
+        Rotation3d robotRotation = new Rotation3d(facingSpeakerVector);
+        return robotRotation;
+    }
     
+
     /**
      * @param lensHeight The height of the limelight in inches
      * @param goalHeight The height of the goal in inches
@@ -33,22 +48,21 @@ public class Aiming {
     }
     
     /**
-     * 
-     * @param tx The current tx value given by limelight
-     * @return The output turning power
+     * @param robotPose The current robot pose given by the swerve subsystem
+     * @return The new robot yaw in radians that points the robot at the speaker.
      */
-    public static double getYawTxAdjustment(double tx){
-        //double value = Math.max(-SwerveSpeedConstants.MaxAngularRate, Math.min(SwerveSpeedConstants.MaxAngularRate, tx * -0.12));
-        
-        double value = yawPID.calculate(tx, 0);
-        //System.out.println(value);
-        return value;
+    public static double getYaw(Pose2d robotPose) {
+        Rotation3d robotRotation = getRobotRotation3d(robotPose);
+        return robotRotation.getZ();
     }
 
-    public static double getYawGyroAdjustment(double yaw){
-        double value = Math.max(-SwerveSpeedConstants.MaxAngularRate, Math.min(SwerveSpeedConstants.MaxAngularRate, yaw * -0.06));
-        //System.out.println(value);
-        return value;
+    /**
+     * @param robotPose The current robot pose given by the swerve subsystem
+     * @return The new robot pitch in radians that points the shooter at the speaker.
+     */
+    public static double getPitch(Pose2d robotPose) {
+        Rotation3d robotRotation = getRobotRotation3d(robotPose);
+        return robotRotation.getY();
     }
 
     public static boolean approximatelyEqual(double v1, double v2, double tolerance){

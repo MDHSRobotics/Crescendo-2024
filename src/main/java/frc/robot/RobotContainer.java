@@ -4,7 +4,6 @@ import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -29,6 +28,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
+import frc.math.Aiming;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.SwerveSpeedConstants;
 import frc.robot.generated.TunerConstants;
@@ -285,7 +285,7 @@ public class RobotContainer {
         //
         // https://www.padcrafter.com/index.php?templates=Operator+Controller&rightStick=Aim+Shooter&leftStick=Aim+Intake&yButton=Intake+note&dpadUp=&xButton=Lock+on+to+April+Tag+%28Speaker+or+Amp%29&aButton=Shoot+into+Speaker&bButton=Shoot+into+Amp&startButton=Reset+shooter&backButton=Reset+Intake&dpadDown=Eject+note&dpadLeft=Calibrate+Shooter+and+Intake&dpadRight=Set+shooter+angle+for+Amp
         //
-        // https://www.padcrafter.com/?backButton=Eject+Intake&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29#?templates=Operator+Controller+New&xButton=Lock+Speaker&bButton=Lock+Amp&yButton=Toss&aButton=Fire&rightStick=Aim+Shooter&leftStickClick&leftStick=Aim+intake&dpadUp=Shooter+Calibrate&dpadLeft=Calibration+mode&dpadDown=Intake+Calibration&rightTrigger=Deploy+Intake&leftTrigger=Eject+Intake&dpadRight&leftBumper=Manual+Podium&rightBumper=Manual+Point+Blank&backButton=E
+        // https://www.padcrafter.com/?startButton=Remove+Note+from+Bot%27s+Top&leftTrigger=Deploy+Intake+Above+Ground&yButton=Toss&xButton=Lock+Speaker&leftBumper=Manual+Podium&leftStick=Aim+intake&dpadUp=Shooter+Calibrate&dpadLeft=Calibration+mode&dpadDown=Intake+Calibration&backButton=Eject+Intake&rightStick=Aim+Shooter&aButton=Fire&bButton=Lock+Amp&rightBumper=Manual+Point+Blank&rightTrigger=Deploy+Intake&rightStickClick=Lock+Speaker+using+Pose+Estimation#?templates=Operator+Controller+New&xButton=Lock+Speaker&bButton=Lock+Amp&yButton=Toss&aButton=Fire&rightStick=Aim+Shooter&leftStickClick&leftStick=Aim+intake&dpadUp=Shooter+Calibrate&dpadLeft=Calibration+mode&dpadDown=Intake+Calibration&rightTrigger=Deploy+Intake&leftTrigger=Eject+Intake&dpadRight&leftBumper=Manual+Podium&rightBumper=Manual+Point+Blank&backButton=Eject+Intake
         // Whenever you edit a button binding, please update this URL
         
         // Run intake
@@ -302,7 +302,7 @@ public class RobotContainer {
                 new ParallelCommandGroup(
                     s_Swerve.applyRequest(() -> new SwerveRequest.FieldCentricFacingAngle().withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed) // Drive forward with // negative Y (forward)
                         .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed) // Drive left with negative X (left)
-                        .withTargetDirection(new Rotation2d(s_Swerve.getAngle() - LimelightHelpers.getTX("")))),
+                        .withTargetDirection(Rotation2d.fromDegrees(s_Swerve.getAngle() - LimelightHelpers.getTX("")))),
                         
                     new RunCommand(() -> s_Shooter.setAngleFromLimelight(), s_Shooter)
                 )
@@ -313,6 +313,17 @@ public class RobotContainer {
         );
         operatorController.x().onTrue(new InstantCommand(() -> m_isAmp = false));
         
+        // Lock on to speaker (using pose estimation)
+        operatorController.rightStick().toggleOnTrue(
+            new ParallelCommandGroup(
+                s_Swerve.applyRequest(() -> new SwerveRequest.FieldCentricFacingAngle().withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed) // Drive forward with // negative Y (forward)
+                    .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed) // Drive left with negative X (left)
+                    .withTargetDirection(new Rotation2d(Aiming.getYaw(s_Swerve.getPose())))),
+                        
+                new RunCommand(() -> s_Shooter.setAngle(Math.toDegrees(Aiming.getPitch(s_Swerve.getPose()))), s_Shooter)
+            ).until(() -> Math.abs(driverController.getRightX()) > 0.1)
+        );
+
         // Lock on to amp
         operatorController.b()
             .toggleOnTrue(

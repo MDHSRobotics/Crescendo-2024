@@ -96,7 +96,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
 
     // The following are callbacks needed for the Path Planner Auto Builder
 
-    private Pose2d getPose() {
+    public Pose2d getPose() {
         SwerveDriveState currentState = getState();
         Pose2d currentPose = currentState.Pose;
         System.out.println("Current pos" + currentPose.toString());
