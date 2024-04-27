@@ -13,6 +13,7 @@ public class Aiming {
 
     private static Translation3d m_BlueSpeakerPosition = new Translation3d(0.25, 5.55, 77.4375);
 
+    /* Pose Estimation Aiming Methods */
     private static Rotation3d getRobotRotation3d(Pose2d robotPose) {
         Translation3d robotTranslation = new Translation3d(
             m_BlueSpeakerPosition.getX() - robotPose.getX(),
@@ -23,7 +24,25 @@ public class Aiming {
         return robotRotation;
     }
     
+    /**
+     * @param robotPose The current robot pose given by the swerve subsystem
+     * @return The new robot yaw in radians that points the robot at the speaker.
+     */
+    public static double getYaw(Pose2d robotPose) {
+        Rotation3d robotRotation = getRobotRotation3d(robotPose);
+        return robotRotation.getZ();
+    }
 
+    /**
+     * @param robotPose The current robot pose given by the swerve subsystem
+     * @return The new robot pitch in radians that points the shooter at the speaker.
+     */
+    public static double getPitch(Pose2d robotPose) {
+        Rotation3d robotRotation = getRobotRotation3d(robotPose);
+        return robotRotation.getY();
+    }
+
+    /* Limelight Aiming Methods */
     /**
      * @param lensHeight The height of the limelight in inches
      * @param goalHeight The height of the goal in inches
@@ -45,24 +64,6 @@ public class Aiming {
      */
     public static double getPitch(double distance, double heightDifference){
         return Math.atan2(heightDifference, distance);
-    }
-    
-    /**
-     * @param robotPose The current robot pose given by the swerve subsystem
-     * @return The new robot yaw in radians that points the robot at the speaker.
-     */
-    public static double getYaw(Pose2d robotPose) {
-        Rotation3d robotRotation = getRobotRotation3d(robotPose);
-        return robotRotation.getZ();
-    }
-
-    /**
-     * @param robotPose The current robot pose given by the swerve subsystem
-     * @return The new robot pitch in radians that points the shooter at the speaker.
-     */
-    public static double getPitch(Pose2d robotPose) {
-        Rotation3d robotRotation = getRobotRotation3d(robotPose);
-        return robotRotation.getY();
     }
 
     public static boolean approximatelyEqual(double v1, double v2, double tolerance){
