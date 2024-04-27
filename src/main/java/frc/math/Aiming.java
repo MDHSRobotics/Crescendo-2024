@@ -11,14 +11,14 @@ import edu.wpi.first.math.numbers.N3;
 
 public class Aiming {
 
-    private static Translation3d m_BlueSpeakerPosition = new Translation3d(0.25, 5.55, 77.4375);
+    private static Translation3d m_BlueSpeakerPosition = new Translation3d(0.25, 5.55, 2.0431125);
 
     /* Pose Estimation Aiming Methods */
     private static Rotation3d getRobotRotation3d(Pose2d robotPose) {
         Translation3d robotTranslation = new Translation3d(
             m_BlueSpeakerPosition.getX() - robotPose.getX(),
             m_BlueSpeakerPosition.getY() - robotPose.getY(),
-            m_BlueSpeakerPosition.getZ() - Constants.ShooterConstants.kPivotHeight); // The x, y, and z distance to the speaker
+            m_BlueSpeakerPosition.getZ() - Constants.ShooterConstants.kPivotHeightM); // The x, y, and z distance to the speaker
         Vector<N3> facingSpeakerVector = robotTranslation.toVector();
         Rotation3d robotRotation = new Rotation3d(facingSpeakerVector);
         return robotRotation;

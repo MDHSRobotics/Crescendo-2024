@@ -50,6 +50,8 @@ public final class Constants {
 
         // Height of the shooter from the ground in inches
         public static final double kPivotHeight = 12.603; //w1
+        // Height of the shooter from the ground in meters
+        public static final double kPivotHeightM = 0.3201162;
 
         // Gear ratio between the pivot and motors
         public static final double kAngleGearRatio = 1920;
