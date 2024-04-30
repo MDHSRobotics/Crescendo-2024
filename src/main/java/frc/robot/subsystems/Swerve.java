@@ -16,6 +16,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.LimelightHelpers;
@@ -23,6 +25,7 @@ import frc.robot.generated.TunerConstants;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.networktables.GenericEntry;
 
 /**
  * Class that extends the Phoenix SwerveDrivetrain class and implements subsystem
@@ -34,6 +37,14 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     private double m_lastSimTime;
 
     private final SwerveRequest.ApplyChassisSpeeds applyChassisSpeedsRequest = new SwerveRequest.ApplyChassisSpeeds();
+
+    private ShuffleboardTab tab = Shuffleboard.getTab("Swerve");
+    private GenericEntry m_yawRate =
+      tab.add("Yaw Rate", 0.0)
+        .getEntry();
+    private GenericEntry m_rawYawRate =
+      tab.add("Raw Yaw Rate", 0.0)
+        .getEntry();
 
     public Swerve(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency, SwerveModuleConstants... modules) {
         super(driveTrainConstants, OdometryUpdateFrequency, modules);
@@ -152,7 +163,8 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         // Update yaw for Limelight Megatag2
         double yaw = m_odometry.getEstimatedPosition().getRotation().getDegrees();
         double yawRate = Math.toDegrees(getRobotRelativeSpeeds().omegaRadiansPerSecond);
-        LimelightHelpers.SetRobotOrientation("", yaw, yawRate, 0.0, 0.0, 0.0, 0.0);
+        double rawYawRate = m_pigeon2.getRate(); // Megatag2 comes with its own latency compensation, so we use raw instead.
+        LimelightHelpers.SetRobotOrientation("", yaw, rawYawRate, 0.0, 0.0, 0.0, 0.0);
         
         /* Add Limelight Bot Pose to Pose Estimation */
         LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("");
@@ -160,5 +172,9 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
             setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
             addVisionMeasurement(limelightMeasurement.pose, limelightMeasurement.timestampSeconds);
         }
+
+        // Add data to Shuffleboard
+        m_yawRate.setDouble(yawRate);
+        m_rawYawRate.setDouble(rawYawRate);
     }
 }
