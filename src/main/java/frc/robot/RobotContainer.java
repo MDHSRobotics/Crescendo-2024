@@ -280,13 +280,11 @@ public class RobotContainer {
 
         /* Operator Buttons */
 
-        // IMPORTANT Please see the following URL to get a graphical annotation of which xbox buttons 
-        //           trigger what commands on the operator controller:
-        //
-        // https://www.padcrafter.com/index.php?templates=Operator+Controller&rightStick=Aim+Shooter&leftStick=Aim+Intake&yButton=Intake+note&dpadUp=&xButton=Lock+on+to+April+Tag+%28Speaker+or+Amp%29&aButton=Shoot+into+Speaker&bButton=Shoot+into+Amp&startButton=Reset+shooter&backButton=Reset+Intake&dpadDown=Eject+note&dpadLeft=Calibrate+Shooter+and+Intake&dpadRight=Set+shooter+angle+for+Amp
-        //
-        // https://www.padcrafter.com/?startButton=Remove+Note+from+Bot%27s+Top&leftTrigger=Deploy+Intake+Above+Ground&yButton=Toss&xButton=Lock+Speaker&leftBumper=Manual+Podium&leftStick=Aim+intake&dpadUp=Shooter+Calibrate&dpadLeft=Calibration+mode&dpadDown=Intake+Calibration&backButton=Eject+Intake&rightStick=Aim+Shooter&aButton=Fire&bButton=Lock+Amp&rightBumper=Manual+Point+Blank&rightTrigger=Deploy+Intake&rightStickClick=Lock+Speaker+using+Pose+Estimation#?templates=Operator+Controller+New&xButton=Lock+Speaker&bButton=Lock+Amp&yButton=Toss&aButton=Fire&rightStick=Aim+Shooter&leftStickClick&leftStick=Aim+intake&dpadUp=Shooter+Calibrate&dpadLeft=Calibration+mode&dpadDown=Intake+Calibration&rightTrigger=Deploy+Intake&leftTrigger=Eject+Intake&dpadRight&leftBumper=Manual+Podium&rightBumper=Manual+Point+Blank&backButton=Eject+Intake
-        // Whenever you edit a button binding, please update this URL
+        /* IMPORTANT Please see the following URL to get a graphical annotation of which xbox buttons 
+            trigger what commands on the operator controller:
+            https://www.padcrafter.com/?xButton=Lock+Speaker&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&leftBumper=Set+Angle%3A+Podium&rightBumper=Set+Angle%3A+Point+Blank&leftStick=Aim+Intake+%28Calibration+Only%29&rightStick=Aim+Shooter+%28Calibration+Only%29&dpadUp=Reset+Shooter+Encoder&dpadDown=Reset+Intake+Encoder&dpadLeft=Calibration+Mode+Toggle&rightTrigger=Deploy+Intake&backButton=Eject+Intake&bButton=Set+Angle%3A+Amp&aButton=Fire&yButton=Pass+Note+%28Straight+Shot%29&startButton=Free+a+Stuck+Note+%28on+shooter%29#
+            Please update this link whenever you change a button.
+        */
         
         // Run intake
         operatorController.rightTrigger().toggleOnTrue(new RunCommand(() -> s_Intake.bottomPosition(), s_Intake).alongWith(new RunCommand(() -> s_Shooter.runFeed(0.7), s_Shooter)));
@@ -386,22 +384,7 @@ public class RobotContainer {
         operatorController.povDown().onTrue(new InstantCommand(() -> s_Intake.resetEncoders(), s_Intake));
 
         // Manual Angle Modes
-        operatorController.y().onTrue(new SequentialCommandGroup(
-                new RunCommand(() -> s_Shooter.setAngle(60), s_Shooter).withTimeout(1),
-
-                new RunCommand(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), s_Shooter).withTimeout(0.05),
-                // Ramp up
-                new RunCommand(() -> s_Shooter.runShooter(0.5, 0.5, 0), s_Shooter).withTimeout(0.9),
-                
-                //Shoot
-                new RunCommand(() -> s_Shooter.runShooter(0.5, 0.5, -0.5), s_Shooter).withTimeout(1)
-            ));
-
-        operatorController.rightBumper().onTrue(new RunCommand(() -> s_Shooter.setAngle(51), s_Shooter));
-        operatorController.leftBumper().onTrue(new RunCommand(() -> s_Shooter.setAngle(36), s_Shooter));
-
-        operatorController.start().toggleOnTrue(new RunCommand(() -> s_Shooter.runShooter(-1,-1,1), s_Shooter));
-        operatorController.back().onTrue(
+        operatorController.y().onTrue(
             new SequentialCommandGroup(
                 new RunCommand(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), s_Shooter).withTimeout(0.05),
                 // Ramp up
@@ -413,6 +396,11 @@ public class RobotContainer {
                 new RunCommand(() -> s_Shooter.runShooter(0, 0, 0), s_Shooter).withTimeout(0.5)
             )
         );
+
+        operatorController.rightBumper().onTrue(new RunCommand(() -> s_Shooter.setAngle(51), s_Shooter));
+        operatorController.leftBumper().onTrue(new RunCommand(() -> s_Shooter.setAngle(36), s_Shooter));
+
+        operatorController.start().toggleOnTrue(new RunCommand(() -> s_Shooter.runShooter(-1,-1,1), s_Shooter));
     }
 
     public static double roundAvoid(double value, int places) {
