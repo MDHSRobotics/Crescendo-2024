@@ -221,7 +221,7 @@ public class Shooter extends SubsystemBase{
     return (LimelightHelpers.getFiducialID("") == 4 || LimelightHelpers.getFiducialID("") == 7);
   }
 
-  public void logShuffleboard(){
+  public void logData(){
     angleRotations.setDouble(angle.getEncoder().getPosition());
     limelightTY.setDouble(LimelightHelpers.getTY(""));
     limelightTX.setDouble(LimelightHelpers.getTX(""));

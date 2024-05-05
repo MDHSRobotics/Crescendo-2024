@@ -108,7 +108,8 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void autonomousPeriodic() {
-        m_robotContainer.s_Shooter.logShuffleboard();
+        m_robotContainer.s_Swerve.logData();
+        m_robotContainer.s_Shooter.logData();
     }
 
     @Override
@@ -132,7 +133,8 @@ public class Robot extends TimedRobot {
         // Configure all controllers
         //BotControllers.configure();
         //RobotManager.botShuffler.update();
-        m_robotContainer.s_Shooter.logShuffleboard();
+        m_robotContainer.s_Swerve.logData();
+        m_robotContainer.s_Shooter.logData();
     }
 
     @Override
@@ -156,7 +158,8 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void testPeriodic() {
-        m_robotContainer.s_Shooter.logShuffleboard();
+        m_robotContainer.s_Swerve.logData();
+        m_robotContainer.s_Shooter.logData();
     }
 
 }

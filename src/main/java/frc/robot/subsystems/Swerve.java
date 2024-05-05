@@ -158,8 +158,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         return m_odometry.getEstimatedPosition().getRotation().getDegrees();
     }
 
-    @Override
-    public void periodic() {
+    public void logData() {
         // Update yaw for Limelight Megatag2
         double yaw = m_odometry.getEstimatedPosition().getRotation().getDegrees();
         double yawRate = Math.toDegrees(getRobotRelativeSpeeds().omegaRadiansPerSecond);
