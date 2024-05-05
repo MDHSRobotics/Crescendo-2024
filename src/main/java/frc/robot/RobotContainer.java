@@ -300,8 +300,8 @@ public class RobotContainer {
                 new RunCommand(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), s_Shooter).withTimeout(0.05),
 
                 new ParallelCommandGroup(
-                    s_Swerve.applyRequest(() -> new SwerveRequest.FieldCentricFacingAngle().withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed) // Drive forward with // negative Y (forward)
-                        .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed) // Drive left with negative X (left)
+                    s_Swerve.applyRequest(() -> new SwerveRequest.FieldCentricFacingAngle().withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
+                        .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
                         .withTargetDirection(Rotation2d.fromDegrees(s_Swerve.getAngle() - LimelightHelpers.getTX("")))),
                         
                     new RunCommand(() -> s_Shooter.setAngleFromLimelight(), s_Shooter)
@@ -316,8 +316,8 @@ public class RobotContainer {
         // Lock on to speaker (using pose estimation)
         operatorController.rightStick().toggleOnTrue(
             new ParallelCommandGroup(
-                s_Swerve.applyRequest(() -> new SwerveRequest.FieldCentricFacingAngle().withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed) // Drive forward with // negative Y (forward)
-                    .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed) // Drive left with negative X (left)
+                s_Swerve.applyRequest(() -> new SwerveRequest.FieldCentricFacingAngle().withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
+                    .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
                     .withTargetDirection(new Rotation2d(Aiming.getYaw(s_Swerve.getPose())))),
                         
                 new RunCommand(() -> s_Shooter.setAngle(Math.toDegrees(Aiming.getPitch(s_Swerve.getPose()))), s_Shooter)
