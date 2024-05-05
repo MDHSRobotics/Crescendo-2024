@@ -52,6 +52,8 @@ public final class Constants {
         public static final double kPivotHeight = 12.375; //w1
         // Height of the shooter from the ground in meters
         public static final double kPivotHeightM = 0.314325;
+        // Horizontal distance of the pivot from the center of the robot in meters
+        public static final double kPivotDistanceM = 0.18415;
 
         // Gear ratio between the pivot and motors
         public static final double kAngleGearRatio = 1920;
