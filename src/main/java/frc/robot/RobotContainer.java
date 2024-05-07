@@ -3,38 +3,34 @@ package frc.robot;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
-
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.math.Aiming;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.SwerveSpeedConstants;
 import frc.robot.generated.TunerConstants;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-
-import frc.robot.subsystems.*;
+import frc.robot.subsystems.Climb;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.LED;
+import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.Swerve;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -52,8 +48,8 @@ public class RobotContainer {
     private final CommandXboxController operatorController = new CommandXboxController(1);
 
     /* Subsystems */
-    public final Swerve s_Swerve = TunerConstants.DriveTrain; // My drivetrain
-    public final Shooter s_Shooter = new Shooter();
+    private final Swerve s_Swerve = TunerConstants.DriveTrain; // My drivetrain
+    private final Shooter s_Shooter = new Shooter();
     private final Intake s_Intake = new Intake();
     private final Climb s_Climb = new Climb();
     private final LED s_Led = new LED();
@@ -74,9 +70,8 @@ public class RobotContainer {
     /* Auto Chooser */
     private final SendableChooser<Command> autoChooser;
 
-    /* Swerve Speeds */
+    /* Robot Modes */
     private boolean m_slowMode = false;
-
     private boolean m_isAmp = false;
     private boolean m_autoshoot = false;
 
@@ -91,133 +86,84 @@ public class RobotContainer {
                 new ConditionalCommand(
                     s_Swerve.applyRequest(() -> new SwerveRequest.SwerveDriveBrake()),
                     s_Swerve.applyRequest(() -> drive.withVelocityX(-driverController
-                        .getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0))
-                        .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
-                        .withRotationalRate(-driverController.getRightX() * SwerveSpeedConstants.MaxAngularRate * (m_slowMode ? 1.0 : 1.0))),
-                    (() -> (driverController.getLeftX() > -0.05 && driverController.getLeftX() < 0.05) && (driverController.getLeftY() > -0.05 && driverController.getLeftY() < 0.05)))
+                        .getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Forward and backward speed
+                        .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Left and right speed
+                        .withRotationalRate(-driverController.getRightX() * SwerveSpeedConstants.MaxAngularRate * (m_slowMode ? 1.0 : 1.0))), // Rotation speed
+                    (() -> // Brake the robot if:
+                    (driverController.getLeftX() > -0.05 && driverController.getLeftX() < 0.05)
+                    && (driverController.getLeftY() > -0.05 && driverController.getLeftY() < 0.05)
+                    && (driverController.getRightX() > -0.05 && driverController.getRightX() < 0.05)
+                    )
+                )
             );
         }
 
-        if (operatorController != null) {
-            s_Shooter.setDefaultCommand(
-                new RunCommand(()-> s_Shooter.run(operatorController.getRightY()), s_Shooter)
-            );
-
-            s_Intake.setDefaultCommand(
-                new RunCommand(() -> s_Intake.topPosition(operatorController.getLeftY()), s_Intake)
-            );
-        }
+        s_Swerve.registerTelemetry(logger::telemeterize);
 
         if (Utils.isSimulation()) {
             s_Swerve.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
         }
-            s_Swerve.registerTelemetry(logger::telemeterize);
+
+        if (operatorController != null) {
+            s_Shooter.setDefaultCommand(
+                s_Shooter.run(() -> s_Shooter.rotateShooter(operatorController.getRightY()))
+            );
+
+            s_Intake.setDefaultCommand(
+                s_Intake.run(() -> s_Intake.topPosition(operatorController.getLeftY()))
+            );
+        }
 
         s_Led.setDefaultCommand(
-            new RunCommand(()-> s_Led.rainbow(), s_Led)
+            s_Led.run(()-> s_Led.rainbow())
         );
 
+        // LEDs glow orange for 3 secs whenever a note is picked up.
+        new Trigger(shooterLimitSwitch::get).onTrue(s_Led.run(() -> s_Led.setColor(255, 20, 0)).withTimeout(3));
+
         s_Climb.setDefaultCommand(
-            new RunCommand((() -> s_Climb.runClimb(0,0)), s_Climb)
+            s_Climb.runOnce((() -> s_Climb.runClimb(0,0)))
         );
 
         SmartDashboard.putData(s_Shooter);
         SmartDashboard.putData(s_Led);
-        //SmartDashboard.putData(s_Climb);
+        SmartDashboard.putData(s_Climb);
         SmartDashboard.putData(s_Intake);
-
-        new Trigger(shooterLimitSwitch::get).onTrue(new RunCommand(() -> s_Led.setColor(255, 20, 0), s_Led).withTimeout(3));
 
         // Configure the button bindings
         configureButtonBindings();
 
+
         /* Named Auto Commands */
-        NamedCommands.registerCommand("Shoot", 
-                //Shoot
-                new RunCommand(() -> s_Shooter.runShooter(0.7, 0.7, -1), s_Shooter).withTimeout(0.5)
-        );
-
-        NamedCommands.registerCommand("Feeder", 
-                //Shoot
-                new RunCommand(() -> s_Shooter.runShooter(0, 0, -1), s_Shooter).withTimeout(0.5)
-        );
-
-        NamedCommands.registerCommand("Shoot Start",  
-            new SequentialCommandGroup(
-                new RunCommand(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), s_Shooter).withTimeout(0.05),
+        NamedCommands.registerCommand("Start Shooter",  
+            Commands.sequence(
+                // Tuck the note into the shooter
+                s_Shooter.run(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5)).withTimeout(0.05),
                 // Ramp up
-                new RunCommand(() -> s_Shooter.runShooter(0.7, 0.7, 0), s_Shooter).withTimeout(1.0),
-                
-                //Shoot
-                new RunCommand(() -> s_Shooter.runShooter(0.7, 0.7, -0.5), s_Shooter).withTimeout(1)
+                s_Shooter.runOnce(() -> s_Shooter.runShooter(0.7, 0.7, 0))
             )
         );
 
-
-        NamedCommands.registerCommand("Angle 25", 
-                //Shoot
-                new RunCommand(() -> s_Shooter.setAngle(40), s_Shooter).withTimeout(0.5)
+        NamedCommands.registerCommand("Shoot",
+            s_Shooter.runOnce(() -> s_Shooter.runShooter(0.7, 0.7, -1.0))
         );
 
-        NamedCommands.registerCommand("Angle 30", 
-                //Shoot
-                new RunCommand(() -> s_Shooter.setAngle(30), s_Shooter).withTimeout(0.5)
+        NamedCommands.registerCommand("Auto Aim",
+            s_Swerve.runOnce(() -> s_Swerve.setAutoRotationOverride(true))
+            .andThen(s_Shooter.run(() -> s_Shooter.setAngle(Aiming.getPitch(s_Swerve.getPose()))))
         );
 
-        NamedCommands.registerCommand("Angle 32", 
-                //Shoot
-                new RunCommand(() -> s_Shooter.setAngle(32), s_Shooter).withTimeout(0.5)
-        );
-
-        NamedCommands.registerCommand("Angle 35", 
-                //Shoot
-                new RunCommand(() -> s_Shooter.setAngle(35), s_Shooter).withTimeout(0.5)
-        );
-
-        NamedCommands.registerCommand("Angle 37", 
-                //Shoot
-                new RunCommand(() -> s_Shooter.setAngle(37), s_Shooter).withTimeout(0.5)
-        );
-
-        NamedCommands.registerCommand("Angle 45", 
-                //Shoot
-                new RunCommand(() -> s_Shooter.setAngle(45), s_Shooter).withTimeout(0.5)
-        );
-
-        NamedCommands.registerCommand("Angle 51", 
-                //Shoot
-                new RunCommand(() -> s_Shooter.setAngle(51), s_Shooter).withTimeout(0.5)
-        );
-
-        NamedCommands.registerCommand("Angle 42", 
-                //Shoot
-                new RunCommand(() -> s_Shooter.setAngle(42), s_Shooter).withTimeout(0.5)
-        );
-
-        NamedCommands.registerCommand("Angle 40", 
-                //Shoot
-                new RunCommand(() -> s_Shooter.setAngle(40), s_Shooter).withTimeout(0.5)
-        );
-
-        NamedCommands.registerCommand("Feeder On", 
-                //Shoot
-                new RunCommand(() -> s_Shooter.runFeed(1), s_Shooter).withTimeout(0.5)
-        );
-
-        NamedCommands.registerCommand("Shoot Stop", 
-                //Shoot
-                new RunCommand(() -> s_Shooter.runShooter(0.0, 0.0, 0.0), s_Shooter).withTimeout(0.5)
+        NamedCommands.registerCommand("Stop Shooter", 
+            s_Shooter.runOnce(() -> s_Shooter.runShooter(0.0, 0.0, 0.0))
         );
 
         NamedCommands.registerCommand("Intake Down", 
-                new RunCommand(() -> s_Intake.bottomPosition(), s_Intake).withTimeout(0.5)
+            s_Intake.runOnce(() -> s_Intake.bottomPosition())
         );
 
         NamedCommands.registerCommand("Intake Up", 
-                //Shoot
-                new RunCommand(() -> s_Intake.topPosition(0), s_Intake).withTimeout(0.5)
+            s_Intake.runOnce(() -> s_Intake.topPosition(0))
         );
-
         
 
         /* Auto Chooser */
@@ -248,32 +194,27 @@ public class RobotContainer {
 
         /* Driver Buttons */
 
-        // IMPORTANT Please see the following URL to get a graphical annotation of which xbox buttons 
-        //           trigger what commands on the driver controller:
-        //
-        // https://www.padcrafter.com/index.php?templates=Driver+Controller&leftBumper=Reset+field+oriented+drive&dpadRight=Tell+human+player+to+amplify&dpadLeft=Tell+human+player+to+coopertition&aButton=Climb+down&yButton=Climb+motor1+and+motor2&dpadDown=&dpadUp=&xButton=Climb+motor2&bButton=Climb+motor1&leftStick=Field+oriented+drive+direction%2Fvelocity&rightStick=Robot+rotation&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&rightTrigger=Fast+mode&leftTrigger=Slow+mode
-
-        //
-        // Whenever you edit a button binding, please update this URL
+        /* IMPORTANT Please see the following URL to get a graphical annotation of which xbox buttons 
+            trigger what commands on the driver controller:
+        https://www.padcrafter.com/index.php?templates=Driver+Controller&leftBumper=Climb+Down&dpadRight=&dpadLeft=&aButton=Tell+Human+Player+to+Amplify&yButton=Right+Climb+Up&dpadDown=&dpadUp=&xButton=Left+Climb+Up&bButton=Tell+Human+Player+to+Coopertition&leftStick=Drive+Robot+in+this+Direction&rightStick=Rotate+Robot&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&rightTrigger=Fast+Mode&leftTrigger=Slow+Mode&rightBumper=Climb+Up&startButton=Reset+Field+Oriented+Drive&plat=1&backButton=
+        Whenever you edit a button binding, please update this URL
+        */
 
         // Reset the field-centric heading on left bumper press. This will break pose estimation.
-        driverController.L1().onTrue(s_Swerve.runOnce(() -> s_Swerve.seedFieldRelative()));
+        driverController.options().onTrue(s_Swerve.runOnce(() -> s_Swerve.seedFieldRelative()));
 
         // LED communication
-        driverController.R1().onTrue(new RunCommand(()-> s_Led.blink(0, 0, 255, 400), s_Led).withTimeout(5));
-        driverController.povRight().onTrue(new RunCommand(()-> s_Led.blink(255, 255, 0, 1000), s_Led).withTimeout(5));
+        driverController.circle().onTrue(s_Led.run(() -> s_Led.blink(0, 0, 255, 400)).withTimeout(5)); // Coopertition
+        driverController.cross().onTrue(s_Led.run(() -> s_Led.blink(255, 255, 0, 1000)).withTimeout(5)); // Amplify
         
         // Climb
-        driverController.povLeft().whileTrue(new RunCommand(() -> s_Climb.runClimb(0,1), s_Climb));
-        driverController.povDown().whileTrue(new RunCommand(() -> s_Climb.runClimb(-1, -1), s_Climb).until(climbLimitSwitch::get));
-        driverController.R3().whileTrue(new RunCommand(() -> s_Climb.runClimb(1, 1), s_Climb));
-        driverController.povRight().whileTrue(new RunCommand(() -> s_Climb.runClimb(1, 0), s_Climb));
+        driverController.L1().whileTrue(s_Climb.startEnd(() -> s_Climb.runClimb(-1, -1), () -> {}).until(climbLimitSwitch::get));
+        driverController.R1().whileTrue(s_Climb.startEnd(() -> s_Climb.runClimb(1, 1), () -> {}));
+        driverController.square().whileTrue(s_Climb.startEnd(() -> s_Climb.runClimb(1, 0), () -> {}));
+        driverController.povRight().whileTrue(s_Climb.startEnd(() -> s_Climb.runClimb(0, 1), () -> {}));
 
-        driverController.R2().onTrue(new InstantCommand(() -> m_slowMode = false));
-        driverController.L2().onTrue(new InstantCommand(() -> m_slowMode = true));
-
-        //driverController.x().toggleOnTrue(new RunCommand(() -> s_Shooter.runShooter(0.6, -1), s_Shooter));
-        //driverController.b().toggleOnFalse(new RunCommand(() -> s_Intake.bottomPosition(), s_Intake));
+        driverController.R2().onTrue(s_Swerve.runOnce(() -> m_slowMode = false));
+        driverController.L2().onTrue(s_Swerve.runOnce(() -> m_slowMode = true));
     }
 
     private void configureOperatorButtonBindings() {
@@ -282,125 +223,138 @@ public class RobotContainer {
 
         /* IMPORTANT Please see the following URL to get a graphical annotation of which xbox buttons 
             trigger what commands on the operator controller:
-            https://www.padcrafter.com/?xButton=Lock+Speaker&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&leftBumper=Set+Angle%3A+Podium&rightBumper=Set+Angle%3A+Point+Blank&leftStick=Aim+Intake+%28Calibration+Only%29&rightStick=Aim+Shooter+%28Calibration+Only%29&dpadUp=Reset+Shooter+Encoder&dpadDown=Reset+Intake+Encoder&dpadLeft=Calibration+Mode+Toggle&rightTrigger=Deploy+Intake&backButton=Eject+Intake&bButton=Set+Angle%3A+Amp&aButton=Fire&yButton=Pass+Note+%28Straight+Shot%29&startButton=Free+a+Stuck+Note+%28on+shooter%29#
+            https://www.padcrafter.com/?rightStickClick=Lock+Speaker+%28using+pose%29&xButton=Lock+Speaker&aButton=Fire&bButton=Set+Angle%3A+Amp&rightStick=Aim+Shooter+%28Calibration+Only%29&rightBumper=Set+Angle%3A+Point+Blank&rightTrigger=Deploy+Intake&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&leftBumper=Set+Angle%3A+Podium&leftStick=Aim+Intake+%28Calibration+Only%29&dpadUp=Reset+Shooter+Encoder&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&startButton=Free+a+Stuck+Note+%28on+shooter%29&backButton=Eject+Intake#?xButton=Lock+Speaker&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&leftBumper=Set+Angle%3A+Podium&rightBumper=Set+Angle%3A+Point+Blank&leftStick=Aim+Intake+%28Calibration+Only%29&rightStick=Aim+Shooter+%28Calibration+Only%29&dpadUp=Reset+Shooter+Encoder&dpadDown=Reset+Intake+Encoder&dpadLeft=Calibration+Mode+Toggle&rightTrigger=Deploy+Intake&backButton=Eject+Intake&bButton=Set+Angle%3A+Amp&aButton=Fire&yButton=Pass+Note+%28Straight+Shot%29&startButton=Free+a+Stuck+Note+%28on+shooter%29&templates=Controller+Scheme+1
             Please update this link whenever you change a button.
         */
         
         // Run intake
-        operatorController.rightTrigger().toggleOnTrue(new RunCommand(() -> s_Intake.bottomPosition(), s_Intake).alongWith(new RunCommand(() -> s_Shooter.runFeed(0.7), s_Shooter)));
-        operatorController.leftTrigger().toggleOnTrue(new RunCommand(() -> s_Intake.midPosition(), s_Intake).alongWith(new RunCommand(() -> s_Shooter.runFeed(0.7), s_Shooter)));
-        operatorController.back().toggleOnTrue(new RunCommand(() -> s_Intake.spitOut(), s_Intake).alongWith(new RunCommand(() -> s_Shooter.runFeed(-1.0), s_Shooter)));
+        operatorController.rightTrigger().toggleOnTrue(s_Intake.startEnd(() -> s_Intake.bottomPosition(), () -> {}).alongWith(s_Shooter.startEnd(() -> s_Shooter.runFeeder(0.7), () -> {}))); // Use startEnd so the command does not end on its own.
+        operatorController.leftTrigger().toggleOnTrue(s_Intake.startEnd(() -> s_Intake.midPosition(), () -> {}).alongWith(s_Shooter.startEnd(() -> s_Shooter.runFeeder(0.7), () -> {})));
+        operatorController.back().toggleOnTrue(s_Intake.startEnd(() -> s_Intake.spitOut(), () -> {}).alongWith(s_Shooter.startEnd(() -> s_Shooter.runFeeder(-1.0), () -> {})));
 
         // Lock on to speaker
         operatorController.x()
-            .toggleOnTrue(
-            new SequentialCommandGroup(
-                new RunCommand(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), s_Shooter).withTimeout(0.05),
+        .toggleOnTrue(
+            Commands.sequence(
+                s_Shooter.startEnd(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), () -> {}).withTimeout(0.05),
 
-                new ParallelCommandGroup(
-                    s_Swerve.applyRequest(() -> new SwerveRequest.FieldCentricFacingAngle().withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
+                Commands.parallel(
+                    s_Swerve.applyRequest(() -> new SwerveRequest.FieldCentricFacingAngle()
+                        .withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
                         .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
                         .withTargetDirection(Rotation2d.fromDegrees(s_Swerve.getAngle() - LimelightHelpers.getTX("")))),
                         
-                    new RunCommand(() -> s_Shooter.setAngleFromLimelight(), s_Shooter)
+                    s_Shooter.run(() -> s_Shooter.setAngleFromLimelight())
                 )
-            )
-            .until(
-                () -> Math.abs(driverController.getRightX()) > 0.1
-            )
+            ).until(() -> Math.abs(driverController.getRightX()) > 0.1)
         );
-        operatorController.x().onTrue(new InstantCommand(() -> m_isAmp = false));
+        // When it locks on speaker, set shoot mode to speaker instead of amp
+        operatorController.x().onTrue(s_Shooter.runOnce(() -> m_isAmp = false));
         
         // Lock on to speaker (using pose estimation)
-        operatorController.rightStick().toggleOnTrue(
-            new ParallelCommandGroup(
-                s_Swerve.applyRequest(() -> new SwerveRequest.FieldCentricFacingAngle().withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
+        operatorController.rightStick()
+        .toggleOnTrue(
+            Commands.parallel(
+                s_Swerve.applyRequest(() -> new SwerveRequest.FieldCentricFacingAngle()
+                    .withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
                     .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
-                    .withTargetDirection(new Rotation2d(Aiming.getYaw(s_Swerve.getPose())))),
+                    .withTargetDirection(Aiming.getYaw(s_Swerve.getPose()))),
                         
-                new RunCommand(() -> s_Shooter.setAngle(Math.toDegrees(Aiming.getPitch(s_Swerve.getPose()))), s_Shooter)
+                s_Shooter.run(() -> s_Shooter.setAngle(Aiming.getPitch(s_Swerve.getPose())))
             ).until(() -> Math.abs(driverController.getRightX()) > 0.1)
         );
 
-        // Lock on to amp
+        // Set angle to amp
         operatorController.b()
-            .toggleOnTrue(
-                new RunCommand(() -> s_Shooter.setAngle(52.0), s_Shooter)
+        .toggleOnTrue(
+                s_Shooter.startEnd(() -> s_Shooter.setAngle(52.0), () -> {})
             .alongWith(
-                new RunCommand(() -> s_Led.setColor(255, 0, 0), s_Led)
+                s_Led.startEnd(() -> s_Led.setColor(255, 0, 0), () -> {})
             )
         );
-        operatorController.b().onTrue(new InstantCommand(() -> m_isAmp = true));
+        // When it sets the angle to amp, set shoot mode to amp as well
+        operatorController.b().onTrue(s_Shooter.runOnce(() -> m_isAmp = true));
        
 
         // Shoot Speaker
         operatorController.a()
-            .and(new Trigger(() -> !m_isAmp))
-            .onTrue(
-            new RunCommand(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.5), s_Shooter).withTimeout(0.5)
-            .andThen(
-                new RunCommand(() -> s_Shooter.runShooter(0, 0, 0), s_Shooter).withTimeout(0.1)
-            )
+        .and(new Trigger(() -> !m_isAmp))
+        .onTrue(
+            s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.5), () -> s_Shooter.runShooter(0, 0, 0))
+            .withTimeout(0.5)
         );
 
         new Trigger(s_Shooter::isReady)
             .and(() -> m_autoshoot)
             .onTrue(
-                new RunCommand(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.5), s_Shooter).withTimeout(0.5)
-            .andThen(
-                new RunCommand(() -> s_Shooter.runShooter(0, 0, 0), s_Shooter).withTimeout(0.1)
-            )
+                s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.5), () -> s_Shooter.runShooter(0, 0, 0))
+                .withTimeout(0.5)
         );
 
-        new Trigger(s_Shooter::isReady).onTrue(new RunCommand(() -> s_Led.setColor(0, 255, 0), s_Led).until(() -> !s_Shooter.isReady()));
-        new Trigger(() -> s_Shooter.tagInSight() && !s_Shooter.isReady()).onTrue(new RunCommand(() -> s_Led.blink(255, 0, 0, 300), s_Led).until(() -> !s_Shooter.tagInSight()));
+        new Trigger(s_Shooter::isReady)
+            .onTrue(
+                s_Led.startEnd(() -> s_Led.setColor(0, 255, 0), () -> {})
+                .until(() -> !s_Shooter.isReady())
+            );
+
+        new Trigger(() -> s_Shooter.tagInSight() && !s_Shooter.isReady())
+            .onTrue(
+                s_Led.run(() -> s_Led.blink(255, 0, 0, 300))
+                .until(() -> !s_Shooter.tagInSight())
+            );
 
         // Shoot Amp
         operatorController.a()
             .and(new Trigger(() -> m_isAmp))
             .onTrue(
-            new SequentialCommandGroup(
-                new RunCommand(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), s_Shooter).withTimeout(0.05),
+            Commands.sequence(
+                // Tuck note into shooter
+                s_Shooter.startEnd(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), () -> {}).withTimeout(0.05),
                 // Ramp up
-                new RunCommand(() -> s_Shooter.runShooter(ShooterConstants.ampTopSpeed, ShooterConstants.ampBottomSpeed, 0), s_Shooter).withTimeout(1.0),
-                //Shoot
-                new RunCommand(() -> s_Shooter.runShooter(ShooterConstants.ampTopSpeed, ShooterConstants.ampBottomSpeed, -0.5), s_Shooter).withTimeout(0.2)
-            )
-            .andThen(
-                new RunCommand(() -> s_Shooter.runShooter(0, 0, 0), s_Shooter).withTimeout(1)
-                // Blink green to indicate good to go
-                //new RunCommand(() -> s_Led.setColor(0, 255, 0), s_Led).withTimeout(2)
+                s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.ampTopSpeed, ShooterConstants.ampBottomSpeed, 0), () -> {}).withTimeout(1.0),
+                // Shoot
+                s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.ampTopSpeed, ShooterConstants.ampBottomSpeed, -0.5), () ->
+                s_Shooter.runShooter(0, 0, 0))
+                .withTimeout(0.2)
             )
         );
 
         // Calibration Mode
         operatorController.povLeft().onTrue(
-            new InstantCommand(() -> s_Shooter.setCalibration(), s_Shooter)
+            s_Shooter.runOnce(() -> s_Shooter.setCalibration())
             .alongWith(
-                new InstantCommand(() -> s_Intake.setCalibration(), s_Intake)
+                s_Shooter.runOnce(() -> s_Intake.setCalibration())
             )
         );
-        operatorController.povUp().onTrue(new InstantCommand(() -> s_Shooter.resetEncoders(), s_Shooter));
-        operatorController.povDown().onTrue(new InstantCommand(() -> s_Intake.resetEncoders(), s_Intake));
+        // Recommended to only use this in calibration mode
+        operatorController.povUp().onTrue(s_Shooter.runOnce(() -> s_Shooter.resetEncoders()));
+        operatorController.povDown().onTrue(s_Intake.runOnce(() -> s_Intake.resetEncoders()));
 
         // Manual Angle Modes
         operatorController.y().onTrue(
-            new SequentialCommandGroup(
-                new RunCommand(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), s_Shooter).withTimeout(0.05),
+            Commands.sequence(
+                // Tuck note into shooter
+                s_Shooter.startEnd(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), () -> {}).withTimeout(0.05),
                 // Ramp up
-                new RunCommand(() -> s_Shooter.runShooter(0.5, 0.5, 0), s_Shooter).withTimeout(1.0),
-                //Shoot
-                new RunCommand(() -> s_Shooter.runShooter(0.5, 0.5, -0.5), s_Shooter).withTimeout(0.5)
-            )
-            .andThen(
-                new RunCommand(() -> s_Shooter.runShooter(0, 0, 0), s_Shooter).withTimeout(0.5)
+                s_Shooter.startEnd(() -> s_Shooter.runShooter(0.5, 0.5, 0), () -> {}).withTimeout(1.0),
+                // Shoot
+                s_Shooter.startEnd(() -> s_Shooter.runShooter(0.5, 0.5, -0.5), () ->
+                s_Shooter.runShooter(0, 0, 0))
+                .withTimeout(0.5)
             )
         );
 
-        operatorController.rightBumper().onTrue(new RunCommand(() -> s_Shooter.setAngle(51), s_Shooter));
-        operatorController.leftBumper().onTrue(new RunCommand(() -> s_Shooter.setAngle(36), s_Shooter));
+        operatorController.rightBumper()
+            .onTrue(s_Shooter.runOnce(() -> m_isAmp = false)
+            .andThen(s_Shooter.startEnd(() -> s_Shooter.setAngle(51), () -> {})));
 
-        operatorController.start().toggleOnTrue(new RunCommand(() -> s_Shooter.runShooter(-1,-1,1), s_Shooter));
+        operatorController.leftBumper()
+            .onTrue(s_Shooter.runOnce(() -> m_isAmp = false)
+            .andThen(s_Shooter.startEnd(() -> s_Shooter.setAngle(36), () -> {})));
+
+
+        // Free a stuck note on the top of the robot
+        operatorController.start().whileTrue(s_Shooter.startEnd(() -> s_Shooter.runShooter(-1,-1,1), () -> s_Shooter.runShooter(0, 0, 0)));
     }
 
     public static double roundAvoid(double value, int places) {
@@ -416,5 +370,16 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand() {
         return autoChooser.getSelected();
+    }
+
+    public void setStartingPosition(Pose2d startingPosition){
+        s_Swerve.seedFieldRelative(startingPosition);
+    }
+
+    public void logData(){
+        s_Swerve.logData();
+        s_Shooter.logData();
+        s_Intake.logData();
+        s_Climb.logData();
     }
 }

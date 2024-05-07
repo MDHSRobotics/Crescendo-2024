@@ -60,6 +60,9 @@ public class Shooter extends SubsystemBase{
   private GenericEntry calculatedAngle =
     tab.add("calculated angle", 0.0)
       .getEntry();
+  private GenericEntry calculatedRotations =
+    tab.add("Calculated Rotations", 0.0)
+      .getEntry();
   private GenericEntry rotationsC =
     tab.add("Rotations", -0.5839)
       .getEntry();
@@ -91,8 +94,7 @@ public class Shooter extends SubsystemBase{
     .getEntry();
   
   private boolean m_calibration = false;
-  private boolean m_isAtAngle = false;
-
+  
   private double m_lastAngle = 23;
 
   public Shooter(){
@@ -128,29 +130,19 @@ public class Shooter extends SubsystemBase{
     SmartDashboard.putNumber("Shooter Power", bottomPower);
     SmartDashboard.putNumber("Feed Power", feed);
     feeder.set(-feed);
-  } 
-
-  public void pullBack(){
-    topShooter.set(0.2);
-    bottomShooter.set(-0.2);
-    feeder.set(0.5);
   }
 
-  public void run(double angleSpeed){     
+  public void rotateShooter(double angleSpeed){
     if(!m_calibration){
       setAngle(23 - 3.5);
     }else{
       angle.set(angleSpeed);
     }
-    
-    feeder.set(0);
-    topShooter.set(0);
-    bottomShooter.set(0);
 
-    m_isAtAngle = false;
+    calculatedRotations.setDouble(0);
   }
 
-  public void runFeed(double power){
+  public void runFeeder(double power){
     feeder.set(power);
   }
 
@@ -181,15 +173,13 @@ public class Shooter extends SubsystemBase{
     }
     runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, 0);
 
-    /* Logging */
-    
     //System.out.println((topShooter.getEncoder().getVelocity()));
     
   }
 
   public void setAngle(double targetAngle){
     //Calculate angle to rotations
-    double rotations = rotationsC.getDouble(0.0) * (targetAngle - ShooterConstants.kBottomMeasureAngle + 4.0);
+    double rotations = rotationsC.getDouble(0.0) * (targetAngle - ShooterConstants.kBottomMeasureAngle);
 
     //Set the rotations
     if(rotations > -45.8 && rotations < 0){
@@ -201,8 +191,8 @@ public class Shooter extends SubsystemBase{
     //System.out.println(rotations);
 
     /* Logging */
-    calculatedAngle.setDouble(targetAngle + 4);
-    m_isAtAngle = Aiming.approximatelyEqual(rotations, angle.getEncoder().getPosition(), 1.0);
+    calculatedAngle.setDouble(targetAngle);
+    calculatedRotations.setDouble(rotations);
   }
 
   public void resetEncoders(){
@@ -217,6 +207,10 @@ public class Shooter extends SubsystemBase{
     return tagInSight() && atSpeed.getBoolean(false) && isAtAngle.getBoolean(false) && txCorrect.getBoolean(false);
   }
 
+  public boolean isAtAngle(){
+    return Aiming.approximatelyEqual(calculatedRotations.getDouble(0), angle.getEncoder().getPosition(), 1.0);
+  }
+
   public boolean tagInSight(){
     return (LimelightHelpers.getFiducialID("") == 4 || LimelightHelpers.getFiducialID("") == 7);
   }
@@ -226,7 +220,7 @@ public class Shooter extends SubsystemBase{
     limelightTY.setDouble(LimelightHelpers.getTY(""));
     limelightTX.setDouble(LimelightHelpers.getTX(""));
     atSpeed.setBoolean(topShooter.getEncoder().getVelocity() < -3800);
-    isAtAngle.setBoolean(m_isAtAngle);
+    isAtAngle.setBoolean(isAtAngle());
     seeTag.setBoolean(tagInSight());
     txCorrect.setBoolean(Aiming.approximatelyEqual(LimelightHelpers.getTX(""), 0, 2.5));
     ready.setBoolean(isReady());

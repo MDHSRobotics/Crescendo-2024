@@ -4,6 +4,7 @@ import java.lang.Math;
 
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import frc.robot.Constants.ShooterConstants;
@@ -16,9 +17,9 @@ public class Aiming {
     /* Pose Estimation Aiming Methods */
     /**
      * @param robotPose The current robot pose given by the swerve subsystem
-     * @return The new robot yaw in radians that points the robot at the speaker.
+     * @return The new robot yaw as a Rotation2d that points the robot at the speaker.
      */
-    public static double getYaw(Pose2d robotPose) {
+    public static Rotation2d getYaw(Pose2d robotPose) {
         // Find the yaw of the vector
         Translation3d robotTranslation = new Translation3d(
             m_BlueSpeakerPosition.getX() - robotPose.getX(),
@@ -26,12 +27,13 @@ public class Aiming {
             m_BlueSpeakerPosition.getZ() - ShooterConstants.kPivotHeightM); // The x, y, and z distance to the speaker
         Vector<N3> facingSpeakerVector = robotTranslation.toVector();
         Rotation3d robotRotation = new Rotation3d(facingSpeakerVector);
-        return robotRotation.getZ();
+        Rotation2d robotYaw = new Rotation2d(robotRotation.getZ());
+        return robotYaw;
     }
 
     /**
      * @param robotPose The current robot pose given by the swerve subsystem
-     * @return The new shooter pitch in radians that points the shooter at the speaker.
+     * @return The new shooter pitch in degrees that points the shooter at the speaker.
      */
     public static double getPitch(Pose2d robotPose) {
         // Must find the (x,y) coordinate of the shooter's pivot point first. If you need to draw this out, go to https://www.desmos.com/calculator/1hg0vdgcf4
@@ -46,7 +48,7 @@ public class Aiming {
             m_BlueSpeakerPosition.getZ() - ShooterConstants.kPivotHeightM); // The x, y, and z distance to the speaker
         Vector<N3> facingSpeakerVector = robotTranslation.toVector();
         Rotation3d robotRotation = new Rotation3d(facingSpeakerVector);
-        return robotRotation.getY();
+        return Math.toDegrees(robotRotation.getY());
     }
 
     /* Limelight Aiming Methods */

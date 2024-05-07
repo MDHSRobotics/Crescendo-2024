@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.Utils;
@@ -9,10 +10,12 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 
 import com.pathplanner.lib.auto.*;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.util.*;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
@@ -20,6 +23,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.math.Aiming;
 import frc.robot.LimelightHelpers;
 import frc.robot.generated.TunerConstants;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -32,6 +36,7 @@ import edu.wpi.first.networktables.GenericEntry;
  * so it can be used in command-based projects easily.
  */
 public class Swerve extends SwerveDrivetrain implements Subsystem {
+    private boolean m_autoRotationOverride = false;
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
@@ -96,7 +101,9 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
                     },
                     this // Reference to this subsystem to set requirements
             );
-
+        
+        // Set the method that will be used to get rotation overrides
+        PPHolonomicDriveController.setRotationTargetOverride(this::getRotationTargetOverride);
     }
 
     // Apply a request to the swerve subsystem
@@ -105,8 +112,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         return run(() -> this.setControl(requestSupplier.get()));
     }
 
-    // The following are callbacks needed for the Path Planner Auto Builder
-
+    /* The following are callbacks needed for the Path Planner Auto Builder */
     public Pose2d getPose() {
         SwerveDriveState currentState = getState();
         Pose2d currentPose = currentState.Pose;
@@ -156,6 +162,22 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     public double getAngle(){
         System.out.println(m_odometry.getEstimatedPosition().getRotation().getDegrees());
         return m_odometry.getEstimatedPosition().getRotation().getDegrees();
+    }
+
+    public Optional<Rotation2d> getRotationTargetOverride(){
+        // Some condition that should decide if we want to override rotation
+        if(m_autoRotationOverride) {
+            // Return an optional containing the rotation override (this should be a field relative rotation)
+            return Optional.of(Aiming.getYaw(getPose()));
+        } else {
+            // return an empty optional when we don't want to override the path's rotation
+            return Optional.empty();
+        }
+    }
+
+
+    public void setAutoRotationOverride(boolean override){
+        m_autoRotationOverride = override;
     }
 
     public void logData() {

@@ -23,6 +23,7 @@ public class Intake extends SubsystemBase{
 
     private SparkPIDController m_pidController;
 
+    /* Shuffleboard Values */
     private ShuffleboardTab tab = Shuffleboard.getTab("Intake");
     private GenericEntry intakeTopRotations =
       tab.add("Intake Top Rotations", 0.0)
@@ -78,9 +79,6 @@ public class Intake extends SubsystemBase{
         
         intake.set(0.0);
         conveyor.set(0.0);
-
-        /* Logging */
-        intakeRotations.setDouble(rightAngle.getEncoder().getPosition());
     }
 
     public void bottomPosition(){
@@ -88,9 +86,6 @@ public class Intake extends SubsystemBase{
         
         intake.set(1.0);
         conveyor.set(-1.0);
-
-        /* Logging */
-        intakeRotations.setDouble(rightAngle.getEncoder().getPosition());
     }
 
     public void midPosition(){
@@ -98,9 +93,6 @@ public class Intake extends SubsystemBase{
 
         intake.set(1.0);
         conveyor.set(-1.0);
-        
-        /* Logging */
-        intakeRotations.setDouble(rightAngle.getEncoder().getPosition());
     }
 
     public void spitOut(){
@@ -116,5 +108,9 @@ public class Intake extends SubsystemBase{
 
     public void setCalibration(){
         m_calibration = !m_calibration;
+    }
+
+    public void logData(){
+        intakeRotations.setDouble(rightAngle.getEncoder().getPosition());
     }
 }

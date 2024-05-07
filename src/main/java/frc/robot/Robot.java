@@ -108,8 +108,7 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void autonomousPeriodic() {
-        m_robotContainer.s_Swerve.logData();
-        m_robotContainer.s_Shooter.logData();
+        m_robotContainer.logData();
     }
 
     @Override
@@ -133,8 +132,7 @@ public class Robot extends TimedRobot {
         // Configure all controllers
         //BotControllers.configure();
         //RobotManager.botShuffler.update();
-        m_robotContainer.s_Swerve.logData();
-        m_robotContainer.s_Shooter.logData();
+        m_robotContainer.logData();
     }
 
     @Override
@@ -145,7 +143,7 @@ public class Robot extends TimedRobot {
         LimelightHelpers.setPipelineIndex("", RobotContainer.kAlliance == Alliance.Blue ? 1 : 0);
 
         // Sets a starting pose for pose estimation to right below the Speaker. Open this project in PathPlanner for more starting positions.
-        m_robotContainer.s_Swerve.seedFieldRelative(new Pose2d(0.48, 4.09, new Rotation2d()));
+        m_robotContainer.setStartingPosition(new Pose2d(0.48, 4.09, new Rotation2d()));
 
         CommandScheduler.getInstance().cancelAll();
 
@@ -158,8 +156,7 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void testPeriodic() {
-        m_robotContainer.s_Swerve.logData();
-        m_robotContainer.s_Shooter.logData();
+        m_robotContainer.logData();
     }
 
 }
