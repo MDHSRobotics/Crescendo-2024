@@ -323,7 +323,7 @@ public class RobotContainer {
         operatorController.povLeft().onTrue(
             s_Shooter.runOnce(() -> s_Shooter.setCalibration())
             .alongWith(
-                s_Shooter.runOnce(() -> s_Intake.setCalibration())
+                s_Intake.runOnce(() -> s_Intake.setCalibration())
             )
         );
         // Recommended to only use this in calibration mode
