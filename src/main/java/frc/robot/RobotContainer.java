@@ -15,10 +15,9 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -60,12 +59,19 @@ public class RobotContainer {
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-        .withDeadband(SwerveSpeedConstants.MaxSpeed * 0.1).withRotationalDeadband(SwerveSpeedConstants.MaxAngularRate * 0.1) // Add a 10% deadband
-        .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // I want field-centric
-                                                                // driving in open loop
+        .withDeadband(SwerveSpeedConstants.MaxSpeed * Constants.stickDeadband)
+        .withRotationalDeadband(SwerveSpeedConstants.MaxAngularRate * Constants.stickDeadband) // Add a 10% deadband
+        .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // I want field-centric driving in open loop
 
-    // Set up telemetry
-    private final Telemetry logger = new Telemetry(SwerveSpeedConstants.MaxSpeed);
+    private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
+
+    private final SwerveRequest.FieldCentricFacingAngle driveFacingAngle = new SwerveRequest.FieldCentricFacingAngle()
+        .withDeadband(SwerveSpeedConstants.MaxSpeed * Constants.stickDeadband)
+        .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+
+
+    // Set up telemetry. Disabled until we need Swerve module states.
+    // private final Telemetry logger = new Telemetry(SwerveSpeedConstants.MaxSpeed);
 
     /* Auto Chooser */
     private final SendableChooser<Command> autoChooser;
@@ -83,22 +89,15 @@ public class RobotContainer {
         /* Default Commands */
         if (driverController != null) {
             s_Swerve.setDefaultCommand( // Drivetrain will execute this command periodically
-                new ConditionalCommand(
-                    s_Swerve.applyRequest(() -> new SwerveRequest.SwerveDriveBrake()),
-                    s_Swerve.applyRequest(() -> drive.withVelocityX(-driverController
-                        .getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Forward and backward speed
+                    s_Swerve.applyRequest(() -> drive
+                        .withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Forward and backward speed
                         .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Left and right speed
-                        .withRotationalRate(-driverController.getRightX() * SwerveSpeedConstants.MaxAngularRate * (m_slowMode ? 1.0 : 1.0))), // Rotation speed
-                    (() -> // Brake the robot if:
-                    (driverController.getLeftX() > -0.05 && driverController.getLeftX() < 0.05)
-                    && (driverController.getLeftY() > -0.05 && driverController.getLeftY() < 0.05)
-                    && (driverController.getRightX() > -0.05 && driverController.getRightX() < 0.05)
-                    )
-                )
+                        .withRotationalRate(-driverController.getRightX() * SwerveSpeedConstants.MaxAngularRate * (m_slowMode ? 1.0 : 1.0))) // Rotation speed
             );
         }
 
-        s_Swerve.registerTelemetry(logger::telemeterize);
+        // Disabled until we need Swerve module states.
+        // s_Swerve.registerTelemetry(logger::telemeterize);
 
         if (Utils.isSimulation()) {
             s_Swerve.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
@@ -125,10 +124,6 @@ public class RobotContainer {
             s_Climb.runOnce((() -> s_Climb.runClimb(0,0)))
         );
 
-        SmartDashboard.putData(s_Shooter);
-        SmartDashboard.putData(s_Led);
-        SmartDashboard.putData(s_Climb);
-        SmartDashboard.putData(s_Intake);
 
         // Configure the button bindings
         configureButtonBindings();
@@ -136,16 +131,15 @@ public class RobotContainer {
 
         /* Named Auto Commands */
         NamedCommands.registerCommand("Start Shooter",  
-            Commands.sequence(
-                // Tuck the note into the shooter
-                s_Shooter.run(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5)).withTimeout(0.05),
-                // Ramp up
-                s_Shooter.runOnce(() -> s_Shooter.runShooter(0.7, 0.7, 0))
-            )
+            // Tuck the note into the shooter, and then ramp up
+            s_Shooter.startEnd(() -> 
+                s_Shooter.runShooter(-0.2, -0.2, 0.5), () -> 
+                s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, 0))
+            .withTimeout(0.05)
         );
 
         NamedCommands.registerCommand("Shoot",
-            s_Shooter.runOnce(() -> s_Shooter.runShooter(0.7, 0.7, -1.0))
+            s_Shooter.runOnce(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -1.0))
         );
 
         NamedCommands.registerCommand("Auto Aim",
@@ -166,10 +160,15 @@ public class RobotContainer {
         );
         
 
+        /* Add Subsystem Sendable tables to Shuffleboard */
+        Shuffleboard.getTab("Swerve").add("Kinematics + Odometry", s_Swerve).withSize(2, 2);
+        Shuffleboard.getTab("Shooter").add("Shooter Info", s_Shooter).withSize(3, 3);
+        Shuffleboard.getTab("Climb").add("Climb Info", s_Climb).withSize(3, 2);
+        Shuffleboard.getTab("Intake").add("Intake Info", s_Intake).withSize(3, 2);
+
         /* Auto Chooser */
         autoChooser = AutoBuilder.buildAutoChooser(); // Default auto will be `Commands.none()`
-        SmartDashboard.putData("Auto Mode", autoChooser);
-        Shuffleboard.getTab("Main").add(autoChooser).withSize(2, 1);
+        Shuffleboard.getTab("Main").add("Select your Auto:", autoChooser).withSize(2, 1);
     }
 
     /**
@@ -196,16 +195,20 @@ public class RobotContainer {
 
         /* IMPORTANT Please see the following URL to get a graphical annotation of which xbox buttons 
             trigger what commands on the driver controller:
-        https://www.padcrafter.com/index.php?templates=Driver+Controller&leftBumper=Climb+Down&dpadRight=&dpadLeft=&aButton=Tell+Human+Player+to+Amplify&yButton=Right+Climb+Up&dpadDown=&dpadUp=&xButton=Left+Climb+Up&bButton=Tell+Human+Player+to+Coopertition&leftStick=Drive+Robot+in+this+Direction&rightStick=Rotate+Robot&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&rightTrigger=Fast+Mode&leftTrigger=Slow+Mode&rightBumper=Climb+Up&startButton=Reset+Field+Oriented+Drive&plat=1&backButton=
+        https://www.padcrafter.com/index.php?templates=Driver+Controller&leftBumper=Climb+Down&dpadRight=&dpadLeft=&aButton=Brake+%28cross+wheels%29&yButton=Right+Climb+Up&dpadDown=Tell+Human+Player+to+Amplify&dpadUp=Tell+Human+Player+to+Coopertition&xButton=Left+Climb+Up&bButton=&leftStick=Drive+Robot+in+this+Direction&rightStick=Rotate+Robot&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&rightTrigger=Fast+Mode&leftTrigger=Slow+Mode&rightBumper=Climb+Up&startButton=Reset+Field+Oriented+Drive&plat=1&backButton=
         Whenever you edit a button binding, please update this URL
         */
 
-        // Reset the field-centric heading on left bumper press. This will break pose estimation.
+        // Brake the robot by crossing the wheels.
+        // If the operator locks onto the speaker, the wheels will stop braking.
+        driverController.cross().whileTrue(s_Swerve.applyRequest(() -> brake).withInterruptBehavior(InterruptionBehavior.kCancelSelf));
+
+        // Reset the field-centric heading on left bumper press. For pose estimation to start working again, drive to an Apriltag.
         driverController.options().onTrue(s_Swerve.runOnce(() -> s_Swerve.seedFieldRelative()));
 
         // LED communication
-        driverController.circle().onTrue(s_Led.run(() -> s_Led.blink(0, 0, 255, 400)).withTimeout(5)); // Coopertition
-        driverController.cross().onTrue(s_Led.run(() -> s_Led.blink(255, 255, 0, 1000)).withTimeout(5)); // Amplify
+        driverController.povUp().onTrue(s_Led.run(() -> s_Led.blink(0, 0, 255, 400)).withTimeout(5)); // Coopertition
+        driverController.povDown().onTrue(s_Led.run(() -> s_Led.blink(255, 255, 0, 1000)).withTimeout(5)); // Amplify
         
         // Climb
         driverController.L1().whileTrue(s_Climb.startEnd(() -> s_Climb.runClimb(-1, -1), () -> {}).until(climbLimitSwitch::get));
@@ -223,30 +226,43 @@ public class RobotContainer {
 
         /* IMPORTANT Please see the following URL to get a graphical annotation of which xbox buttons 
             trigger what commands on the operator controller:
-            https://www.padcrafter.com/?rightStickClick=Lock+Speaker+%28using+pose%29&xButton=Lock+Speaker&aButton=Fire&bButton=Set+Angle%3A+Amp&rightStick=Aim+Shooter+%28Calibration+Only%29&rightBumper=Set+Angle%3A+Point+Blank&rightTrigger=Deploy+Intake&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&leftBumper=Set+Angle%3A+Podium&leftStick=Aim+Intake+%28Calibration+Only%29&dpadUp=Reset+Shooter+Encoder&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&startButton=Free+a+Stuck+Note+%28on+shooter%29&backButton=Eject+Intake#?xButton=Lock+Speaker&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&leftBumper=Set+Angle%3A+Podium&rightBumper=Set+Angle%3A+Point+Blank&leftStick=Aim+Intake+%28Calibration+Only%29&rightStick=Aim+Shooter+%28Calibration+Only%29&dpadUp=Reset+Shooter+Encoder&dpadDown=Reset+Intake+Encoder&dpadLeft=Calibration+Mode+Toggle&rightTrigger=Deploy+Intake&backButton=Eject+Intake&bButton=Set+Angle%3A+Amp&aButton=Fire&yButton=Pass+Note+%28Straight+Shot%29&startButton=Free+a+Stuck+Note+%28on+shooter%29&templates=Controller+Scheme+1
+            https://www.padcrafter.com/?rightStickClick=Lock+Speaker+%28using+pose%29&xButton=Lock+Speaker&aButton=Fire&bButton=Set+Angle%3A+Amp&rightStick=Aim+Shooter+%28Calibration+Only%29&rightBumper=Set+Angle%3A+Point+Blank&rightTrigger=Deploy+Intake&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&leftBumper=Set+Angle%3A+Podium&leftStick=Aim+Intake+%28Calibration+Only%29&dpadUp=Reset+Shooter+Encoder&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&startButton=Free+a+Stuck+Note+%28on+shooter%29&backButton=Eject+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF#?xButton=Lock+Speaker&leftTrigger=Deploy+Intake+(Slightly+Above+Ground)&leftBumper=Set+Angle%3A+Podium&rightBumper=Set+Angle%3A+Point+Blank&leftStick=Aim+Intake+(Calibration+Only)&rightStick=Aim+Shooter+(Calibration+Only)&dpadUp=Reset+Shooter+Encoder&dpadDown=Reset+Intake+Encoder&dpadLeft=Calibration+Mode+Toggle&rightTrigger=Deploy+Intake&backButton=Eject+Intake&bButton=Set+Angle%3A+Amp&aButton=Fire&yButton=Pass+Note+(Straight+Shot)&startButton=Free+a+Stuck+Note+(on+shooter)&templates=Controller+Scheme+1
             Please update this link whenever you change a button.
         */
         
         // Run intake
-        operatorController.rightTrigger().toggleOnTrue(s_Intake.startEnd(() -> s_Intake.bottomPosition(), () -> {}).alongWith(s_Shooter.startEnd(() -> s_Shooter.runFeeder(0.7), () -> {}))); // Use startEnd so the command does not end on its own.
-        operatorController.leftTrigger().toggleOnTrue(s_Intake.startEnd(() -> s_Intake.midPosition(), () -> {}).alongWith(s_Shooter.startEnd(() -> s_Shooter.runFeeder(0.7), () -> {})));
-        operatorController.back().toggleOnTrue(s_Intake.startEnd(() -> s_Intake.spitOut(), () -> {}).alongWith(s_Shooter.startEnd(() -> s_Shooter.runFeeder(-1.0), () -> {})));
+        operatorController.rightTrigger().toggleOnTrue(
+            s_Intake.startEnd(() -> s_Intake.bottomPosition(), () -> {})
+            .alongWith(s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, -0.7), () -> {})));
 
-        // Lock on to speaker
+        operatorController.leftTrigger().toggleOnTrue(
+            s_Intake.startEnd(() -> s_Intake.midPosition(), () -> {})
+            .alongWith(s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, -0.7), () -> {})));
+
+        operatorController.back().toggleOnTrue(
+            s_Intake.startEnd(() -> s_Intake.spitOut(), () -> {})
+            .alongWith(s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, 1.0), () -> {})));
+
+
+        // Lock on to speaker (using limelight)
         operatorController.x()
         .toggleOnTrue(
             Commands.sequence(
-                s_Shooter.startEnd(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), () -> {}).withTimeout(0.05),
+                // Tuck note into shooter and then ramp up
+                s_Shooter.startEnd(() -> 
+                    s_Shooter.runShooter(-0.2, -0.2, 0.5), () ->
+                    s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, 0))
+                    .withTimeout(0.05),
 
                 Commands.parallel(
-                    s_Swerve.applyRequest(() -> new SwerveRequest.FieldCentricFacingAngle()
+                    s_Swerve.applyRequest(() -> driveFacingAngle
                         .withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
                         .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
                         .withTargetDirection(Rotation2d.fromDegrees(s_Swerve.getAngle() - LimelightHelpers.getTX("")))),
                         
                     s_Shooter.run(() -> s_Shooter.setAngleFromLimelight())
                 )
-            ).until(() -> Math.abs(driverController.getRightX()) > 0.1)
+            ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
         );
         // When it locks on speaker, set shoot mode to speaker instead of amp
         operatorController.x().onTrue(s_Shooter.runOnce(() -> m_isAmp = false));
@@ -255,7 +271,7 @@ public class RobotContainer {
         operatorController.rightStick()
         .toggleOnTrue(
             Commands.parallel(
-                s_Swerve.applyRequest(() -> new SwerveRequest.FieldCentricFacingAngle()
+                s_Swerve.applyRequest(() -> driveFacingAngle
                     .withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
                     .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
                     .withTargetDirection(Aiming.getYaw(s_Swerve.getPose()))),
@@ -263,6 +279,8 @@ public class RobotContainer {
                 s_Shooter.run(() -> s_Shooter.setAngle(Aiming.getPitch(s_Swerve.getPose())))
             ).until(() -> Math.abs(driverController.getRightX()) > 0.1)
         );
+        // When it locks on speaker, set shoot mode to speaker instead of amp
+        operatorController.rightStick().onTrue(s_Shooter.runOnce(() -> m_isAmp = false));
 
         // Set angle to amp
         operatorController.b()
@@ -280,14 +298,17 @@ public class RobotContainer {
         operatorController.a()
         .and(new Trigger(() -> !m_isAmp))
         .onTrue(
-            s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.5), () -> s_Shooter.runShooter(0, 0, 0))
+            // Shoot and then stop
+            s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.5), () -> 
+            s_Shooter.runShooter(0, 0, 0))
             .withTimeout(0.5)
         );
 
         new Trigger(s_Shooter::isReady)
             .and(() -> m_autoshoot)
             .onTrue(
-                s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.5), () -> s_Shooter.runShooter(0, 0, 0))
+                s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.5), () -> 
+                s_Shooter.runShooter(0, 0, 0))
                 .withTimeout(0.5)
         );
 
@@ -312,7 +333,7 @@ public class RobotContainer {
                 s_Shooter.startEnd(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), () -> {}).withTimeout(0.05),
                 // Ramp up
                 s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.ampTopSpeed, ShooterConstants.ampBottomSpeed, 0), () -> {}).withTimeout(1.0),
-                // Shoot
+                // Shoot and then stop shooting
                 s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.ampTopSpeed, ShooterConstants.ampBottomSpeed, -0.5), () ->
                 s_Shooter.runShooter(0, 0, 0))
                 .withTimeout(0.2)
@@ -339,8 +360,8 @@ public class RobotContainer {
                 s_Shooter.startEnd(() -> s_Shooter.runShooter(0.5, 0.5, 0), () -> {}).withTimeout(1.0),
                 // Shoot
                 s_Shooter.startEnd(() -> s_Shooter.runShooter(0.5, 0.5, -0.5), () ->
-                s_Shooter.runShooter(0, 0, 0))
-                .withTimeout(0.5)
+                    s_Shooter.runShooter(0, 0, 0))
+                    .withTimeout(0.5)
             )
         );
 
@@ -354,7 +375,8 @@ public class RobotContainer {
 
 
         // Free a stuck note on the top of the robot
-        operatorController.start().whileTrue(s_Shooter.startEnd(() -> s_Shooter.runShooter(-1,-1,1), () -> s_Shooter.runShooter(0, 0, 0)));
+        operatorController.start().whileTrue(s_Shooter.startEnd(() -> s_Shooter.runShooter(-1,-1,0), () -> 
+            s_Shooter.runShooter(0, 0, 0)));
     }
 
     public static double roundAvoid(double value, int places) {
@@ -376,10 +398,8 @@ public class RobotContainer {
         s_Swerve.seedFieldRelative(startingPosition);
     }
 
-    public void logData(){
-        s_Swerve.logData();
+    public void logData() {
+        s_Swerve.updatePose();
         s_Shooter.logData();
-        s_Intake.logData();
-        s_Climb.logData();
     }
 }

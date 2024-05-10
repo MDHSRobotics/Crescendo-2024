@@ -12,10 +12,27 @@
     "types": {
       "/FMSInfo": "FMSInfo",
       "/Pose": "Field2d",
+      "/Shuffleboard/LED/Disabled": "Command",
+      "/Shuffleboard/LED/StartEndCommand": "Command",
+      "/Shuffleboard/LED/Toggle Manual Control: Disabled": "Command",
+      "/Shuffleboard/Main/Select your Auto:": "String Chooser",
+      "/Shuffleboard/Main/SendableChooser[0]": "String Chooser",
+      "/Shuffleboard/Shooter/Command Info/Default Command": "Command",
+      "/Shuffleboard/Shooter/Commands": "Subsystem",
+      "/Shuffleboard/Swerve/Kinematics + Odometry": "Subsystem",
+      "/Shuffleboard/Swerve/Module 0": "Mechanism2d",
+      "/Shuffleboard/Swerve/Module 1": "Mechanism2d",
+      "/Shuffleboard/Swerve/Module 2": "Mechanism2d",
+      "/Shuffleboard/Swerve/Module 3": "Mechanism2d",
+      "/SmartDashboard/Auto Mode": "String Chooser",
+      "/SmartDashboard/Climb": "Subsystem",
+      "/SmartDashboard/Intake": "Subsystem",
+      "/SmartDashboard/LED": "Subsystem",
       "/SmartDashboard/Module 0": "Mechanism2d",
       "/SmartDashboard/Module 1": "Mechanism2d",
       "/SmartDashboard/Module 2": "Mechanism2d",
-      "/SmartDashboard/Module 3": "Mechanism2d"
+      "/SmartDashboard/Module 3": "Mechanism2d",
+      "/SmartDashboard/Shooter": "Subsystem"
     }
   },
   "NetworkTables Info": {

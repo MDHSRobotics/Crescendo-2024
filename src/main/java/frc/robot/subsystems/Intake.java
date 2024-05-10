@@ -8,6 +8,7 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkFlex;
 
 import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -27,18 +28,15 @@ public class Intake extends SubsystemBase{
     private ShuffleboardTab tab = Shuffleboard.getTab("Intake");
     private GenericEntry intakeTopRotations =
       tab.add("Intake Top Rotations", 0.0)
+        .withSize(2, 1)
         .getEntry();
     private GenericEntry intakeBottomRotations =
       tab.add("Intake Bottom Rotations", 34.0)
-        .getEntry();
-    private GenericEntry intakeRotations =
-      tab.add("Intake Rotations", -20.0)
+        .withSize(2, 1)
         .getEntry();
     private GenericEntry intakeMidPositions =
       tab.add("Intake Mid Rotations", 30.0)
-        .getEntry();
-    private GenericEntry spitPower =
-      tab.add("Spit Power", -1.0)
+        .withSize(2, 1)
         .getEntry();
 
     private boolean m_calibration = false;
@@ -55,10 +53,10 @@ public class Intake extends SubsystemBase{
         m_pidController = rightAngle.getPIDController();
         m_pidController.setP(0.1);
 
-        leftAngle.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
-        rightAngle.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
-        intake.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
-        conveyor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
+        // Consider increasing the period in different ways: https://docs.revrobotics.com/brushless/spark-max/control-interfaces#use-case-examples
+        leftAngle.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 100);
+        leftAngle.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 500);
+        leftAngle.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 500);
 
         leftAngle.setOpenLoopRampRate(0.1);
         rightAngle.setOpenLoopRampRate(0.1);
@@ -96,7 +94,7 @@ public class Intake extends SubsystemBase{
     }
 
     public void spitOut(){
-        intake.set(spitPower.getDouble(-1));
+        intake.set(-1);
         conveyor.set(1);
     }
     
@@ -110,7 +108,11 @@ public class Intake extends SubsystemBase{
         m_calibration = !m_calibration;
     }
 
-    public void logData(){
-        intakeRotations.setDouble(rightAngle.getEncoder().getPosition());
+    // Initialize the Sendable that will log values to Shuffleboard in a nice little table for us
+    @Override
+    public void initSendable(SendableBuilder builder) {
+        builder.addDoubleProperty("Angle Rotations", () -> rightAngle.getEncoder().getPosition(), null);
+        builder.addDoubleProperty("Intake Speed", () -> intake.get(), null);
+        builder.addDoubleProperty("Conveyer Speed", () -> conveyor.get(), null);
     }
 }

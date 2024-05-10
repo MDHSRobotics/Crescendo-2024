@@ -2,9 +2,7 @@ package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
 
-import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.ClimbConstants;
@@ -16,14 +14,6 @@ public class Climb extends SubsystemBase{
 
     CANSparkMax leftClimb;
     CANSparkMax rightClimb;
-
-    private ShuffleboardTab tab = Shuffleboard.getTab("Climb");
-    private GenericEntry leftClimbRotations =
-      tab.add("Left Climb Rotations", 0)
-         .getEntry();
-    private GenericEntry rightClimbRotations =
-      tab.add("Right Climb Rotations", 0)
-         .getEntry();
 
 
     public Climb(){
@@ -39,9 +29,12 @@ public class Climb extends SubsystemBase{
         rightClimb.set(climb2Power);
     }
 
-    public void logData(){
-        leftClimbRotations.setDouble(leftClimb.getEncoder().getPosition());
-        rightClimbRotations.setDouble(rightClimb.getEncoder().getPosition());
+
+    // Initialize the Sendable that will log values to Shuffleboard in a nice little table for us
+    @Override
+    public void initSendable(SendableBuilder builder) {
+        builder.addDoubleProperty("Left Motor Rotations", () -> leftClimb.getEncoder().getPosition(), null);
+        builder.addDoubleProperty("Right Motor Rotations", () -> rightClimb.getEncoder().getPosition(), null);
     }
 
 }

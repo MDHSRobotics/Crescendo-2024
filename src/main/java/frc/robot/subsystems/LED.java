@@ -8,7 +8,8 @@ import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.LEDConstants;
@@ -22,6 +23,9 @@ public class LED extends SubsystemBase{
     private int m_lastPixel = 1;
 
     private ShuffleboardTab tab = Shuffleboard.getTab("LED");
+
+    private Command toggleManualColorControl;
+
     private GenericEntry color =
       tab.add("Color", false)
         .withProperties(Map.of("colorWhenFalse", "black"))
@@ -47,6 +51,11 @@ public class LED extends SubsystemBase{
 
         m_ledBuffer = new AddressableLEDBuffer(LEDConstants.kStripLength);
         m_led.setLength(m_ledBuffer.getLength());
+
+        // Add a command to shuffleboard that lets the user test out colors
+        toggleManualColorControl = Commands.startEnd(() -> colorTest(), () -> toggleManualColorControl.setName("Toggle Manual Control: Disabled"), this);
+        toggleManualColorControl.setName("Toggle Manual Control: Disabled");
+        tab.add(toggleManualColorControl).withSize(2, 1);
     }
 
     /**
@@ -57,12 +66,10 @@ public class LED extends SubsystemBase{
      */
     public void setColor(int r, int g, int b){
         //System.out.println("Target Color: (r: "+r+" g: "+g+" b: "+b+")");
-        for (var i = 0; i < m_ledBuffer.getLength(); i++) {
+        for (int i = 0; i < m_ledBuffer.getLength(); i++) {
             // Sets the specified LED to the RGB values for red
             m_ledBuffer.setRGB(i, r, g, b);
          }
-        // Set the data
-        SmartDashboard.putString("LED RGB", "r:" + r + " g: " + g + " b: " + b);
         m_led.setData(m_ledBuffer);
         m_led.start();
 
@@ -90,10 +97,10 @@ public class LED extends SubsystemBase{
     public void rainbow() {
         
         // For every pixel
-        for (var i = 0; i < m_ledBuffer.getLength(); i++) {
+        for (int i = 0; i < m_ledBuffer.getLength(); i++) {
           // Calculate the hue - hue is easier for rainbows because the color
           // shape is a circle so only one value needs to precess
-          final var hue = (m_rainbowFirstPixelHue + (i * 180 / m_ledBuffer.getLength())) % 180;
+          final int hue = (m_rainbowFirstPixelHue + (i * 180 / m_ledBuffer.getLength())) % 180;
           // Set the value
           m_ledBuffer.setHSV(i, hue, 255, 128);
         }
@@ -107,7 +114,7 @@ public class LED extends SubsystemBase{
     }
     
     public void redShift() {
-        final var hue = (m_rainbowFirstPixelHue + (m_firstPixel * 180 / m_ledBuffer.getLength())) % 180;
+        final int hue = (m_rainbowFirstPixelHue + (m_firstPixel * 180 / m_ledBuffer.getLength())) % 180;
           // Set the value
         m_ledBuffer.setHSV(m_firstPixel, hue, 255, 128);
         m_ledBuffer.setRGB(m_lastPixel, 0, 0, 0);
@@ -123,7 +130,7 @@ public class LED extends SubsystemBase{
 
     public void colorTest(){
         setColor((int) tRed.getInteger(0), (int) tGreen.getInteger(0), (int) tBlue.getInteger(0));
+        toggleManualColorControl.setName("Toggle Manual Control: Enabled");
     }
 
-    
 }

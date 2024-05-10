@@ -19,58 +19,49 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.math.Aiming;
 import frc.robot.LimelightHelpers;
 import frc.robot.generated.TunerConstants;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
 
 /**
  * Class that extends the Phoenix SwerveDrivetrain class and implements subsystem
  * so it can be used in command-based projects easily.
  */
-public class Swerve extends SwerveDrivetrain implements Subsystem {
+public class Swerve extends SwerveDrivetrain implements Subsystem, Sendable {
     private boolean m_autoRotationOverride = false;
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
+    
+    private double m_yawRate;
+    private double m_rawYawRate;
 
-    private final SwerveRequest.ApplyChassisSpeeds applyChassisSpeedsRequest = new SwerveRequest.ApplyChassisSpeeds();
 
-    private ShuffleboardTab tab = Shuffleboard.getTab("Swerve");
-    private GenericEntry m_yawRate =
-      tab.add("Yaw Rate", 0.0)
-        .getEntry();
-    private GenericEntry m_rawYawRate =
-      tab.add("Raw Yaw Rate", 0.0)
-        .getEntry();
+    private final SwerveRequest.ApplyChassisSpeeds AutoRequest = new SwerveRequest.ApplyChassisSpeeds();
 
     public Swerve(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency, SwerveModuleConstants... modules) {
         super(driveTrainConstants, OdometryUpdateFrequency, modules);
+        configurePathPlanner();
         if (Utils.isSimulation()) {
             startSimThread();
         }
-
-        // Configure AutoBuilder last
-        configurePathPlanningAutoBuilder();
     }
     public Swerve(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
         super(driveTrainConstants, modules);
+        configurePathPlanner();
         if (Utils.isSimulation()) {
             startSimThread();
         }
-
-        // Configure AutoBuilder last
-        configurePathPlanningAutoBuilder();
     }
 
-    private void configurePathPlanningAutoBuilder() {
+    private void configurePathPlanner() {
         double driveBaseRadius = 0;
         for (var moduleLocation : m_moduleLocations) {
             driveBaseRadius = Math.max(driveBaseRadius, moduleLocation.getNorm());
@@ -88,17 +79,10 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
                             driveBaseRadius, // Drive base radius in meters. Distance from robot center to furthest module.
                             new ReplanningConfig() // Default path replanning config. See the API for the options here
                     ),
-                    () -> {
-                    // Boolean supplier that controls when the path will be mirrored for the red alliance
+                    // Boolean supplier that controls when the path will be mirrored for the red alliance.
                     // This will flip the path being followed to the red side of the field.
                     // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-
-                    var alliance = DriverStation.getAlliance();
-                    if (alliance.isPresent()) {
-                        return alliance.get() == DriverStation.Alliance.Red;
-                    }
-                    return false;
-                    },
+                    () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
                     this // Reference to this subsystem to set requirements
             );
         
@@ -106,17 +90,12 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         PPHolonomicDriveController.setRotationTargetOverride(this::getRotationTargetOverride);
     }
 
-    // Apply a request to the swerve subsystem
-    public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
-
-        return run(() -> this.setControl(requestSupplier.get()));
-    }
 
     /* The following are callbacks needed for the Path Planner Auto Builder */
     public Pose2d getPose() {
         SwerveDriveState currentState = getState();
         Pose2d currentPose = currentState.Pose;
-        System.out.println("Current pos" + currentPose.toString());
+        // System.out.println("Current pos" + currentPose.toString());
 
         return currentPose;
     }
@@ -127,21 +106,21 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
 
          SwerveDriveState currentState = getState();
          SwerveModuleState [] moduleStates = currentState.ModuleStates;
-         SwerveDriveKinematics kinematics = this.m_kinematics;
 
-         ChassisSpeeds chassisSpeeds = kinematics.toChassisSpeeds(moduleStates);
+         ChassisSpeeds chassisSpeeds = m_kinematics.toChassisSpeeds(moduleStates);
          
-         System.out.println("Getting current robot speeds " + chassisSpeeds.toString());
+         // System.out.println("Getting current robot speeds " + chassisSpeeds.toString());
 
         return chassisSpeeds;
     }
 
     public void driveRobotRelative(ChassisSpeeds speeds){
 
-        setControl(applyChassisSpeedsRequest.withSpeeds(speeds));
+        setControl(AutoRequest.withSpeeds(speeds));
 
-        System.out.println("Drive Robot Relative speeds: " + speeds.toString());
+        // System.out.println("Drive Robot Relative speeds: " + speeds.toString());
       }
+
 
     // Simulation
     private void startSimThread() {
@@ -159,8 +138,14 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         m_simNotifier.startPeriodic(kSimLoopPeriod);
     }
 
+    // Apply a request to the swerve subsystem
+    public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
+
+        return run(() -> this.setControl(requestSupplier.get()));
+    }
+
     public double getAngle(){
-        System.out.println(m_odometry.getEstimatedPosition().getRotation().getDegrees());
+        // System.out.println(m_odometry.getEstimatedPosition().getRotation().getDegrees());
         return m_odometry.getEstimatedPosition().getRotation().getDegrees();
     }
 
@@ -180,22 +165,30 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         m_autoRotationOverride = override;
     }
 
-    public void logData() {
+    public void updatePose() {
         // Update yaw for Limelight Megatag2
-        double yaw = m_odometry.getEstimatedPosition().getRotation().getDegrees();
-        double yawRate = Math.toDegrees(getRobotRelativeSpeeds().omegaRadiansPerSecond);
-        double rawYawRate = m_pigeon2.getRate(); // Megatag2 comes with its own latency compensation, so we use raw instead.
-        LimelightHelpers.SetRobotOrientation("", yaw, rawYawRate, 0.0, 0.0, 0.0, 0.0);
+        double yaw = getAngle();
+        m_yawRate = Math.toDegrees(getRobotRelativeSpeeds().omegaRadiansPerSecond);
+        m_rawYawRate = m_pigeon2.getRate(); // Megatag2 comes with its own latency compensation, so we use raw instead.
+        LimelightHelpers.SetRobotOrientation("", yaw, m_rawYawRate, 0.0, 0.0, 0.0, 0.0);
         
         /* Add Limelight Bot Pose to Pose Estimation */
         LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("");
-        if((limelightMeasurement.tagCount >= 1) && (Math.abs(yawRate) < 720)) { // if our angular velocity is greater than 720 degrees per second, ignore vision updates
+        if((limelightMeasurement.tagCount >= 1) && (Math.abs(m_yawRate) < 720)) { // if our angular velocity is greater than 720 degrees per second, ignore vision updates
             setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
             addVisionMeasurement(limelightMeasurement.pose, limelightMeasurement.timestampSeconds);
         }
+    }
 
-        // Add data to Shuffleboard
-        m_yawRate.setDouble(yawRate);
-        m_rawYawRate.setDouble(rawYawRate);
+    // Initialize the Sendable that will log values to Shuffleboard in a nice little table for us
+    @Override
+    public void initSendable(SendableBuilder builder){
+        builder.addDoubleProperty("X Position", () -> getPose().getX(), null);
+        builder.addDoubleProperty("Y Position", () -> getPose().getY(), null);
+        builder.addDoubleProperty("X Velocity", () -> getRobotRelativeSpeeds().vxMetersPerSecond, null);
+        builder.addDoubleProperty("Y Velocity", () -> getRobotRelativeSpeeds().vyMetersPerSecond, null);
+        builder.addDoubleProperty("Yaw", () -> getAngle(), null);
+        builder.addDoubleProperty("Yaw Rate", () -> m_yawRate, null);
+        builder.addDoubleProperty("Raw Yaw Rate", () -> m_rawYawRate, null);
     }
 }

@@ -1,7 +1,6 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.SparkAbsoluteEncoder;
 
 import java.util.Map;
 
@@ -10,12 +9,12 @@ import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.IdleMode;
 
 import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.ComplexWidget;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 
@@ -33,44 +32,39 @@ public class Shooter extends SubsystemBase{
 
   private SparkPIDController m_pidController;
 
+  /* Shuffleboard */
   private ShuffleboardTab tab = Shuffleboard.getTab("Shooter");
-  private GenericEntry shootSpeedTop =
-    tab.add("Max Speed", 1)
+
+  private ComplexWidget cameraView =
+    tab.addCamera("Limelight", "limelight", "10.41.41.11:5800")
+      .withWidget(BuiltInWidgets.kCameraStream)
+      .withSize(4, 4);
+
+  private GenericEntry shootSpeedTopAdjustment =
+    tab.add("Top Shooter Speed Multiplier", 1)
       .withWidget(BuiltInWidgets.kNumberSlider)
-      .withProperties(Map.of("min", 0, "max", 1)) // specify widget properties here
+      .withProperties(Map.of("min", 0, "max", 1))
       .getEntry();
-  
-  private GenericEntry shootSpeedBot =
-    tab.add("Max Speed Bot", 1)
+  private GenericEntry shootSpeedBotAdjustment =
+    tab.add("Bottom Shooter Speed Multiplier", 1)
       .withWidget(BuiltInWidgets.kNumberSlider)
-      .withProperties(Map.of("min", 0, "max", 1)) // specify widget properties here
+      .withProperties(Map.of("min", 0, "max", 1))
       .getEntry();
-  private GenericEntry angleRotations =
-    tab.add("Angle Rotations", 0.0)
-      .getEntry();
-  private GenericEntry limelightTY =
-    tab.add("limelight TY", 0.0)
-      .getEntry();
-  private GenericEntry limelightTX =
-    tab.add("limelight TX", 0.0)
-      .getEntry();
+
   private GenericEntry calculatedDistance =
-    tab.add("calculated distance", 0.0)
+    tab.add("Calculated distance", 0.0)
+      .withSize(2, 1)
       .getEntry();
   private GenericEntry calculatedAngle =
-    tab.add("calculated angle", 0.0)
+    tab.add("Calculated angle", 0.0)
       .getEntry();
   private GenericEntry calculatedRotations =
     tab.add("Calculated Rotations", 0.0)
+      .withSize(2, 1)
       .getEntry();
-  private GenericEntry rotationsC =
-    tab.add("Rotations", -0.5839)
-      .getEntry();
-  private GenericEntry movingAngle =
-    tab.add("Moving angle motors", false)
-      .getEntry();
+      
   private GenericEntry adjustment = Shuffleboard.getTab("Main")
-    .add("Adjustment Angle", 0)
+    .add("Adjustment Angle", 4)
     .getEntry();
   private GenericEntry atSpeed = Shuffleboard.getTab("Main")
     .add("At Speed", false)
@@ -94,7 +88,7 @@ public class Shooter extends SubsystemBase{
     .getEntry();
   
   private boolean m_calibration = false;
-  
+  private boolean m_movingAngle = false;
   private double m_lastAngle = 23;
 
   public Shooter(){
@@ -109,26 +103,23 @@ public class Shooter extends SubsystemBase{
     topShooter.setIdleMode(IdleMode.kBrake);
     bottomShooter.setIdleMode(IdleMode.kBrake);
 
-    topShooter.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
-    bottomShooter.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
-    angle.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
-    feeder.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
+    // Uncomment if CAN utilization is too high. Also, consider increasing the period in different ways: https://docs.revrobotics.com/brushless/spark-max/control-interfaces#use-case-examples
+    // topShooter.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
+    // bottomShooter.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
+    // angle.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
+    // feeder.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
 
     topShooter.setOpenLoopRampRate(0.1);
     bottomShooter.setOpenLoopRampRate(0.1);
     angle.setOpenLoopRampRate(0.1);
     feeder.setOpenLoopRampRate(0.1);
     
-    SmartDashboard.putNumber("Angle 1 rotations", angle.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition());
-    SmartDashboard.putNumber("Angle 2 rotations", angle.getEncoder().getPosition());
     //shooter2.setIdleMode(IdleMode.kCoast);
   }
 
   public void runShooter(double topPower, double bottomPower, double feed){
-    topShooter.set(-topPower * shootSpeedTop.getDouble(1.0));
-    bottomShooter.set(bottomPower * shootSpeedBot.getDouble(1.0));
-    SmartDashboard.putNumber("Shooter Power", bottomPower);
-    SmartDashboard.putNumber("Feed Power", feed);
+    topShooter.set(-topPower * shootSpeedTopAdjustment.getDouble(1.0));
+    bottomShooter.set(bottomPower * shootSpeedBotAdjustment.getDouble(1.0));
     feeder.set(-feed);
   }
 
@@ -138,12 +129,10 @@ public class Shooter extends SubsystemBase{
     }else{
       angle.set(angleSpeed);
     }
-
+    // Update the calculated angle so it doesn't appear to be aiming
+    calculatedAngle.setDouble(0);
     calculatedRotations.setDouble(0);
-  }
-
-  public void runFeeder(double power){
-    feeder.set(power);
+    calculatedAngle.setDouble(0);
   }
 
   //adjust the angle of the shooter
@@ -164,31 +153,26 @@ public class Shooter extends SubsystemBase{
       double angle = Aiming.getPitch(adjustedDistance, heightDifference);
 
       // set the angle
-      setAngle(Math.toDegrees(angle) + adjustment.getDouble(4));
-      m_lastAngle = Math.toDegrees(Math.toDegrees(angle) + adjustment.getDouble(4));
+      setAngle(Math.toDegrees(angle) + adjustment.getDouble(0));
+      m_lastAngle = Math.toDegrees(Math.toDegrees(angle) + adjustment.getDouble(0));
       
       calculatedDistance.setDouble(horizontalDistance);
-    }else{
+    } else {
       setAngle(m_lastAngle);
     }
-    runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, 0);
-
-    //System.out.println((topShooter.getEncoder().getVelocity()));
-    
   }
 
   public void setAngle(double targetAngle){
     //Calculate angle to rotations
-    double rotations = rotationsC.getDouble(0.0) * (targetAngle - ShooterConstants.kBottomMeasureAngle);
+    double rotations = ShooterConstants.kDegreesToRotationsConversion * (targetAngle - ShooterConstants.kBottomMeasureAngle);
 
     //Set the rotations
-    if(rotations > -45.8 && rotations < 0){
+    if (rotations > -45.8 && rotations < 0){
       m_pidController.setReference(rotations, CANSparkMax.ControlType.kPosition);
-      movingAngle.setBoolean(true);
-    }else{
-      movingAngle.setBoolean(false);
+      m_movingAngle = true;
+    } else {
+      m_movingAngle = false;
     }
-    //System.out.println(rotations);
 
     /* Logging */
     calculatedAngle.setDouble(targetAngle);
@@ -216,14 +200,25 @@ public class Shooter extends SubsystemBase{
   }
 
   public void logData(){
-    angleRotations.setDouble(angle.getEncoder().getPosition());
-    limelightTY.setDouble(LimelightHelpers.getTY(""));
-    limelightTX.setDouble(LimelightHelpers.getTX(""));
     atSpeed.setBoolean(topShooter.getEncoder().getVelocity() < -3800);
     isAtAngle.setBoolean(isAtAngle());
     seeTag.setBoolean(tagInSight());
     txCorrect.setBoolean(Aiming.approximatelyEqual(LimelightHelpers.getTX(""), 0, 2.5));
     ready.setBoolean(isReady());
+  }
+  
+
+  // Initialize the Sendable that will log values to Shuffleboard in a nice little table for us
+  @Override
+  public void initSendable(SendableBuilder builder) {
+    // Log shooter info
+    builder.addDoubleProperty("Bottom Shooter Speed", () -> bottomShooter.get(), null);
+    builder.addDoubleProperty("Top Shooter Speed", () -> topShooter.get(), null);
+    builder.addDoubleProperty("Feeder Speed", () -> feeder.get(), null);
+    builder.addDoubleProperty("Angle Rotations", () -> angle.getEncoder().getPosition(), null);
+    builder.addDoubleProperty("Limelight TX", () -> LimelightHelpers.getTX(""), null);
+    builder.addDoubleProperty("Limelight TY", () -> LimelightHelpers.getTX(""), null);
+    builder.addBooleanProperty("Moving Shooter Angle", () -> m_movingAngle, null);
   }
 
 }

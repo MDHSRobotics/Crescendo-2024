@@ -139,8 +139,10 @@ public class Robot extends TimedRobot {
     public void testInit() {
         //Logger.setup("Initializing Test Mode...");
 
-        RobotContainer.kAlliance = DriverStation.getAlliance().orElse(Alliance.Blue);
-        LimelightHelpers.setPipelineIndex("", RobotContainer.kAlliance == Alliance.Blue ? 1 : 0);
+        // Use a different limelight pipeline depending on alliance.
+        // Only necessary in Orange County Regionals, where the lights make Apriltags hard to see.
+        // RobotContainer.kAlliance = DriverStation.getAlliance().orElse(Alliance.Blue);
+        // LimelightHelpers.setPipelineIndex("", RobotContainer.kAlliance == Alliance.Blue ? 1 : 0);
 
         // Sets a starting pose for pose estimation to right below the Speaker. Open this project in PathPlanner for more starting positions.
         m_robotContainer.setStartingPosition(new Pose2d(0.48, 4.09, new Rotation2d()));
