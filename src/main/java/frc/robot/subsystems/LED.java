@@ -33,17 +33,17 @@ public class LED extends SubsystemBase{
     private GenericEntry tRed = 
       tab.add("tRed", 1)
         .withWidget(BuiltInWidgets.kNumberSlider)
-        .withProperties(Map.of("min", 0, "max", 255)) // specify widget properties here
+        .withProperties(Map.of("min", 0, "max", 255))
         .getEntry();
     private GenericEntry tGreen = 
       tab.add("tGreen", 1)
         .withWidget(BuiltInWidgets.kNumberSlider)
-        .withProperties(Map.of("min", 0, "max", 255)) // specify widget properties here
+        .withProperties(Map.of("min", 0, "max", 255))
         .getEntry();
     private GenericEntry tBlue = 
       tab.add("tBlue", 1)
         .withWidget(BuiltInWidgets.kNumberSlider)
-        .withProperties(Map.of("min", 0, "max", 255)) // specify widget properties here
+        .withProperties(Map.of("min", 0, "max", 255))
         .getEntry();
 
     public LED(){

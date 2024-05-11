@@ -3,13 +3,15 @@ package frc.robot.subsystems;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkFlex;
 
 import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -24,8 +26,19 @@ public class Intake extends SubsystemBase{
 
     private SparkPIDController m_pidController;
 
+    private RelativeEncoder m_leftAngleEncoder;
+    private RelativeEncoder m_rightAngleEncoder;
+
+    private boolean m_calibration = false;
+
     /* Shuffleboard Values */
     private ShuffleboardTab tab = Shuffleboard.getTab("Intake");
+
+    private ShuffleboardLayout list = tab.getLayout("Intake Info", BuiltInLayouts.kList).withSize(3, 2);
+    private GenericEntry angleRotations = list.add("Angle Rotations", 0.0).getEntry();
+    private GenericEntry intakeSpeed = list.add("Intake Speed", 0.0).getEntry();
+    private GenericEntry conveyorSpeed = list.add("Conveyer Speed", 0.0).getEntry();
+
     private GenericEntry intakeTopRotations =
       tab.add("Intake Top Rotations", 0.0)
         .withSize(2, 1)
@@ -39,13 +52,14 @@ public class Intake extends SubsystemBase{
         .withSize(2, 1)
         .getEntry();
 
-    private boolean m_calibration = false;
-
     public Intake(){
         intake = new CANSparkFlex(IntakeConstants.kIntakeID, MotorType.kBrushless);
         conveyor = new CANSparkMax(IntakeConstants.kConveyorID, MotorType.kBrushless);
         leftAngle = new CANSparkMax(IntakeConstants.kLeftAngleID, MotorType.kBrushless);
         rightAngle = new CANSparkMax(IntakeConstants.kRightAngleID, MotorType.kBrushless);
+
+        m_leftAngleEncoder = leftAngle.getEncoder();
+        m_rightAngleEncoder = rightAngle.getEncoder();
 
         rightAngle.setIdleMode(IdleMode.kBrake);
         leftAngle.setIdleMode(IdleMode.kBrake);
@@ -100,19 +114,20 @@ public class Intake extends SubsystemBase{
     
     
     public void resetEncoders(){
-        leftAngle.getEncoder().setPosition(0);
-        rightAngle.getEncoder().setPosition(0);
+        m_leftAngleEncoder.setPosition(0);
+        m_rightAngleEncoder.setPosition(0);
     }
 
     public void setCalibration(){
         m_calibration = !m_calibration;
     }
 
-    // Initialize the Sendable that will log values to Shuffleboard in a nice little table for us
+    
     @Override
-    public void initSendable(SendableBuilder builder) {
-        builder.addDoubleProperty("Angle Rotations", () -> rightAngle.getEncoder().getPosition(), null);
-        builder.addDoubleProperty("Intake Speed", () -> intake.get(), null);
-        builder.addDoubleProperty("Conveyer Speed", () -> conveyor.get(), null);
+    public void periodic() {
+        /* Shuffleboard logging */
+        angleRotations.setDouble(rightAngle.getEncoder().getPosition());
+        intakeSpeed.setDouble(intake.get());
+        conveyorSpeed.setDouble(conveyor.get());
     }
 }

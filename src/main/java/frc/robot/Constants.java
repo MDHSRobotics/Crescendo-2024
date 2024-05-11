@@ -1,11 +1,12 @@
 package frc.robot;
 
+import frc.robot.generated.TunerConstants;
 
 public final class Constants {
     public static final double stickDeadband = 0.1;
 
     public class SwerveSpeedConstants {
-        public static final double MaxSpeed = 6; // 6 meters per second desired top speed
+        public static final double MaxSpeed = TunerConstants.kSpeedAt12VoltsMps;
         public static final double MaxAngularRate = 1.5 * Math.PI; // 3/4 of a rotation per second max angular velocity
     }
 

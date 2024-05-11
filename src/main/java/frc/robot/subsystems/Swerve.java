@@ -3,7 +3,9 @@ package frc.robot.subsystems;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
@@ -16,35 +18,91 @@ import com.pathplanner.lib.util.*;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.math.Aiming;
 import frc.robot.LimelightHelpers;
 import frc.robot.generated.TunerConstants;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.util.sendable.Sendable;
-import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.networktables.GenericEntry;
 
 /**
  * Class that extends the Phoenix SwerveDrivetrain class and implements subsystem
  * so it can be used in command-based projects easily.
  */
-public class Swerve extends SwerveDrivetrain implements Subsystem, Sendable {
+public class Swerve extends SwerveDrivetrain implements Subsystem {
     private boolean m_autoRotationOverride = false;
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
     
-    private double m_yawRate;
-    private double m_rawYawRate;
-
+    private CANcoder m_canCoder; // Temporary variable for finding kCoupleRatio. Remove after finished.
 
     private final SwerveRequest.ApplyChassisSpeeds AutoRequest = new SwerveRequest.ApplyChassisSpeeds();
+
+    private final SwerveRequest.SysIdSwerveTranslation TranslationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
+    private final SwerveRequest.SysIdSwerveRotation RotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
+    private final SwerveRequest.SysIdSwerveSteerGains SteerCharacterization = new SwerveRequest.SysIdSwerveSteerGains();
+
+    /* Routines for swerve characterization. Use one of these sysidroutines for your particular test */
+    private SysIdRoutine SysIdRoutineTranslation = new SysIdRoutine(
+            new SysIdRoutine.Config(
+                    null,
+                    Units.Volts.of(4),
+                    null,
+                    (state) -> SignalLogger.writeString("state", state.toString())),
+            new SysIdRoutine.Mechanism(
+                    (volts) -> setControl(TranslationCharacterization.withVolts(volts)),
+                    null,
+                    this));
+
+    private final SysIdRoutine SysIdRoutineRotation = new SysIdRoutine(
+            new SysIdRoutine.Config(
+                    null,
+                    Units.Volts.of(4),
+                    null,
+                    (state) -> SignalLogger.writeString("state", state.toString())),
+            new SysIdRoutine.Mechanism(
+                    (volts) -> setControl(RotationCharacterization.withVolts(volts)),
+                    null,
+                    this));
+    private final SysIdRoutine SysIdRoutineSteer = new SysIdRoutine(
+            new SysIdRoutine.Config(
+                    null,
+                    Units.Volts.of(7),
+                    null,
+                    (state) -> SignalLogger.writeString("state", state.toString())),
+            new SysIdRoutine.Mechanism(
+                    (volts) -> setControl(SteerCharacterization.withVolts(volts)),
+                    null,
+                    this));
+
+    /* Change this to the sysid routine you want to test */
+    private final SysIdRoutine RoutineToApply = SysIdRoutineTranslation;
+
+    /* Shuffleboard logging */
+    private ShuffleboardTab tab = Shuffleboard.getTab("Swerve");
+    private ShuffleboardLayout list = tab.getLayout("Kinematics+Odometry", BuiltInLayouts.kList).withSize(3, 4);
+    private GenericEntry xPosition = list.add("X Position", 0.0).getEntry();
+    private GenericEntry yPosition = list.add("Y Position", 0.0).getEntry();
+    private GenericEntry xVelocity = list.add("X Velocity", 0.0).getEntry();
+    private GenericEntry yVelocity = list.add("Y Velocity", 0.0).getEntry();
+    private GenericEntry yaw = list.add("Yaw", 0.0).getEntry();
+    private GenericEntry yawRate = list.add("Yaw Rate", 0.0).getEntry();
+    private GenericEntry rawYawRate = list.add("Raw Yaw Rate", 0.0).getEntry();
+    private GenericEntry driveWheelRotations = tab.add("Drive Wheel Rotations", 0.0).withSize(2, 1).getEntry();
+
 
     public Swerve(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency, SwerveModuleConstants... modules) {
         super(driveTrainConstants, OdometryUpdateFrequency, modules);
@@ -52,6 +110,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem, Sendable {
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        m_canCoder = getModule(0).getCANcoder(); // Temporary variable for finding kCoupleRatio. Remove after finished.
     }
     public Swerve(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
         super(driveTrainConstants, modules);
@@ -59,6 +118,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem, Sendable {
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        m_canCoder = getModule(0).getCANcoder(); // Temporary variable for finding kCoupleRatio. Remove after finished.
     }
 
     private void configurePathPlanner() {
@@ -90,6 +150,17 @@ public class Swerve extends SwerveDrivetrain implements Subsystem, Sendable {
         PPHolonomicDriveController.setRotationTargetOverride(this::getRotationTargetOverride);
     }
 
+    /*
+     * Both the sysid commands are specific to one particular sysid routine, change
+     * which one you're trying to characterize
+     */
+    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+        return RoutineToApply.quasistatic(direction);
+    }
+
+    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+        return RoutineToApply.dynamic(direction);
+    }
 
     /* The following are callbacks needed for the Path Planner Auto Builder */
     public Pose2d getPose() {
@@ -101,15 +172,19 @@ public class Swerve extends SwerveDrivetrain implements Subsystem, Sendable {
     }
 
     private ChassisSpeeds getRobotRelativeSpeeds(){
+        SwerveDriveState currentState = getState();
+        SwerveModuleState[] moduleStates = currentState.ModuleStates;
+        // moduleStates will be null when the robot is not enabled, so construct SwerveModuleStates with zeros for speed and angle.
+        if (moduleStates == null) {
+            moduleStates = new SwerveModuleState[4];
+            for (byte i = 0; i < moduleStates.length; i++) {
+                moduleStates[i] = new SwerveModuleState();
+            }
+        }
 
-        //return m_kinematics.toChassisSpeeds(getState().ModuleStates);
-
-         SwerveDriveState currentState = getState();
-         SwerveModuleState [] moduleStates = currentState.ModuleStates;
-
-         ChassisSpeeds chassisSpeeds = m_kinematics.toChassisSpeeds(moduleStates);
+        ChassisSpeeds chassisSpeeds = m_kinematics.toChassisSpeeds(moduleStates);
          
-         // System.out.println("Getting current robot speeds " + chassisSpeeds.toString());
+        //System.out.println("Getting current robot speeds " + chassisSpeeds.toString());
 
         return chassisSpeeds;
     }
@@ -144,9 +219,9 @@ public class Swerve extends SwerveDrivetrain implements Subsystem, Sendable {
         return run(() -> this.setControl(requestSupplier.get()));
     }
 
-    public double getAngle(){
+    public double getRobotYaw(){
         // System.out.println(m_odometry.getEstimatedPosition().getRotation().getDegrees());
-        return m_odometry.getEstimatedPosition().getRotation().getDegrees();
+        return getPose().getRotation().getDegrees();
     }
 
     public Optional<Rotation2d> getRotationTargetOverride(){
@@ -165,30 +240,28 @@ public class Swerve extends SwerveDrivetrain implements Subsystem, Sendable {
         m_autoRotationOverride = override;
     }
 
-    public void updatePose() {
-        // Update yaw for Limelight Megatag2
-        double yaw = getAngle();
-        m_yawRate = Math.toDegrees(getRobotRelativeSpeeds().omegaRadiansPerSecond);
-        m_rawYawRate = m_pigeon2.getRate(); // Megatag2 comes with its own latency compensation, so we use raw instead.
-        LimelightHelpers.SetRobotOrientation("", yaw, m_rawYawRate, 0.0, 0.0, 0.0, 0.0);
+
+    @Override
+    public void periodic() {
+        /* Shuffleboard logging */
+        xPosition.setDouble(getPose().getX());
+        yPosition.setDouble(getPose().getY());
+        xVelocity.setDouble(getRobotRelativeSpeeds().vxMetersPerSecond);
+        yVelocity.setDouble(getRobotRelativeSpeeds().vyMetersPerSecond);
+        yaw.setDouble(getRobotYaw());
+        yawRate.setDouble(Math.toDegrees(getRobotRelativeSpeeds().omegaRadiansPerSecond));
+        rawYawRate.setDouble(m_pigeon2.getRate());
+        driveWheelRotations.setDouble(m_canCoder.getPositionSinceBoot().getValueAsDouble());
+
+        /* Update yaw for Limelight Megatag2 */
+        // Megatag2 comes with its own latency compensation, so we use raw instead.
+        LimelightHelpers.SetRobotOrientation("", yaw.getDouble(0.0), rawYawRate.getDouble(0.0), 0.0, 0.0, 0.0, 0.0);
         
         /* Add Limelight Bot Pose to Pose Estimation */
         LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("");
-        if((limelightMeasurement.tagCount >= 1) && (Math.abs(m_yawRate) < 720)) { // if our angular velocity is greater than 720 degrees per second, ignore vision updates
+        if((limelightMeasurement.tagCount >= 1) && (Math.abs(yawRate.getDouble(0.0)) < 720)) { // if our angular velocity is greater than 720 degrees per second, ignore vision updates
             setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
             addVisionMeasurement(limelightMeasurement.pose, limelightMeasurement.timestampSeconds);
         }
-    }
-
-    // Initialize the Sendable that will log values to Shuffleboard in a nice little table for us
-    @Override
-    public void initSendable(SendableBuilder builder){
-        builder.addDoubleProperty("X Position", () -> getPose().getX(), null);
-        builder.addDoubleProperty("Y Position", () -> getPose().getY(), null);
-        builder.addDoubleProperty("X Velocity", () -> getRobotRelativeSpeeds().vxMetersPerSecond, null);
-        builder.addDoubleProperty("Y Velocity", () -> getRobotRelativeSpeeds().vyMetersPerSecond, null);
-        builder.addDoubleProperty("Yaw", () -> getAngle(), null);
-        builder.addDoubleProperty("Yaw Rate", () -> m_yawRate, null);
-        builder.addDoubleProperty("Raw Yaw Rate", () -> m_rawYawRate, null);
     }
 }

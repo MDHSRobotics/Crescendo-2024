@@ -1,5 +1,7 @@
 package frc.robot;
 
+import com.ctre.phoenix6.SignalLogger;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -49,7 +51,7 @@ public class Robot extends TimedRobot {
         // and puts our autonomous chooser on the dashboard.
         m_robotContainer = new RobotContainer();
 
-        //Pathweaver.intializeTrajectories();
+        SignalLogger.setPath("/logs");
     }
 
     /**
@@ -78,6 +80,7 @@ public class Robot extends TimedRobot {
     @Override
     public void disabledInit() {
         //Logger.ending("Disabling Robot...");
+        SignalLogger.stop();
 
         CommandScheduler.getInstance().cancelAll();
     }
@@ -108,18 +111,16 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void autonomousPeriodic() {
-        m_robotContainer.logData();
     }
 
     @Override
     public void teleopInit() {
         //Logger.setup("Initializing Teleop Mode...");
 
-        // Set subsystem "teleop" default commands
-        //BotSubsystems.setTeleopDefaultCommands();
-        RobotContainer.kAlliance = DriverStation.getAlliance().orElse(Alliance.Blue);
-
-        LimelightHelpers.setPipelineIndex("", RobotContainer.kAlliance == Alliance.Blue ? 1 : 0);
+        // Use a different limelight pipeline depending on alliance.
+        // Only necessary in Orange County Regionals, where the lights make Apriltags hard to see.
+        // RobotContainer.kAlliance = DriverStation.getAlliance().orElse(Alliance.Blue);
+        // LimelightHelpers.setPipelineIndex("", RobotContainer.kAlliance == Alliance.Blue ? 1 : 0);
 
         CommandScheduler.getInstance().cancelAll();
     }
@@ -132,7 +133,6 @@ public class Robot extends TimedRobot {
         // Configure all controllers
         //BotControllers.configure();
         //RobotManager.botShuffler.update();
-        m_robotContainer.logData();
     }
 
     @Override
@@ -158,7 +158,6 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void testPeriodic() {
-        m_robotContainer.logData();
     }
 
 }

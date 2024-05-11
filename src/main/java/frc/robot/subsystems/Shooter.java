@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
 
 import java.util.Map;
 
@@ -9,10 +10,11 @@ import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.IdleMode;
 
 import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.ComplexWidget;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.revrobotics.CANSparkLowLevel.MotorType;
@@ -32,13 +34,26 @@ public class Shooter extends SubsystemBase{
 
   private SparkPIDController m_pidController;
 
-  /* Shuffleboard */
+  private RelativeEncoder m_angleEncoder;
+
+  private boolean m_calibration = false;
+  private double m_lastAngle = 23;
+
+  /* Shuffleboard Logging */
   private ShuffleboardTab tab = Shuffleboard.getTab("Shooter");
 
   private ComplexWidget cameraView =
     tab.addCamera("Limelight", "limelight", "10.41.41.11:5800")
       .withWidget(BuiltInWidgets.kCameraStream)
       .withSize(4, 4);
+
+  private ShuffleboardLayout list = tab.getLayout("Shooter Info", BuiltInLayouts.kList).withSize(3, 4);
+  private GenericEntry bottomShooterSpeed = list.add("Bottom Shooter Speed", 0.0).getEntry();
+  private GenericEntry topShooterSpeed = list.add("Top Shooter Speed", 0.0).getEntry();
+  private GenericEntry feederSpeed = list.add("Feeder Speed", 0.0).getEntry();
+  private GenericEntry angleRotations = list.add("Angle Rotations", 0.0).getEntry();
+  private GenericEntry tx = list.add("Limelight TX", 0.0).getEntry();
+  private GenericEntry ty = list.add("Limelight TY", 0.0).getEntry();
 
   private GenericEntry shootSpeedTopAdjustment =
     tab.add("Top Shooter Speed Multiplier", 1)
@@ -86,16 +101,15 @@ public class Shooter extends SubsystemBase{
     .add("Ready", false)
     .withSize(4, 4)
     .getEntry();
-  
-  private boolean m_calibration = false;
-  private boolean m_movingAngle = false;
-  private double m_lastAngle = 23;
+
 
   public Shooter(){
     topShooter = new CANSparkFlex(ShooterConstants.kTopID, MotorType.kBrushless);
     bottomShooter = new CANSparkFlex(ShooterConstants.kBottomID, MotorType.kBrushless);
     angle = new CANSparkFlex(ShooterConstants.kAngleRightID, MotorType.kBrushless);
     feeder = new CANSparkMax(ShooterConstants.kFeederID, MotorType.kBrushless);
+
+    m_angleEncoder = angle.getEncoder();
 
     m_pidController = angle.getPIDController();
     m_pidController.setP(0.1);
@@ -124,9 +138,9 @@ public class Shooter extends SubsystemBase{
   }
 
   public void rotateShooter(double angleSpeed){
-    if(!m_calibration){
+    if (!m_calibration) {
       setAngle(23 - 3.5);
-    }else{
+    } else {
       angle.set(angleSpeed);
     }
     // Update the calculated angle so it doesn't appear to be aiming
@@ -143,7 +157,7 @@ public class Shooter extends SubsystemBase{
           LimelightConstants.kLimelightLensHeightInches, 
           LimelightConstants.kSpeakerTagHeight,
           LimelightConstants.kLimelightMountAngleDegrees,
-          LimelightHelpers.getTY(""));
+          ty.getDouble(0.0));
       
       // adjust the distances
       double adjustedDistance = horizontalDistance + LimelightConstants.kLimelightPivotHorizontalDistance - LimelightConstants.kSpeakerHorizontal;
@@ -163,15 +177,12 @@ public class Shooter extends SubsystemBase{
   }
 
   public void setAngle(double targetAngle){
-    //Calculate angle to rotations
+    // Calculate angle to rotations
     double rotations = ShooterConstants.kDegreesToRotationsConversion * (targetAngle - ShooterConstants.kBottomMeasureAngle);
 
     //Set the rotations
     if (rotations > -45.8 && rotations < 0){
       m_pidController.setReference(rotations, CANSparkMax.ControlType.kPosition);
-      m_movingAngle = true;
-    } else {
-      m_movingAngle = false;
     }
 
     /* Logging */
@@ -199,26 +210,23 @@ public class Shooter extends SubsystemBase{
     return (LimelightHelpers.getFiducialID("") == 4 || LimelightHelpers.getFiducialID("") == 7);
   }
 
-  public void logData(){
+
+  @Override
+  public void periodic() {
+    /* Shuffleboard logging */
+    // List data
+    bottomShooterSpeed.setDouble(bottomShooter.get());
+    topShooterSpeed.setDouble(topShooter.get());
+    feederSpeed.setDouble(feeder.get());
+    angleRotations.setDouble(m_angleEncoder.getPosition());
+    tx.setDouble(LimelightHelpers.getTX(""));
+    ty.setDouble(LimelightHelpers.getTY(""));
+
+    // Widget data
     atSpeed.setBoolean(topShooter.getEncoder().getVelocity() < -3800);
     isAtAngle.setBoolean(isAtAngle());
     seeTag.setBoolean(tagInSight());
     txCorrect.setBoolean(Aiming.approximatelyEqual(LimelightHelpers.getTX(""), 0, 2.5));
     ready.setBoolean(isReady());
   }
-  
-
-  // Initialize the Sendable that will log values to Shuffleboard in a nice little table for us
-  @Override
-  public void initSendable(SendableBuilder builder) {
-    // Log shooter info
-    builder.addDoubleProperty("Bottom Shooter Speed", () -> bottomShooter.get(), null);
-    builder.addDoubleProperty("Top Shooter Speed", () -> topShooter.get(), null);
-    builder.addDoubleProperty("Feeder Speed", () -> feeder.get(), null);
-    builder.addDoubleProperty("Angle Rotations", () -> angle.getEncoder().getPosition(), null);
-    builder.addDoubleProperty("Limelight TX", () -> LimelightHelpers.getTX(""), null);
-    builder.addDoubleProperty("Limelight TY", () -> LimelightHelpers.getTX(""), null);
-    builder.addBooleanProperty("Moving Shooter Angle", () -> m_movingAngle, null);
-  }
-
 }

@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.math.Aiming;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.SwerveSpeedConstants;
@@ -70,8 +71,8 @@ public class RobotContainer {
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
 
-    // Set up telemetry. Disabled until we need Swerve module states.
-    // private final Telemetry logger = new Telemetry(SwerveSpeedConstants.MaxSpeed);
+    // Set up telemetry.
+    private final Telemetry logger = new Telemetry(SwerveSpeedConstants.MaxSpeed);
 
     /* Auto Chooser */
     private final SendableChooser<Command> autoChooser;
@@ -96,8 +97,7 @@ public class RobotContainer {
             );
         }
 
-        // Disabled until we need Swerve module states.
-        // s_Swerve.registerTelemetry(logger::telemeterize);
+        s_Swerve.registerTelemetry(logger::telemeterize);
 
         if (Utils.isSimulation()) {
             s_Swerve.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
@@ -158,13 +158,6 @@ public class RobotContainer {
         NamedCommands.registerCommand("Intake Up", 
             s_Intake.runOnce(() -> s_Intake.topPosition(0))
         );
-        
-
-        /* Add Subsystem Sendable tables to Shuffleboard */
-        Shuffleboard.getTab("Swerve").add("Kinematics + Odometry", s_Swerve).withSize(2, 2);
-        Shuffleboard.getTab("Shooter").add("Shooter Info", s_Shooter).withSize(3, 3);
-        Shuffleboard.getTab("Climb").add("Climb Info", s_Climb).withSize(3, 2);
-        Shuffleboard.getTab("Intake").add("Intake Info", s_Intake).withSize(3, 2);
 
         /* Auto Chooser */
         autoChooser = AutoBuilder.buildAutoChooser(); // Default auto will be `Commands.none()`
@@ -204,7 +197,7 @@ public class RobotContainer {
         driverController.cross().whileTrue(s_Swerve.applyRequest(() -> brake).withInterruptBehavior(InterruptionBehavior.kCancelSelf));
 
         // Reset the field-centric heading on left bumper press. For pose estimation to start working again, drive to an Apriltag.
-        driverController.options().onTrue(s_Swerve.runOnce(() -> s_Swerve.seedFieldRelative()));
+        // driverController.options().onTrue(s_Swerve.runOnce(() -> s_Swerve.seedFieldRelative()));
 
         // LED communication
         driverController.povUp().onTrue(s_Led.run(() -> s_Led.blink(0, 0, 255, 400)).withTimeout(5)); // Coopertition
@@ -218,6 +211,12 @@ public class RobotContainer {
 
         driverController.R2().onTrue(s_Swerve.runOnce(() -> m_slowMode = false));
         driverController.L2().onTrue(s_Swerve.runOnce(() -> m_slowMode = true));
+
+        // SysId Controls
+        driverController.touchpad().and(driverController.povUp()).whileTrue(s_Swerve.sysIdDynamic(Direction.kForward));
+        driverController.touchpad().and(driverController.povUp()).whileTrue(s_Swerve.sysIdDynamic(Direction.kReverse));
+        driverController.options().and(driverController.povUp()).whileTrue(s_Swerve.sysIdQuasistatic(Direction.kForward));
+        driverController.options().and(driverController.povUp()).whileTrue(s_Swerve.sysIdQuasistatic(Direction.kReverse));
     }
 
     private void configureOperatorButtonBindings() {
@@ -258,7 +257,7 @@ public class RobotContainer {
                     s_Swerve.applyRequest(() -> driveFacingAngle
                         .withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
                         .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
-                        .withTargetDirection(Rotation2d.fromDegrees(s_Swerve.getAngle() - LimelightHelpers.getTX("")))),
+                        .withTargetDirection(Rotation2d.fromDegrees(s_Swerve.getRobotYaw() - LimelightHelpers.getTX("")))),
                         
                     s_Shooter.run(() -> s_Shooter.setAngleFromLimelight())
                 )
@@ -396,10 +395,5 @@ public class RobotContainer {
 
     public void setStartingPosition(Pose2d startingPosition){
         s_Swerve.seedFieldRelative(startingPosition);
-    }
-
-    public void logData() {
-        s_Swerve.updatePose();
-        s_Shooter.logData();
     }
 }
