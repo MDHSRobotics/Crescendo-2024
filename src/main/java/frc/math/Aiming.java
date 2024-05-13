@@ -12,19 +12,18 @@ import edu.wpi.first.math.numbers.N3;
 
 public class Aiming {
 
-    private static Translation3d m_BlueSpeakerPosition = new Translation3d(0.25, 5.55, 2.0431125);
-
     /* Pose Estimation Aiming Methods */
     /**
+     * @param targetPose The 3D position of the target (found in PoseConstants)
      * @param robotPose The current robot pose given by the swerve subsystem
      * @return The new robot yaw as a Rotation2d that points the robot at the speaker.
      */
-    public static Rotation2d getYaw(Pose2d robotPose) {
-        // Find the yaw of the vector
+    public static Rotation2d getYaw(Translation3d goalPose, Pose2d robotPose) {
+        // Find the yaw of the vector between the two points
         Translation3d robotTranslation = new Translation3d(
-            m_BlueSpeakerPosition.getX() - robotPose.getX(),
-            m_BlueSpeakerPosition.getY() - robotPose.getY(),
-            m_BlueSpeakerPosition.getZ() - ShooterConstants.kPivotHeightM); // The x, y, and z distance to the speaker
+            goalPose.getX() - robotPose.getX(),
+            goalPose.getY() - robotPose.getY(),
+            goalPose.getZ() - ShooterConstants.kPivotHeightM); // The x, y, and z distance to the speaker
         Vector<N3> facingSpeakerVector = robotTranslation.toVector();
         Rotation3d robotRotation = new Rotation3d(facingSpeakerVector);
         Rotation2d robotYaw = new Rotation2d(robotRotation.getZ());
@@ -32,20 +31,21 @@ public class Aiming {
     }
 
     /**
+     * @param targetPose The 3D position of the target, given by the swerve subsystem
      * @param robotPose The current robot pose given by the swerve subsystem
      * @return The new shooter pitch in degrees that points the shooter at the speaker.
      */
-    public static double getPitch(Pose2d robotPose) {
-        // Must find the (x,y) coordinate of the shooter's pivot point first. If you need to draw this out, go to https://www.desmos.com/calculator/1hg0vdgcf4
+    public static double getPitch(Translation3d goalPose, Pose2d robotPose) {
+        // Must find the (x,y) coordinate of the shooter's pivot point first. If you need to draw this out to understand, go to https://www.desmos.com/calculator/1hg0vdgcf4
         double robotHeading = robotPose.getRotation().getRadians();
         double xCorrection = ShooterConstants.kPivotDistanceM * Math.cos(Math.PI + robotHeading);
         double yCorrection = ShooterConstants.kPivotDistanceM * Math.sin(Math.PI + robotHeading);
 
         // Find the pitch of the vector
         Translation3d robotTranslation = new Translation3d(
-            m_BlueSpeakerPosition.getX() - (robotPose.getX() + xCorrection),
-            m_BlueSpeakerPosition.getY() - (robotPose.getY() + yCorrection),
-            m_BlueSpeakerPosition.getZ() - ShooterConstants.kPivotHeightM); // The x, y, and z distance to the speaker
+            goalPose.getX() - (robotPose.getX() + xCorrection),
+            goalPose.getY() - (robotPose.getY() + yCorrection),
+            goalPose.getZ() - ShooterConstants.kPivotHeightM); // The x, y, and z distance to the speaker
         Vector<N3> facingSpeakerVector = robotTranslation.toVector();
         Rotation3d robotRotation = new Rotation3d(facingSpeakerVector);
         return Math.toDegrees(robotRotation.getY());

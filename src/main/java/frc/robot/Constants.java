@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Translation3d;
 import frc.robot.generated.TunerConstants;
 
 public final class Constants {
@@ -34,6 +35,12 @@ public final class Constants {
         public static final double kSpeakerHeight = 86.0; // h2
         public static final double kSpeakerHorizontal = 9.0; // l2
 
+    }
+
+    public class PoseConstants {
+        // 3D position of each speaker opening in meters
+        public static final Translation3d kBlueSpeakerPosition = new Translation3d(0.25, 5.55, 2.0431125);
+        public static final Translation3d kRedSpeakerPosition = new Translation3d(16.3, 5.55, 2.0431125);
     }
 
     public class ShooterConstants {

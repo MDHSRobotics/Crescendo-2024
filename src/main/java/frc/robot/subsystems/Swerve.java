@@ -32,6 +32,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.math.Aiming;
 import frc.robot.LimelightHelpers;
+import frc.robot.Constants.PoseConstants;
 import frc.robot.generated.TunerConstants;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -224,11 +225,21 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         return getPose().getRotation().getDegrees();
     }
 
+    /**
+     * @return The new robot yaw as a Rotation2d that points the robot at the speaker.
+     */
+    public Rotation2d getTargetYaw() {
+        if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue) { // If blue alliance:
+            return Aiming.getYaw(PoseConstants.kBlueSpeakerPosition, getPose());
+        }
+        return Aiming.getYaw(PoseConstants.kRedSpeakerPosition, getPose());
+    }
+
     public Optional<Rotation2d> getRotationTargetOverride(){
         // Some condition that should decide if we want to override rotation
         if(m_autoRotationOverride) {
             // Return an optional containing the rotation override (this should be a field relative rotation)
-            return Optional.of(Aiming.getYaw(getPose()));
+            return Optional.of(getTargetYaw());
         } else {
             // return an empty optional when we don't want to override the path's rotation
             return Optional.empty();

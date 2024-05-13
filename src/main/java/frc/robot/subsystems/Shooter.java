@@ -9,7 +9,10 @@ import com.revrobotics.CANSparkFlex;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.IdleMode;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.ComplexWidget;
@@ -23,6 +26,7 @@ import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 import frc.math.Aiming;
 import frc.robot.LimelightHelpers;
 import frc.robot.Constants.LimelightConstants;
+import frc.robot.Constants.PoseConstants;
 import frc.robot.Constants.ShooterConstants;
 
 public class Shooter extends SubsystemBase{
@@ -78,27 +82,28 @@ public class Shooter extends SubsystemBase{
       .withSize(2, 1)
       .getEntry();
       
-  private GenericEntry adjustment = Shuffleboard.getTab("Main")
-    .add("Adjustment Angle", 4)
+  private ShuffleboardTab mainTab = Shuffleboard.getTab("Main");
+  private GenericEntry adjustment = 
+    mainTab.add("Adjustment Angle", 4)
     .getEntry();
-  private GenericEntry atSpeed = Shuffleboard.getTab("Main")
-    .add("At Speed", false)
+  private GenericEntry atSpeed =
+    mainTab.add("At Speed", false)
     .withSize(2, 2)
     .getEntry();
-  private GenericEntry isAtAngle = Shuffleboard.getTab("Main")
-    .add("At Angle", false)
+  private GenericEntry isAtAngle =
+    mainTab.add("At Angle", false)
     .withSize(2, 2)
     .getEntry();
-  private GenericEntry seeTag = Shuffleboard.getTab("Main")
-    .add("Sees Tag ", false)
+  private GenericEntry seeTag =
+    mainTab.add("Sees Tag ", false)
     .withSize(2, 2)
     .getEntry();
-  private GenericEntry txCorrect = Shuffleboard.getTab("Main")
-    .add("TX Correct", false)
+  private GenericEntry txCorrect =
+    mainTab.add("TX Correct", false)
     .withSize(2, 2)
     .getEntry();
-  private GenericEntry ready = Shuffleboard.getTab("Main")
-    .add("Ready", false)
+  private GenericEntry ready =
+    mainTab.add("Ready", false)
     .withSize(4, 4)
     .getEntry();
 
@@ -170,10 +175,29 @@ public class Shooter extends SubsystemBase{
       setAngle(Math.toDegrees(angle) + adjustment.getDouble(0));
       m_lastAngle = Math.toDegrees(Math.toDegrees(angle) + adjustment.getDouble(0));
       
+      /* Logging */
       calculatedDistance.setDouble(horizontalDistance);
     } else {
       setAngle(m_lastAngle);
     }
+  }
+
+  /** 
+    * Angles the shooter to a target based on the given position.
+    * @param robotPose The current robot pose given by the swerve subsystem
+    */
+  public void setAngleFromPose(Pose2d robotPose) {
+    double targetPitch;
+
+    // Calculate the angle based on alliance
+    if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue) { // If blue alliance:
+      targetPitch = Aiming.getPitch(PoseConstants.kBlueSpeakerPosition, robotPose);
+    } else {
+      targetPitch = Aiming.getPitch(PoseConstants.kRedSpeakerPosition, robotPose);
+    }
+
+    // Set the angle
+    setAngle(targetPitch);
   }
 
   public void setAngle(double targetAngle){

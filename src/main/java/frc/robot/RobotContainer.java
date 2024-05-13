@@ -144,7 +144,7 @@ public class RobotContainer {
 
         NamedCommands.registerCommand("Auto Aim",
             s_Swerve.runOnce(() -> s_Swerve.setAutoRotationOverride(true))
-            .andThen(s_Shooter.run(() -> s_Shooter.setAngle(Aiming.getPitch(s_Swerve.getPose()))))
+            .andThen(s_Shooter.run(() -> s_Shooter.setAngleFromPose(s_Swerve.getPose())))
         );
 
         NamedCommands.registerCommand("Stop Shooter", 
@@ -273,9 +273,9 @@ public class RobotContainer {
                 s_Swerve.applyRequest(() -> driveFacingAngle
                     .withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
                     .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
-                    .withTargetDirection(Aiming.getYaw(s_Swerve.getPose()))),
+                    .withTargetDirection(s_Swerve.getTargetYaw())),
                         
-                s_Shooter.run(() -> s_Shooter.setAngle(Aiming.getPitch(s_Swerve.getPose())))
+                s_Shooter.run(() -> s_Shooter.setAngleFromPose(s_Swerve.getPose()))
             ).until(() -> Math.abs(driverController.getRightX()) > 0.1)
         );
         // When it locks on speaker, set shoot mode to speaker instead of amp
