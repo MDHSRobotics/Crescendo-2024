@@ -22,7 +22,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.math.Aiming;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.SwerveSpeedConstants;
 import frc.robot.generated.TunerConstants;
