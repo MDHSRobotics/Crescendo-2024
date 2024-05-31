@@ -111,6 +111,7 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void autonomousPeriodic() {
+        m_robotContainer.logSubsystemData();
     }
 
     @Override
@@ -130,9 +131,7 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void teleopPeriodic() {
-        // Configure all controllers
-        //BotControllers.configure();
-        //RobotManager.botShuffler.update();
+        m_robotContainer.logSubsystemData();
     }
 
     @Override
@@ -158,6 +157,7 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void testPeriodic() {
+        m_robotContainer.logSubsystemData();
     }
 
 }

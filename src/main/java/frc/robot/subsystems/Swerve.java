@@ -43,18 +43,19 @@ import edu.wpi.first.networktables.GenericEntry;
  * so it can be used in command-based projects easily.
  */
 public class Swerve extends SwerveDrivetrain implements Subsystem {
-    private boolean m_autoRotationOverride = false;
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
+
+    private boolean m_autoRotationOverride = false;
     
     private CANcoder m_canCoder; // Temporary variable for finding kCoupleRatio. Remove after finished.
-
+    
     private final SwerveRequest.ApplyChassisSpeeds AutoRequest = new SwerveRequest.ApplyChassisSpeeds();
 
     private final SwerveRequest.SysIdSwerveTranslation TranslationCharacterization = new SwerveRequest.SysIdSwerveTranslation(); // Driving forward
-    private final SwerveRequest.SysIdSwerveRotation RotationCharacterization = new SwerveRequest.SysIdSwerveRotation(); // Rotating robot
-    private final SwerveRequest.SysIdSwerveSteerGains SteerCharacterization = new SwerveRequest.SysIdSwerveSteerGains(); // Rotating wheels only
+    // private final SwerveRequest.SysIdSwerveRotation RotationCharacterization = new SwerveRequest.SysIdSwerveRotation(); // Rotating robot
+    // private final SwerveRequest.SysIdSwerveSteerGains SteerCharacterization = new SwerveRequest.SysIdSwerveSteerGains(); // Rotating wheels only
 
     /* Routines for swerve characterization. Use one of these sysidroutines for your particular test */
     private SysIdRoutine SysIdRoutineTranslation = new SysIdRoutine(
@@ -68,26 +69,26 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
                     null,
                     this));
 
-    private final SysIdRoutine SysIdRoutineRotation = new SysIdRoutine(
-            new SysIdRoutine.Config(
-                    null,
-                    Units.Volts.of(4),
-                    null,
-                    (state) -> SignalLogger.writeString("state", state.toString())),
-            new SysIdRoutine.Mechanism(
-                    (volts) -> setControl(RotationCharacterization.withVolts(volts)),
-                    null,
-                    this));
-    private final SysIdRoutine SysIdRoutineSteer = new SysIdRoutine(
-            new SysIdRoutine.Config(
-                    null,
-                    Units.Volts.of(7),
-                    null,
-                    (state) -> SignalLogger.writeString("state", state.toString())),
-            new SysIdRoutine.Mechanism(
-                    (volts) -> setControl(SteerCharacterization.withVolts(volts)),
-                    null,
-                    this));
+    // private final SysIdRoutine SysIdRoutineRotation = new SysIdRoutine(
+    //         new SysIdRoutine.Config(
+    //                 null,
+    //                 Units.Volts.of(4),
+    //                 null,
+    //                 (state) -> SignalLogger.writeString("state", state.toString())),
+    //         new SysIdRoutine.Mechanism(
+    //                 (volts) -> setControl(RotationCharacterization.withVolts(volts)),
+    //                 null,
+    //                 this));
+    // private final SysIdRoutine SysIdRoutineSteer = new SysIdRoutine(
+    //         new SysIdRoutine.Config(
+    //                 null,
+    //                 Units.Volts.of(7),
+    //                 null,
+    //                 (state) -> SignalLogger.writeString("state", state.toString())),
+    //         new SysIdRoutine.Mechanism(
+    //                 (volts) -> setControl(SteerCharacterization.withVolts(volts)),
+    //                 null,
+    //                 this));
 
     /* Change this to the sysid routine you want to test */
     private final SysIdRoutine RoutineToApply = SysIdRoutineTranslation;
@@ -175,13 +176,6 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     private ChassisSpeeds getRobotRelativeSpeeds(){
         SwerveDriveState currentState = getState();
         SwerveModuleState[] moduleStates = currentState.ModuleStates;
-        // moduleStates will be null when the robot is not enabled, so construct SwerveModuleStates with zeros for speed and angle.
-        if (moduleStates == null) {
-            moduleStates = new SwerveModuleState[4];
-            for (byte i = 0; i < moduleStates.length; i++) {
-                moduleStates[i] = new SwerveModuleState();
-            }
-        }
 
         ChassisSpeeds chassisSpeeds = m_kinematics.toChassisSpeeds(moduleStates);
          
@@ -252,9 +246,9 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     }
 
 
-    @Override
-    public void periodic() {
-        /* Shuffleboard logging */
+    /* Shuffleboard logging. We avoid overriding periodic() because it runs even when the robot is disabled. */
+    public void logData() {
+        // Subsystem data
         xPosition.setDouble(getPose().getX());
         yPosition.setDouble(getPose().getY());
         xVelocity.setDouble(getRobotRelativeSpeeds().vxMetersPerSecond);
@@ -265,7 +259,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         driveWheelRotations.setDouble(m_canCoder.getPositionSinceBoot().getValueAsDouble());
 
         /* Update yaw for Limelight Megatag2 */
-        // Megatag2 comes with its own latency compensation, so we use raw instead.
+        // Megatag2 comes with its own latency compensation, so we use raw yaw rate instead.
         LimelightHelpers.SetRobotOrientation("", yaw.getDouble(0.0), rawYawRate.getDouble(0.0), 0.0, 0.0, 0.0, 0.0);
         
         /* Add Limelight Bot Pose to Pose Estimation */
@@ -275,4 +269,5 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
             addVisionMeasurement(limelightMeasurement.pose, limelightMeasurement.timestampSeconds);
         }
     }
+
 }

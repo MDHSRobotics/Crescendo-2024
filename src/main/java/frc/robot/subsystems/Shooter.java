@@ -235,10 +235,9 @@ public class Shooter extends SubsystemBase{
   }
 
 
-  @Override
-  public void periodic() {
-    /* Shuffleboard logging */
-    // List data
+  /* Shuffleboard logging. We avoid overriding periodic() because it runs even when the robot is disabled. */
+  public void logData() {
+    // Listed data
     bottomShooterSpeed.setDouble(bottomShooter.get());
     topShooterSpeed.setDouble(topShooter.get());
     feederSpeed.setDouble(feeder.get());

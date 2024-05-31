@@ -39,8 +39,9 @@ public class Climb extends SubsystemBase{
     }
 
 
-    @Override
-    public void periodic() {
+    /* Shuffleboard logging. We avoid overriding periodic() because it runs even when the robot is disabled. */
+    public void logData() {
+        // Subsystem data
         leftRotations.setDouble(leftClimb.getEncoder().getPosition());
         rightRotations.setDouble(rightClimb.getEncoder().getPosition());
     }

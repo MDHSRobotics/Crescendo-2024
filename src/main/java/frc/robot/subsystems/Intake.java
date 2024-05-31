@@ -123,9 +123,9 @@ public class Intake extends SubsystemBase{
     }
 
     
-    @Override
-    public void periodic() {
-        /* Shuffleboard logging */
+    /* Shuffleboard logging. We avoid overriding periodic() because it runs even when the robot is disabled. */
+    public void logData() {
+        // Subsystem data
         angleRotations.setDouble(rightAngle.getEncoder().getPosition());
         intakeSpeed.setDouble(intake.get());
         conveyorSpeed.setDouble(conveyor.get());

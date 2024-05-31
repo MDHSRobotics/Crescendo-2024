@@ -395,4 +395,11 @@ public class RobotContainer {
     public void setStartingPosition(Pose2d startingPosition){
         s_Swerve.seedFieldRelative(startingPosition);
     }
+
+    public void logSubsystemData() {
+        s_Swerve.logData();
+        s_Shooter.logData();
+        s_Intake.logData();
+        s_Climb.logData();
+    }
 }
