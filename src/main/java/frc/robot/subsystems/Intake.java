@@ -78,6 +78,8 @@ public class Intake extends SubsystemBase{
         conveyor.setOpenLoopRampRate(0.1);
 
         leftAngle.follow(rightAngle, true);
+        
+        conveyor.setInverted(true);
     }
 
     
@@ -97,19 +99,19 @@ public class Intake extends SubsystemBase{
         m_pidController.setReference(intakeBottomRotations.getDouble(0), CANSparkMax.ControlType.kPosition);
         
         intake.set(1.0);
-        conveyor.set(-1.0);
+        conveyor.set(1.0);
     }
 
     public void midPosition(){
         m_pidController.setReference(intakeMidPositions.getDouble(0), CANSparkMax.ControlType.kPosition);
 
         intake.set(1.0);
-        conveyor.set(-1.0);
+        conveyor.set(1.0);
     }
 
     public void spitOut(){
         intake.set(-1);
-        conveyor.set(1);
+        conveyor.set(-1);
     }
     
     
