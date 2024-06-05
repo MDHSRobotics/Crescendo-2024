@@ -112,14 +112,23 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         if (Utils.isSimulation()) {
             startSimThread();
         }
+
+        // Set the pose estimator's trust of poses from the Limelight
+        setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
+        
         m_canCoder = getModule(0).getCANcoder(); // Temporary variable for finding kCoupleRatio. Remove after finished.
     }
+    
     public Swerve(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
         super(driveTrainConstants, modules);
         configurePathPlanner();
         if (Utils.isSimulation()) {
             startSimThread();
         }
+
+        // Set the pose estimator's trust of poses from the Limelight
+        setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
+        
         m_canCoder = getModule(0).getCANcoder(); // Temporary variable for finding kCoupleRatio. Remove after finished.
     }
 
@@ -265,7 +274,6 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         /* Add Limelight Bot Pose to Pose Estimation */
         LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("");
         if((limelightMeasurement.tagCount >= 1) && (Math.abs(yawRate.getDouble(0.0)) < 720)) { // if our angular velocity is greater than 720 degrees per second, ignore vision updates
-            setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
             addVisionMeasurement(limelightMeasurement.pose, limelightMeasurement.timestampSeconds);
         }
     }
