@@ -264,7 +264,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         yVelocity.setDouble(getRobotRelativeSpeeds().vyMetersPerSecond);
         yaw.setDouble(getRobotYaw());
         yawRate.setDouble(Math.toDegrees(getRobotRelativeSpeeds().omegaRadiansPerSecond));
-        rawYawRate.setDouble(m_pigeon2.getRate());
+        rawYawRate.setDouble(-m_pigeon2.getRate()); // Negative so that counterclockwise is positive like getRobotRelativeSpeeds().omegaRadiansPerSecond
         driveWheelRotations.setDouble(m_canCoder.getPositionSinceBoot().getValueAsDouble());
 
         /* Update yaw for Limelight Megatag2 */
