@@ -2,6 +2,7 @@ package frc.math;
 
 import java.lang.Math;
 
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -25,8 +26,9 @@ public class Aiming {
             goalPose.getY() - robotPose.getY(),
             goalPose.getZ() - ShooterConstants.kPivotHeightM); // The x, y, and z distance to the speaker
         Vector<N3> facingSpeakerVector = robotTranslation.toVector();
-        Rotation3d robotRotation = new Rotation3d(facingSpeakerVector);
+        Rotation3d robotRotation = new Rotation3d(VecBuilder.fill(0, 0, 0), facingSpeakerVector); // Rotation from forward to facing the speaker.
         Rotation2d robotYaw = new Rotation2d(robotRotation.getZ());
+
         return robotYaw;
     }
 
@@ -47,7 +49,8 @@ public class Aiming {
             goalPose.getY() - (robotPose.getY() + yCorrection),
             goalPose.getZ() - ShooterConstants.kPivotHeightM); // The x, y, and z distance to the speaker
         Vector<N3> facingSpeakerVector = robotTranslation.toVector();
-        Rotation3d robotRotation = new Rotation3d(facingSpeakerVector);
+        Rotation3d robotRotation = new Rotation3d(VecBuilder.fill(0, 0, 0), facingSpeakerVector); // Rotation from forward to facing the speaker.
+        
         return Math.toDegrees(robotRotation.getY());
     }
 
