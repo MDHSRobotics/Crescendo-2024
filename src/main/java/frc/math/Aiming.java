@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import frc.robot.Constants.PoseConstants;
 import frc.robot.Constants.ShooterConstants;
 import edu.wpi.first.math.numbers.N3;
 
@@ -26,7 +27,7 @@ public class Aiming {
             goalPose.getY() - robotPose.getY(),
             goalPose.getZ() - ShooterConstants.kPivotHeightM); // The x, y, and z distance to the speaker
         Vector<N3> facingSpeakerVector = robotTranslation.toVector();
-        Rotation3d robotRotation = new Rotation3d(VecBuilder.fill(0, 0, 0), facingSpeakerVector); // Rotation from forward to facing the speaker.
+        Rotation3d robotRotation = new Rotation3d(PoseConstants.facingForwardVector, facingSpeakerVector); // Rotation from forward to facing the speaker.
         Rotation2d robotYaw = new Rotation2d(robotRotation.getZ());
 
         return robotYaw;
@@ -49,7 +50,7 @@ public class Aiming {
             goalPose.getY() - (robotPose.getY() + yCorrection),
             goalPose.getZ() - ShooterConstants.kPivotHeightM); // The x, y, and z distance to the speaker
         Vector<N3> facingSpeakerVector = robotTranslation.toVector();
-        Rotation3d robotRotation = new Rotation3d(VecBuilder.fill(0, 0, 0), facingSpeakerVector); // Rotation from forward to facing the speaker.
+        Rotation3d robotRotation = new Rotation3d(PoseConstants.facingForwardVector, facingSpeakerVector); // Rotation from forward to facing the speaker.
         
         return Math.toDegrees(robotRotation.getY());
     }

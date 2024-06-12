@@ -1,6 +1,9 @@
 package frc.robot;
 
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.numbers.N3;
 import frc.robot.generated.TunerConstants;
 
 public final class Constants {
@@ -38,6 +41,9 @@ public final class Constants {
     }
 
     public class PoseConstants {
+        // Initial vector of the robot orientation, representing a robot with no rotation.
+        public static final Vector<N3> facingForwardVector = VecBuilder.fill(1, 0, 0);
+
         // 3D position of each speaker opening in meters
         public static final Translation3d kBlueSpeakerPosition = new Translation3d(0.25, 5.55, 2.0431125);
         public static final Translation3d kRedSpeakerPosition = new Translation3d(16.3, 5.55, 2.0431125);
