@@ -44,13 +44,12 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void robotInit() {
-        //Logger.setup("Initializing Robot...");
-
         // Initialize our RobotManager, which initializes and perists the state of the robot,
         // including flags, sensors, devices, subsystems, commands, shuffleboard,
         // and puts our autonomous chooser on the dashboard.
         m_robotContainer = new RobotContainer();
 
+        // Set the log path for SysId
         SignalLogger.setPath("/logs");
     }
 
@@ -68,9 +67,6 @@ public class Robot extends TimedRobot {
         // and running subsystem periodic() methods.  This must be called from the robot's periodic
         // block in order for anything in the Command-based framework to work.
         CommandScheduler.getInstance().run();
-
-        // Update the Shuffleboard
-        //RobotManager.botShuffler.update();
         
     }
 
@@ -79,7 +75,7 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void disabledInit() {
-        //Logger.ending("Disabling Robot...");
+        // Stop logging SysId
         SignalLogger.stop();
 
         CommandScheduler.getInstance().cancelAll();
@@ -94,7 +90,6 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void autonomousInit() {
-        //Logger.setup("Initializing Autonomous Mode...");
         m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
         CommandScheduler.getInstance().cancelAll();
@@ -116,8 +111,6 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-        //Logger.setup("Initializing Teleop Mode...");
-
         // Use a different limelight pipeline depending on alliance.
         // Only necessary in Orange County Regionals, where the lights make Apriltags hard to see.
         // RobotContainer.kAlliance = DriverStation.getAlliance().orElse(Alliance.Blue);
@@ -136,8 +129,6 @@ public class Robot extends TimedRobot {
 
     @Override
     public void testInit() {
-        //Logger.setup("Initializing Test Mode...");
-
         // Use a different limelight pipeline depending on alliance.
         // Only necessary in Orange County Regionals, where the lights make Apriltags hard to see.
         // RobotContainer.kAlliance = DriverStation.getAlliance().orElse(Alliance.Blue);
@@ -147,9 +138,6 @@ public class Robot extends TimedRobot {
         m_robotContainer.setStartingPosition(new Pose2d(0.48, 4.09, new Rotation2d()));
 
         CommandScheduler.getInstance().cancelAll();
-
-        // Re-enable the scheduler
-        CommandScheduler.getInstance().enable();
     }
 
     /**
