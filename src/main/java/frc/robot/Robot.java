@@ -75,7 +75,7 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void disabledInit() {
-        // Stop logging SysId
+        // Stop logging for SysId
         SignalLogger.stop();
 
         CommandScheduler.getInstance().cancelAll();
@@ -138,6 +138,9 @@ public class Robot extends TimedRobot {
         m_robotContainer.setStartingPosition(new Pose2d(0.48, 4.09, new Rotation2d()));
 
         CommandScheduler.getInstance().cancelAll();
+
+        // Start logging for SysId
+        SignalLogger.start();
     }
 
     /**
