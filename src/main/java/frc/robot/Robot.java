@@ -9,6 +9,8 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.math.Aiming;
+import frc.robot.Constants.PoseConstants;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -48,6 +50,11 @@ public class Robot extends TimedRobot {
 
         // Set the log path for SysId
         SignalLogger.setPath("/logs");
+
+        // Unit test for getYaw (should be ~45) and getPitch (should be 180), remove when finished
+        Pose2d inFrontOfSpeakerPose = new Pose2d(1.9787875, 5.55, new Rotation2d());
+        System.out.println(Aiming.getYaw(PoseConstants.kBlueSpeakerPosition, inFrontOfSpeakerPose).getDegrees());
+        System.out.println(Aiming.getPitch(PoseConstants.kBlueSpeakerPosition, inFrontOfSpeakerPose));
     }
 
     /**
