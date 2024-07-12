@@ -11,7 +11,9 @@ public final class Constants {
 
     public class SwerveSpeedConstants {
         public static final double MaxSpeed = TunerConstants.kSpeedAt12VoltsMps;
-        public static final double MaxAngularRate = 1.5 * Math.PI; // 3/4 of a rotation per second max angular velocity
+        // https://www.chiefdelphi.com/t/how-to-calculate-the-max-free-speed-of-a-swerve/400741/3
+        // https://study.com/skill/learn/converting-angular-speed-from-revolutions-per-second-to-radians-per-second-explanation.html#:~:text=Steps%20for%20Converting%20Angular%20Speed,r%20a%20d%201%20revolution%20.
+        public static final double MaxAngularRate = 11.89;
     }
 
     public class LimelightConstants {
