@@ -231,15 +231,24 @@ public class RobotContainer {
         // Run intake
         operatorController.rightTrigger().toggleOnTrue(
             s_Intake.startEnd(() -> s_Intake.bottomPosition(), () -> {})
-            .alongWith(s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, -0.7), () -> {})));
+            .alongWith(
+                s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, -0.7),
+                () -> s_Shooter.runShooter(0, 0, 0))
+            ));
 
         operatorController.leftTrigger().toggleOnTrue(
             s_Intake.startEnd(() -> s_Intake.midPosition(), () -> {})
-            .alongWith(s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, -0.7), () -> {})));
+            .alongWith(
+                s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, -0.7),
+                () -> s_Shooter.runShooter(0, 0, 0))
+            ));
 
         operatorController.back().toggleOnTrue(
             s_Intake.startEnd(() -> s_Intake.spitOut(), () -> {})
-            .alongWith(s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, 1.0), () -> {})));
+            .alongWith(
+                s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, 1.0),
+                () -> s_Shooter.runShooter(0, 0, 0))
+            ));
 
 
         // Lock on to speaker (using limelight)
