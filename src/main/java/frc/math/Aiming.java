@@ -51,7 +51,9 @@ public class Aiming {
         Vector<N3> facingSpeakerVector = robotTranslation.toVector();
         Rotation3d robotRotation = new Rotation3d(PoseConstants.facingForwardVector, facingSpeakerVector); // Rotation from forward to facing the speaker.
         
-        return Math.toDegrees(robotRotation.getY());
+        // We take the negative because we want the clockwise angle.
+        // https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html#wpilib-coordinate-system
+        return -Math.toDegrees(robotRotation.getY());
     }
 
     /* Limelight Aiming Methods */

@@ -151,7 +151,6 @@ public class Shooter extends SubsystemBase{
     // Update the calculated angle so it doesn't appear to be aiming
     calculatedAngle.setDouble(0);
     calculatedRotations.setDouble(0);
-    calculatedAngle.setDouble(0);
   }
 
   //adjust the angle of the shooter
