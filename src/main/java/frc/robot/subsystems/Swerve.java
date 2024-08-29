@@ -102,7 +102,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     private GenericEntry yVelocity = list.add("Y Velocity", 0.0).getEntry();
     private GenericEntry yaw = list.add("Yaw", 0.0).getEntry();
     private GenericEntry yawRate = list.add("Yaw Rate", 0.0).getEntry();
-    private GenericEntry rawYawRate = list.add("Raw Yaw Rate", 0.0).getEntry();
+    //private GenericEntry rawYawRate = list.add("Raw Yaw Rate", 0.0).getEntry();
     private GenericEntry driveWheelRotations = tab.add("Drive Wheel Rotations", 0.0).withSize(2, 1).getEntry();
 
 
@@ -264,12 +264,11 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         yVelocity.setDouble(getRobotRelativeSpeeds().vyMetersPerSecond);
         yaw.setDouble(getRobotYaw());
         yawRate.setDouble(Math.toDegrees(getRobotRelativeSpeeds().omegaRadiansPerSecond));
-        rawYawRate.setDouble(-m_pigeon2.getRate()); // Negative so that counterclockwise is positive like getRobotRelativeSpeeds().omegaRadiansPerSecond
+        //rawYawRate.setDouble(-m_pigeon2.getRate()); // Negative so that counterclockwise is positive like getRobotRelativeSpeeds().omegaRadiansPerSecond
         driveWheelRotations.setDouble(m_canCoder.getPositionSinceBoot().getValueAsDouble());
 
         /* Update yaw for Limelight Megatag2 */
-        // Megatag2 comes with its own latency compensation, so we use raw yaw rate instead.
-        LimelightHelpers.SetRobotOrientation("", yaw.getDouble(0.0), rawYawRate.getDouble(0.0), 0.0, 0.0, 0.0, 0.0);
+        LimelightHelpers.SetRobotOrientation("", yaw.getDouble(0.0), yawRate.getDouble(0.0), 0.0, 0.0, 0.0, 0.0);
         
         /* Add Limelight Bot Pose to Pose Estimation */
         LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("");
