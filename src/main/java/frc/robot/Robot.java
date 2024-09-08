@@ -9,8 +9,6 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.math.Aiming;
-import frc.robot.Constants.PoseConstants;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -74,10 +72,10 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void disabledInit() {
+        CommandScheduler.getInstance().cancelAll();
+
         // Stop logging for SysId
         SignalLogger.stop();
-
-        CommandScheduler.getInstance().cancelAll();
     }
 
     @Override
@@ -89,9 +87,9 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void autonomousInit() {
-        m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-
         CommandScheduler.getInstance().cancelAll();
+
+        m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
         // Schedule the autonomous command
         if (m_autonomousCommand != null) {
@@ -110,12 +108,14 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
+        CommandScheduler.getInstance().cancelAll();
+
         // Use a different limelight pipeline depending on alliance.
         // Only necessary in Orange County Regionals, where the lights make Apriltags hard to see.
-        // RobotContainer.kAlliance = DriverStation.getAlliance().orElse(Alliance.Blue);
-        // LimelightHelpers.setPipelineIndex("", RobotContainer.kAlliance == Alliance.Blue ? 1 : 0);
+        LimelightHelpers.setPipelineIndex("", m_robotContainer.kAlliance == Alliance.Blue ? 1 : 0);
 
-        CommandScheduler.getInstance().cancelAll();
+        // Set the starting perspective for driving.
+        m_robotContainer.setOperatorPerspective(Rotation2d.fromDegrees(m_robotContainer.kAlliance == Alliance.Blue ? 0 : 180));
     }
 
     /**
@@ -128,15 +128,18 @@ public class Robot extends TimedRobot {
 
     @Override
     public void testInit() {
+        CommandScheduler.getInstance().cancelAll();
+        
         // Use a different limelight pipeline depending on alliance.
         // Only necessary in Orange County Regionals, where the lights make Apriltags hard to see.
         // RobotContainer.kAlliance = DriverStation.getAlliance().orElse(Alliance.Blue);
         // LimelightHelpers.setPipelineIndex("", RobotContainer.kAlliance == Alliance.Blue ? 1 : 0);
 
-        // Sets a starting pose for pose estimation to right below the Speaker. Open this project in PathPlanner for more starting positions.
+        // Sets a starting pose for pose estimation to right below the Speaker. Only useful for testing without megatag2. Open this project in PathPlanner for more starting positions.
         m_robotContainer.setStartingPosition(new Pose2d(0.48, 4.09, new Rotation2d()));
 
-        CommandScheduler.getInstance().cancelAll();
+        // Set the starting perspective for driving.
+        m_robotContainer.setOperatorPerspective(Rotation2d.fromDegrees(m_robotContainer.kAlliance == Alliance.Blue ? 0 : 180));
 
         // Start logging for SysId
         SignalLogger.start();

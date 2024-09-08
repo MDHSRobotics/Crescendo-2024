@@ -40,7 +40,6 @@ public class Shooter extends SubsystemBase{
 
   private RelativeEncoder m_angleEncoder;
 
-  private boolean m_calibration = false;
   private double m_lastAngle = 23;
 
   /* Shuffleboard Logging */
@@ -143,11 +142,8 @@ public class Shooter extends SubsystemBase{
   }
 
   public void rotateShooter(double angleSpeed){
-    if (!m_calibration) {
-      setAngle(23 - 3.5);
-    } else {
-      angle.set(angleSpeed);
-    }
+    angle.set(angleSpeed);
+
     // Update the calculated angle so it doesn't appear to be aiming
     calculatedAngle.setDouble(0);
     calculatedRotations.setDouble(0);
@@ -170,15 +166,13 @@ public class Shooter extends SubsystemBase{
       // calculate the angle
       double angle = Aiming.getPitch(adjustedDistance, heightDifference);
 
-      // set the angle
-      setAngle(Math.toDegrees(angle) + adjustment.getDouble(0));
+      // Update the angle
       m_lastAngle = Math.toDegrees(Math.toDegrees(angle) + adjustment.getDouble(0));
       
       /* Logging */
       calculatedDistance.setDouble(horizontalDistance);
-    } else {
-      setAngle(m_lastAngle);
     }
+    setAngle(m_lastAngle, true);
   }
 
   /** 
@@ -196,10 +190,10 @@ public class Shooter extends SubsystemBase{
     }
 
     // Set the angle
-    setAngle(targetPitch);
+    setAngle(targetPitch, true);
   }
 
-  public void setAngle(double targetAngle){
+  public void setAngle(double targetAngle, boolean isAngleCalculated){
     // Calculate angle to rotations
     double rotations = ShooterConstants.kDegreesToRotationsConversion * (targetAngle - ShooterConstants.kBottomMeasureAngle);
 
@@ -209,20 +203,19 @@ public class Shooter extends SubsystemBase{
     }
 
     /* Logging */
-    calculatedAngle.setDouble(targetAngle);
     calculatedRotations.setDouble(rotations);
+
+    if (isAngleCalculated) {
+      calculatedAngle.setDouble(targetAngle);
+    } else {
+      // Update the calculated values so it doesn't appear to be aiming
+      calculatedAngle.setDouble(0);
+      calculatedDistance.setDouble(0);
+    }
   }
 
   public void resetEncoders(){
     angle.getEncoder().setPosition(0);
-  }
-
-  public void setCalibration(){
-    m_calibration = !m_calibration;
-  }
-
-  public boolean isReady(){
-    return tagInSight() && atSpeed.getBoolean(false) && isAtAngle.getBoolean(false) && txCorrect.getBoolean(false);
   }
 
   public boolean isAtAngle(){
@@ -233,6 +226,9 @@ public class Shooter extends SubsystemBase{
     return (LimelightHelpers.getFiducialID("") == 4 || LimelightHelpers.getFiducialID("") == 7);
   }
 
+  public boolean isReady(){
+    return tagInSight() && atSpeed.getBoolean(false) && isAtAngle.getBoolean(false) && txCorrect.getBoolean(false);
+  }
 
   /* Shuffleboard logging. We avoid overriding periodic() because it runs even when the robot is disabled. */
   public void logData() {

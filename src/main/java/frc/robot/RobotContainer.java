@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -76,12 +77,19 @@ public class RobotContainer {
     /* Auto Chooser */
     private final SendableChooser<Command> autoChooser;
 
-    /* Robot Modes */
+    /* Robot States */
     private boolean m_slowMode = false;
     private boolean m_isAmp = false;
     private boolean m_autoshoot = false;
 
-    public static Alliance kAlliance;
+    /* Robot State Triggers */
+    private Trigger shooterLimitSwitchPressed = new Trigger(shooterLimitSwitch::get);
+    private Trigger isAmp = new Trigger(() -> m_isAmp);
+    private Trigger shooterIsReady = new Trigger(s_Shooter::isReady);
+    private Trigger autoshootEnabled = new Trigger(() -> m_autoshoot);
+    private Trigger tagIsInSight = new Trigger(s_Shooter::tagInSight);
+
+    public Alliance kAlliance;
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
@@ -92,7 +100,7 @@ public class RobotContainer {
                     s_Swerve.applyRequest(() -> drive
                         .withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Forward and backward speed
                         .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Left and right speed
-                        .withRotationalRate(-driverController.getRightX() * SwerveSpeedConstants.MaxAngularRate * (m_slowMode ? 1.0 : 1.0))) // Rotation speed
+                        .withRotationalRate(-driverController.getRightX() * SwerveSpeedConstants.MaxAngularRate * (m_slowMode ? 0.2 : 1.0))) // Rotation speed
             );
         }
 
@@ -102,22 +110,28 @@ public class RobotContainer {
             s_Swerve.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
         }
 
-        if (operatorController != null) {
-            s_Shooter.setDefaultCommand(
-                s_Shooter.run(() -> s_Shooter.rotateShooter(operatorController.getRightY()))
-            );
+        s_Shooter.setDefaultCommand(
+            // Turn off shooter and move to bottom position
+            s_Shooter.runOnce(() -> s_Shooter.runShooter(0, 0, 0))
+            .andThen(
+                s_Shooter.startEnd(() -> s_Shooter.setAngle(19.5, false), () -> {})
+            )
+        );
 
-            s_Intake.setDefaultCommand(
-                s_Intake.run(() -> s_Intake.topPosition(operatorController.getLeftY()))
-            );
-        }
+        s_Intake.setDefaultCommand(
+            // Turn off intake and move to top position
+            s_Intake.runOnce(() -> s_Intake.runIntake(0, 0))
+            .andThen(
+                s_Intake.startEnd(() -> s_Intake.topPosition(), () -> {})
+            )
+        );
 
         s_Led.setDefaultCommand(
             s_Led.run(()-> s_Led.rainbow())
         );
 
         // LEDs glow orange for 3 secs whenever a note is picked up.
-        new Trigger(shooterLimitSwitch::get).onTrue(s_Led.run(() -> s_Led.setColor(255, 20, 0)).withTimeout(3));
+        shooterLimitSwitchPressed.onTrue(s_Led.run(() -> s_Led.setColor(255, 20, 0)).withTimeout(3));
 
         s_Climb.setDefaultCommand(
             s_Climb.runOnce((() -> s_Climb.runClimb(0,0)))
@@ -155,12 +169,15 @@ public class RobotContainer {
         );
 
         NamedCommands.registerCommand("Intake Up", 
-            s_Intake.runOnce(() -> s_Intake.topPosition(0))
+            s_Intake.runOnce(() -> s_Intake.topPosition())
         );
 
         /* Auto Chooser */
         autoChooser = AutoBuilder.buildAutoChooser(); // Default auto will be `Commands.none()`
         Shuffleboard.getTab("Main").add("Select your Auto:", autoChooser).withSize(2, 1);
+
+        // Save the current alliance for future use.
+        kAlliance = DriverStation.getAlliance().orElse(Alliance.Blue);
     }
 
     /**
@@ -203,10 +220,10 @@ public class RobotContainer {
         driverController.povDown().onTrue(s_Led.run(() -> s_Led.blink(255, 255, 0, 1000)).withTimeout(5)); // Amplify
         
         // Climb
-        driverController.L1().whileTrue(s_Climb.startEnd(() -> s_Climb.runClimb(-1, -1), () -> {}).until(climbLimitSwitch::get));
+        driverController.L1().and(climbLimitSwitch::get).whileTrue(s_Climb.startEnd(() -> s_Climb.runClimb(-1, -1), () -> {}));
         driverController.R1().whileTrue(s_Climb.startEnd(() -> s_Climb.runClimb(1, 1), () -> {}));
         driverController.square().whileTrue(s_Climb.startEnd(() -> s_Climb.runClimb(1, 0), () -> {}));
-        driverController.povRight().whileTrue(s_Climb.startEnd(() -> s_Climb.runClimb(0, 1), () -> {}));
+        driverController.triangle().whileTrue(s_Climb.startEnd(() -> s_Climb.runClimb(0, 1), () -> {}));
 
         driverController.R2().onTrue(s_Swerve.runOnce(() -> m_slowMode = false));
         driverController.L2().onTrue(s_Swerve.runOnce(() -> m_slowMode = true));
@@ -228,137 +245,170 @@ public class RobotContainer {
             Please update this link whenever you change a button.
         */
         
-        // Run intake
+        // Run intake at bottom position
         operatorController.rightTrigger().toggleOnTrue(
-            s_Intake.startEnd(() -> s_Intake.bottomPosition(), () -> {})
-            .alongWith(
-                s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, -0.7),
-                () -> s_Shooter.runShooter(0, 0, 0))
-            ));
+            Commands.parallel(
+                Commands.sequence(
+                    s_Intake.runOnce(() -> s_Intake.runIntake(1, 1)),
+                    s_Intake.runOnce(() -> s_Intake.bottomPosition())
+                ),
+                s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, -0.7), () -> {})
+            )
+        );
 
+        // Run intake at mid position
         operatorController.leftTrigger().toggleOnTrue(
-            s_Intake.startEnd(() -> s_Intake.midPosition(), () -> {})
-            .alongWith(
-                s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, -0.7),
-                () -> s_Shooter.runShooter(0, 0, 0))
-            ));
+            Commands.parallel(
+                Commands.sequence(
+                    s_Intake.runOnce(() -> s_Intake.runIntake(1, 1)),
+                    s_Intake.runOnce(() -> s_Intake.midPosition())
+                ),
+                s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, -0.7), () -> {})
+            )
+        );
 
+        // Eject note from intake
         operatorController.back().toggleOnTrue(
-            s_Intake.startEnd(() -> s_Intake.spitOut(), () -> {})
-            .alongWith(
-                s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, 1.0),
-                () -> s_Shooter.runShooter(0, 0, 0))
-            ));
+            Commands.parallel(
+                Commands.sequence(
+                    s_Intake.runOnce(() -> s_Intake.midPosition()),
+                    s_Intake.runOnce(() -> s_Intake.runIntake(-1, -1))
+                ),
+                s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, 1), () -> {})
+            )
+        );
 
 
         // Lock on to speaker (using limelight)
-        operatorController.x()
-        .toggleOnTrue(
-            Commands.sequence(
-                // Tuck note into shooter and then ramp up
-                s_Shooter.startEnd(() -> 
-                    s_Shooter.runShooter(-0.2, -0.2, 0.5), () ->
-                    s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, 0))
+        operatorController.x().toggleOnTrue(
+            Commands.parallel(
+                s_Swerve.applyRequest(() -> driveFacingAngle
+                    .withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
+                    .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
+                    .withTargetDirection(Rotation2d.fromDegrees(s_Swerve.getRobotYaw() - LimelightHelpers.getTX("")))),
+
+                Commands.sequence(
+                    // Set firing mode to speaker
+                    s_Shooter.runOnce(() -> m_isAmp = false),
+                    // Rev up the shooter
+                    s_Shooter.startEnd(() -> 
+                        s_Shooter.runShooter(-0.2, -0.2, 0.5), () ->
+                        s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, 0))
                     .withTimeout(0.05),
 
-                Commands.parallel(
-                    s_Swerve.applyRequest(() -> driveFacingAngle
-                        .withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
-                        .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
-                        .withTargetDirection(Rotation2d.fromDegrees(s_Swerve.getRobotYaw() - LimelightHelpers.getTX("")))),
-                        
+                    // Angle the shooter
                     s_Shooter.run(() -> s_Shooter.setAngleFromLimelight())
                 )
             ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
         );
-        // When it locks on speaker, set shoot mode to speaker instead of amp
-        operatorController.x().onTrue(s_Shooter.runOnce(() -> m_isAmp = false));
         
         // Lock on to speaker (using pose estimation)
-        operatorController.rightStick()
-        .toggleOnTrue(
+        operatorController.rightStick().toggleOnTrue(
             Commands.parallel(
                 s_Swerve.applyRequest(() -> driveFacingAngle
                     .withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
                     .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
                     .withTargetDirection(s_Swerve.getTargetYaw())),
-                        
-                s_Shooter.run(() -> s_Shooter.setAngleFromPose(s_Swerve.getPose()))
-            ).until(() -> Math.abs(driverController.getRightX()) > 0.1)
+
+                Commands.sequence(
+                    // Set firing mode to speaker
+                    s_Shooter.runOnce(() -> m_isAmp = false),
+                    // Rev up the shooter
+                    s_Shooter.startEnd(() -> 
+                        s_Shooter.runShooter(-0.2, -0.2, 0.5), () ->
+                        s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, 0))
+                    .withTimeout(0.05),
+
+                    // Angle the shooter
+                    s_Shooter.run(() -> s_Shooter.setAngleFromPose(s_Swerve.getPose()))
+                )
+            ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
         );
-        // When it locks on speaker, set shoot mode to speaker instead of amp
-        operatorController.rightStick().onTrue(s_Shooter.runOnce(() -> m_isAmp = false));
 
         // Set angle to amp
-        operatorController.b()
-        .toggleOnTrue(
-                s_Shooter.startEnd(() -> s_Shooter.setAngle(52.0), () -> {})
-            .alongWith(
+        operatorController.b().toggleOnTrue(
+            Commands.parallel(
+                Commands.sequence(
+                    s_Shooter.runOnce(() -> m_isAmp = true),
+                    s_Shooter.startEnd(() -> s_Shooter.setAngle(52.0, false), () -> {})
+                ),
+
                 s_Led.startEnd(() -> s_Led.setColor(255, 0, 0), () -> {})
             )
         );
-        // When it sets the angle to amp, set shoot mode to amp as well
-        operatorController.b().onTrue(s_Shooter.runOnce(() -> m_isAmp = true));
-       
 
-        // Shoot Speaker
-        operatorController.a()
-        .and(new Trigger(() -> !m_isAmp))
+        // Toggle Auto Shoot
+        operatorController.leftStick().onTrue(
+            s_Shooter.runOnce(() -> m_autoshoot = !m_autoshoot)
+        );
+
+
+        // Shoot in amp or speaker, depending on the amp angle mode
+        operatorController.a().onTrue(
+            Commands.either(
+                Commands.sequence(
+                    // Tuck note into shooter
+                    s_Shooter.startEnd(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), () -> {})
+                    .withTimeout(0.05),
+                    // Ramp up
+                    s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.ampTopSpeed, ShooterConstants.ampBottomSpeed, 0), () -> {})
+                    .withTimeout(1.0),
+                    // Shoot into amp
+                    s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.ampTopSpeed, ShooterConstants.ampBottomSpeed, -0.5), () -> {})
+                    .withTimeout(0.2)
+                ),
+                
+                // Shoot into speaker
+                s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.5), () -> {})
+                .withTimeout(0.5),
+            isAmp)
+        );
+
+
+        // When the shooter is ready and autoshoot is enabled, then shoot
+        shooterIsReady
+        .and(autoshootEnabled)
         .onTrue(
-            // Shoot and then stop
-            s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.5), () -> 
-            s_Shooter.runShooter(0, 0, 0))
+            s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.5), () -> {})
             .withTimeout(0.5)
         );
 
-        new Trigger(s_Shooter::isReady)
-            .and(() -> m_autoshoot)
-            .onTrue(
-                s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.5), () -> 
-                s_Shooter.runShooter(0, 0, 0))
-                .withTimeout(0.5)
+        // When a tag is in sight but the shooter is not ready, blink the LEDs red
+        tagIsInSight
+        .and(shooterIsReady.negate())
+        .toggleOnTrue(
+            s_Led.run(() -> s_Led.blink(255, 0, 0, 300))
         );
 
-        new Trigger(s_Shooter::isReady)
-            .onTrue(
-                s_Led.startEnd(() -> s_Led.setColor(0, 255, 0), () -> {})
-                .until(() -> !s_Shooter.isReady())
-            );
-
-        new Trigger(() -> s_Shooter.tagInSight() && !s_Shooter.isReady())
-            .onTrue(
-                s_Led.run(() -> s_Led.blink(255, 0, 0, 300))
-                .until(() -> !s_Shooter.tagInSight())
-            );
-
-        // Shoot Amp
-        operatorController.a()
-            .and(new Trigger(() -> m_isAmp))
-            .onTrue(
-            Commands.sequence(
-                // Tuck note into shooter
-                s_Shooter.startEnd(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), () -> {}).withTimeout(0.05),
-                // Ramp up
-                s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.ampTopSpeed, ShooterConstants.ampBottomSpeed, 0), () -> {}).withTimeout(1.0),
-                // Shoot and then stop shooting
-                s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.ampTopSpeed, ShooterConstants.ampBottomSpeed, -0.5), () ->
-                s_Shooter.runShooter(0, 0, 0))
-                .withTimeout(0.2)
-            )
+        // When the shooter is ready, turn the LEDs green
+        shooterIsReady.toggleOnTrue(
+            s_Led.startEnd(() -> s_Led.setColor(0, 255, 0), () -> {})
         );
+
 
         // Calibration Mode
-        operatorController.povLeft().onTrue(
-            s_Shooter.runOnce(() -> s_Shooter.setCalibration())
-            .alongWith(
-                s_Intake.runOnce(() -> s_Intake.setCalibration())
+        operatorController.povLeft().toggleOnTrue(
+            Commands.parallel(
+                s_Shooter.run(() -> s_Shooter.rotateShooter(operatorController.getRightY())),
+                s_Intake.run(() -> s_Intake.rotateIntake(operatorController.getLeftY()))
             )
         );
-        // Recommended to only use this in calibration mode
+        // Only use this in calibration mode
         operatorController.povUp().onTrue(s_Shooter.runOnce(() -> s_Shooter.resetEncoders()));
         operatorController.povDown().onTrue(s_Intake.runOnce(() -> s_Intake.resetEncoders()));
 
-        // Manual Angle Modes
+        /* Manual Angle Buttons */
+        // Point Blank Shooting Angle
+        operatorController.rightBumper()
+            .onTrue(s_Shooter.runOnce(() -> m_isAmp = false)
+            .andThen(s_Shooter.startEnd(() -> s_Shooter.setAngle(51, false), () -> {})));
+
+        // Podium Shooting Angle
+        operatorController.leftBumper()
+            .onTrue(s_Shooter.runOnce(() -> m_isAmp = false)
+            .andThen(s_Shooter.startEnd(() -> s_Shooter.setAngle(36, false), () -> {})));
+
+        // Manual shoot
         operatorController.y().onTrue(
             Commands.sequence(
                 // Tuck note into shooter
@@ -366,30 +416,14 @@ public class RobotContainer {
                 // Ramp up
                 s_Shooter.startEnd(() -> s_Shooter.runShooter(0.5, 0.5, 0), () -> {}).withTimeout(1.0),
                 // Shoot
-                s_Shooter.startEnd(() -> s_Shooter.runShooter(0.5, 0.5, -0.5), () ->
-                    s_Shooter.runShooter(0, 0, 0))
-                    .withTimeout(0.5)
+                s_Shooter.startEnd(() -> s_Shooter.runShooter(0.5, 0.5, -0.5), () -> {})
+                .withTimeout(0.5)
             )
         );
 
-        operatorController.rightBumper()
-            .onTrue(s_Shooter.runOnce(() -> m_isAmp = false)
-            .andThen(s_Shooter.startEnd(() -> s_Shooter.setAngle(51), () -> {})));
-
-        operatorController.leftBumper()
-            .onTrue(s_Shooter.runOnce(() -> m_isAmp = false)
-            .andThen(s_Shooter.startEnd(() -> s_Shooter.setAngle(36), () -> {})));
-
 
         // Free a stuck note on the top of the robot
-        operatorController.start().whileTrue(s_Shooter.startEnd(() -> s_Shooter.runShooter(-1,-1,0), () -> 
-            s_Shooter.runShooter(0, 0, 0)));
-    }
-
-    public static double roundAvoid(double value, int places) {
-        double scale = Math.pow(10, places);
-        double newValue = Math.round(value * scale) / scale;
-        return newValue; 
+        operatorController.start().whileTrue(s_Shooter.startEnd(() -> s_Shooter.runShooter(-1,-1,0), () -> {}));
     }
 
     /**
@@ -401,8 +435,12 @@ public class RobotContainer {
         return autoChooser.getSelected();
     }
 
-    public void setStartingPosition(Pose2d startingPosition){
+    public void setStartingPosition(Pose2d startingPosition) {
         s_Swerve.seedFieldRelative(startingPosition);
+    }
+
+    public void setOperatorPerspective(Rotation2d fieldDirection) {
+        s_Swerve.setOperatorPerspectiveForward(fieldDirection);
     }
 
     public void logSubsystemData() {

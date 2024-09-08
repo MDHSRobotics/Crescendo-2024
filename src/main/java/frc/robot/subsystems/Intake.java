@@ -29,8 +29,6 @@ public class Intake extends SubsystemBase{
     private RelativeEncoder m_leftAngleEncoder;
     private RelativeEncoder m_rightAngleEncoder;
 
-    private boolean m_calibration = false;
-
     /* Shuffleboard Values */
     private ShuffleboardTab tab = Shuffleboard.getTab("Intake");
 
@@ -82,46 +80,31 @@ public class Intake extends SubsystemBase{
         conveyor.setInverted(true);
     }
 
-    
+    public void runIntake(double intakeSpeed, double conveyerSpeed) {
+        intake.set(intakeSpeed);
+        conveyor.set(conveyerSpeed);
+    }
 
-    public void topPosition(double power){
-        if(!m_calibration){
-            m_pidController.setReference(intakeTopRotations.getDouble(0), CANSparkMax.ControlType.kPosition);
-        }else{
-            rightAngle.set(power);
-        }
-        
-        intake.set(0.0);
-        conveyor.set(0.0);
+    public void rotateIntake(double angleSpeed) {
+        rightAngle.set(angleSpeed);
+    }
+
+    public void topPosition(){
+        m_pidController.setReference(intakeTopRotations.getDouble(0), CANSparkMax.ControlType.kPosition);
     }
 
     public void bottomPosition(){
         m_pidController.setReference(intakeBottomRotations.getDouble(0), CANSparkMax.ControlType.kPosition);
-        
-        intake.set(1.0);
-        conveyor.set(1.0);
     }
 
     public void midPosition(){
         m_pidController.setReference(intakeMidPositions.getDouble(0), CANSparkMax.ControlType.kPosition);
-
-        intake.set(1.0);
-        conveyor.set(1.0);
-    }
-
-    public void spitOut(){
-        intake.set(-1);
-        conveyor.set(-1);
     }
     
     
     public void resetEncoders(){
         m_leftAngleEncoder.setPosition(0);
         m_rightAngleEncoder.setPosition(0);
-    }
-
-    public void setCalibration(){
-        m_calibration = !m_calibration;
     }
 
     
