@@ -60,9 +60,12 @@ public final class Constants {
         public static final int kAngleRightID = 6;
         public static final int kFeederID = 7;
 
+        // Limit Switch ID
+        public static final int kLimitSwitchID = 0;
+
         //The max and min angles of the shooter in degrees
         public static final double kShooterMaxAngle = 90;
-        public static final double kShooterMinAngle = 20;
+        public static final double kShooterMinAngle = 19.5;
 
         // Height of the shooter from the ground in inches
         public static final double kPivotHeight = 12.375; //w1
@@ -100,11 +103,8 @@ public final class Constants {
         public static final int kLeftClimbMotorID = 1;
         public static final int kRightClimbMotorID = 2;
 
-        public static final int leftTopLimit = 0;
-        public static final int rightTopLimit = 0;
-        public static final int leftBottomLimit = 10;
-        public static final int rightBottomLimit = 10;
-
+        // Limit Switch ID
+        public static final int kLimitSwitchID = 2;
     }
 
     public class LEDConstants {

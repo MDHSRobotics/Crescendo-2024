@@ -18,19 +18,17 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.robot.Constants.ShooterConstants;
-import frc.robot.Constants.SwerveSpeedConstants;
+
+import frc.robot.Constants.*;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.Climb;
-import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.LED;
-import frc.robot.subsystems.Shooter;
-import frc.robot.subsystems.Swerve;
+import frc.robot.subsystems.*;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -55,8 +53,8 @@ public class RobotContainer {
     private final LED s_Led = new LED();
     
     /* Limit Switches */
-    DigitalInput shooterLimitSwitch = new DigitalInput(0);
-    DigitalInput climbLimitSwitch = new DigitalInput(2);
+    DigitalInput shooterLimitSwitch = new DigitalInput(ShooterConstants.kLimitSwitchID);
+    DigitalInput climbLimitSwitch = new DigitalInput(ClimbConstants.kLimitSwitchID);
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -84,10 +82,11 @@ public class RobotContainer {
 
     /* Robot State Triggers */
     private Trigger shooterLimitSwitchPressed = new Trigger(shooterLimitSwitch::get);
-    private Trigger isAmp = new Trigger(() -> m_isAmp);
+    private Trigger climbLimitSwitchPressed = new Trigger(climbLimitSwitch::get);
+    private Trigger ampModeActivated = new Trigger(() -> m_isAmp);
+    private Trigger tagIsInSight = new Trigger(s_Shooter::tagInSight);
     private Trigger shooterIsReady = new Trigger(s_Shooter::isReady);
     private Trigger autoshootEnabled = new Trigger(() -> m_autoshoot);
-    private Trigger tagIsInSight = new Trigger(s_Shooter::tagInSight);
 
     public Alliance kAlliance;
 
@@ -114,7 +113,7 @@ public class RobotContainer {
             // Turn off shooter and move to bottom position
             s_Shooter.runOnce(() -> s_Shooter.runShooter(0, 0, 0))
             .andThen(
-                s_Shooter.startEnd(() -> s_Shooter.setAngle(19.5, false), () -> {})
+                s_Shooter.startEnd(() -> s_Shooter.setAngle(ShooterConstants.kShooterMinAngle, false), () -> {})
             )
         );
 
@@ -130,53 +129,42 @@ public class RobotContainer {
             s_Led.run(()-> s_Led.rainbow())
         );
 
+        s_Climb.setDefaultCommand(
+            s_Climb.startEnd(() -> s_Climb.runClimb(0,0), () -> {})
+        );
+
+
+        /* Trigger-Activated Commands */
         // LEDs glow orange for 3 secs whenever a note is picked up.
         shooterLimitSwitchPressed.onTrue(s_Led.run(() -> s_Led.setColor(255, 20, 0)).withTimeout(3));
 
-        s_Climb.setDefaultCommand(
-            s_Climb.runOnce((() -> s_Climb.runClimb(0,0)))
+        // When a tag is in sight but the shooter is not ready, blink the LEDs red
+        tagIsInSight.and(shooterIsReady.negate()).toggleOnTrue(
+            s_Led.run(() -> s_Led.blink(255, 0, 0, 300))
         );
 
+        // When the shooter is ready and autoshoot is enabled, then shoot
+        shooterIsReady.and(autoshootEnabled).onTrue(
+            s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.5), () -> {})
+            .withTimeout(0.5)
+        );
+
+        // When the shooter is ready, turn the LEDs green
+        shooterIsReady.toggleOnTrue(
+            s_Led.startEnd(() -> s_Led.setColor(0, 255, 0), () -> {})
+        );
 
         // Configure the button bindings
         configureButtonBindings();
 
-
-        /* Named Auto Commands */
-        NamedCommands.registerCommand("Start Shooter",  
-            // Tuck the note into the shooter, and then ramp up
-            s_Shooter.startEnd(() -> 
-                s_Shooter.runShooter(-0.2, -0.2, 0.5), () -> 
-                s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, 0))
-            .withTimeout(0.05)
-        );
-
-        NamedCommands.registerCommand("Shoot",
-            s_Shooter.runOnce(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -1.0))
-        );
-
-        NamedCommands.registerCommand("Auto Aim",
-            s_Swerve.runOnce(() -> s_Swerve.setAutoRotationOverride(true))
-            .andThen(s_Shooter.run(() -> s_Shooter.setAngleFromPose(s_Swerve.getPose())))
-        );
-
-        NamedCommands.registerCommand("Stop Shooter", 
-            s_Shooter.runOnce(() -> s_Shooter.runShooter(0.0, 0.0, 0.0))
-        );
-
-        NamedCommands.registerCommand("Intake Down", 
-            s_Intake.runOnce(() -> s_Intake.bottomPosition())
-        );
-
-        NamedCommands.registerCommand("Intake Up", 
-            s_Intake.runOnce(() -> s_Intake.topPosition())
-        );
+        // Register the autonomous commands for Pathplanner
+        registerPathplannerCommands();
 
         /* Auto Chooser */
         autoChooser = AutoBuilder.buildAutoChooser(); // Default auto will be `Commands.none()`
         Shuffleboard.getTab("Main").add("Select your Auto:", autoChooser).withSize(2, 1);
 
-        // Save the current alliance for future use.
+        // Save the current alliance for use in Robot.java
         kAlliance = DriverStation.getAlliance().orElse(Alliance.Blue);
     }
 
@@ -213,6 +201,7 @@ public class RobotContainer {
         driverController.cross().whileTrue(s_Swerve.applyRequest(() -> brake).withInterruptBehavior(InterruptionBehavior.kCancelSelf));
 
         // Reset the field-centric heading on left bumper press. For pose estimation to start working again, drive to an Apriltag.
+        // Temporarily disabled until we verify Limelight measurements will work.
         // driverController.options().onTrue(s_Swerve.runOnce(() -> s_Swerve.seedFieldRelative()));
 
         // LED communication
@@ -220,13 +209,13 @@ public class RobotContainer {
         driverController.povDown().onTrue(s_Led.run(() -> s_Led.blink(255, 255, 0, 1000)).withTimeout(5)); // Amplify
         
         // Climb
-        driverController.L1().and(climbLimitSwitch::get).whileTrue(s_Climb.startEnd(() -> s_Climb.runClimb(-1, -1), () -> {}));
+        driverController.L1().and(climbLimitSwitchPressed).whileTrue(s_Climb.startEnd(() -> s_Climb.runClimb(-1, -1), () -> {}));
         driverController.R1().whileTrue(s_Climb.startEnd(() -> s_Climb.runClimb(1, 1), () -> {}));
         driverController.square().whileTrue(s_Climb.startEnd(() -> s_Climb.runClimb(1, 0), () -> {}));
         driverController.triangle().whileTrue(s_Climb.startEnd(() -> s_Climb.runClimb(0, 1), () -> {}));
 
-        driverController.R2().onTrue(s_Swerve.runOnce(() -> m_slowMode = false));
-        driverController.L2().onTrue(s_Swerve.runOnce(() -> m_slowMode = true));
+        driverController.R2().onTrue(new InstantCommand(() -> m_slowMode = false, new Subsystem[0])); // no subsystems required
+        driverController.L2().onTrue(new InstantCommand(() -> m_slowMode = true, new Subsystem[0])); // no subsystems required
 
         // SysId Controls
         driverController.touchpad().and(driverController.povUp()).whileTrue(s_Swerve.sysIdDynamic(Direction.kForward));
@@ -289,7 +278,7 @@ public class RobotContainer {
 
                 Commands.sequence(
                     // Set firing mode to speaker
-                    s_Shooter.runOnce(() -> m_isAmp = false),
+                    new InstantCommand(() -> m_isAmp = false, new Subsystem[0]), // no subsystems required
                     // Rev up the shooter
                     s_Shooter.startEnd(() -> 
                         s_Shooter.runShooter(-0.2, -0.2, 0.5), () ->
@@ -312,7 +301,7 @@ public class RobotContainer {
 
                 Commands.sequence(
                     // Set firing mode to speaker
-                    s_Shooter.runOnce(() -> m_isAmp = false),
+                    new InstantCommand(() -> m_isAmp = false, new Subsystem[0]), // no subsystems required
                     // Rev up the shooter
                     s_Shooter.startEnd(() -> 
                         s_Shooter.runShooter(-0.2, -0.2, 0.5), () ->
@@ -329,7 +318,7 @@ public class RobotContainer {
         operatorController.b().toggleOnTrue(
             Commands.parallel(
                 Commands.sequence(
-                    s_Shooter.runOnce(() -> m_isAmp = true),
+                    new InstantCommand(() -> m_isAmp = true, new Subsystem[0]), // no subsystems required
                     s_Shooter.startEnd(() -> s_Shooter.setAngle(52.0, false), () -> {})
                 ),
 
@@ -339,13 +328,14 @@ public class RobotContainer {
 
         // Toggle Auto Shoot
         operatorController.leftStick().onTrue(
-            s_Shooter.runOnce(() -> m_autoshoot = !m_autoshoot)
+            new InstantCommand(() -> m_autoshoot = !m_autoshoot, new Subsystem[0]) // no subsystems required
         );
 
 
         // Shoot in amp or speaker, depending on the amp angle mode
         operatorController.a().onTrue(
             Commands.either(
+                // Amp:
                 Commands.sequence(
                     // Tuck note into shooter
                     s_Shooter.startEnd(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), () -> {})
@@ -358,34 +348,14 @@ public class RobotContainer {
                     .withTimeout(0.2)
                 ),
                 
-                // Shoot into speaker
+                // Speaker:
                 s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.5), () -> {})
                 .withTimeout(0.5),
-            isAmp)
+            ampModeActivated)
         );
 
 
-        // When the shooter is ready and autoshoot is enabled, then shoot
-        shooterIsReady
-        .and(autoshootEnabled)
-        .onTrue(
-            s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.5), () -> {})
-            .withTimeout(0.5)
-        );
-
-        // When a tag is in sight but the shooter is not ready, blink the LEDs red
-        tagIsInSight
-        .and(shooterIsReady.negate())
-        .toggleOnTrue(
-            s_Led.run(() -> s_Led.blink(255, 0, 0, 300))
-        );
-
-        // When the shooter is ready, turn the LEDs green
-        shooterIsReady.toggleOnTrue(
-            s_Led.startEnd(() -> s_Led.setColor(0, 255, 0), () -> {})
-        );
-
-
+        /* Manual Controls */
         // Calibration Mode
         operatorController.povLeft().toggleOnTrue(
             Commands.parallel(
@@ -397,16 +367,19 @@ public class RobotContainer {
         operatorController.povUp().onTrue(s_Shooter.runOnce(() -> s_Shooter.resetEncoders()));
         operatorController.povDown().onTrue(s_Intake.runOnce(() -> s_Intake.resetEncoders()));
 
-        /* Manual Angle Buttons */
         // Point Blank Shooting Angle
         operatorController.rightBumper()
-            .onTrue(s_Shooter.runOnce(() -> m_isAmp = false)
-            .andThen(s_Shooter.startEnd(() -> s_Shooter.setAngle(51, false), () -> {})));
+        .onTrue(
+            new InstantCommand(() -> m_isAmp = false, new Subsystem[0]) // no subsystems required
+            .andThen(s_Shooter.startEnd(() -> s_Shooter.setAngle(51, false), () -> {}))
+        );
 
         // Podium Shooting Angle
         operatorController.leftBumper()
-            .onTrue(s_Shooter.runOnce(() -> m_isAmp = false)
-            .andThen(s_Shooter.startEnd(() -> s_Shooter.setAngle(36, false), () -> {})));
+        .onTrue(
+            new InstantCommand(() -> m_isAmp = false, new Subsystem[0]) // no subsystems required
+            .andThen(s_Shooter.startEnd(() -> s_Shooter.setAngle(36, false), () -> {}))
+        );
 
         // Manual shoot
         operatorController.y().onTrue(
@@ -423,7 +396,54 @@ public class RobotContainer {
 
 
         // Free a stuck note on the top of the robot
-        operatorController.start().whileTrue(s_Shooter.startEnd(() -> s_Shooter.runShooter(-1,-1,0), () -> {}));
+        operatorController.start().whileTrue(
+            s_Shooter.startEnd(() -> s_Shooter.runShooter(-1,-1,0), () -> {})
+        );
+    }
+
+
+    // Register autonomous commands
+    private void registerPathplannerCommands()
+    {
+        // IMPORTANT: In autonomous, the default subsystem commands do not get scheduled.
+
+        NamedCommands.registerCommand("Rev Up the Shooter",  
+            // Tuck the note into the shooter, and then ramp up
+            s_Shooter.startEnd(() -> 
+                s_Shooter.runShooter(-0.2, -0.2, 0.5), () -> 
+                s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, 0))
+            .withTimeout(0.05)
+        );
+
+        NamedCommands.registerCommand("Run Shooter",
+            s_Shooter.runOnce(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -1.0))
+        );
+
+        NamedCommands.registerCommand("Stop Shooter",
+            s_Shooter.runOnce(() -> s_Shooter.runShooter(0, 0, 0))
+        );
+
+        NamedCommands.registerCommand("Enable Auto Aim",
+            Commands.parallel(
+                s_Swerve.runOnce(() -> s_Swerve.setAutoRotationOverride(true)),
+                s_Shooter.run(() -> s_Shooter.setAngleFromPose(s_Swerve.getPose())).withInterruptBehavior(InterruptionBehavior.kCancelSelf)
+            )
+        );
+
+        NamedCommands.registerCommand("Disable Auto Aim",
+            Commands.parallel(
+                s_Swerve.runOnce(() -> s_Swerve.setAutoRotationOverride(false)),
+                s_Shooter.runOnce(() -> s_Shooter.setAngle(ShooterConstants.kShooterMinAngle, false))
+            )
+        );
+
+        NamedCommands.registerCommand("Intake Down", 
+            s_Intake.runOnce(() -> s_Intake.bottomPosition())
+        );
+
+        NamedCommands.registerCommand("Intake Up", 
+            s_Intake.runOnce(() -> s_Intake.topPosition())
+        );
     }
 
     /**
