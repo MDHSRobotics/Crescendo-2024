@@ -201,8 +201,7 @@ public class RobotContainer {
         driverController.cross().whileTrue(s_Swerve.applyRequest(() -> brake).withInterruptBehavior(InterruptionBehavior.kCancelSelf));
 
         // Reset the field-centric heading on left bumper press. For pose estimation to start working again, drive to an Apriltag.
-        // Temporarily disabled until we verify Limelight measurements will work.
-        // driverController.options().onTrue(s_Swerve.runOnce(() -> s_Swerve.seedFieldRelative()));
+        driverController.options().onTrue(s_Swerve.runOnce(() -> s_Swerve.seedFieldRelative()));
 
         // LED communication
         driverController.povUp().onTrue(s_Led.run(() -> s_Led.blink(0, 0, 255, 400)).withTimeout(5)); // Coopertition
@@ -292,7 +291,7 @@ public class RobotContainer {
         );
         
         // Lock on to speaker (using pose estimation)
-        operatorController.rightStick().toggleOnTrue(
+        /*operatorController.rightStick().toggleOnTrue(
             Commands.parallel(
                 s_Swerve.applyRequest(() -> driveFacingAngle
                     .withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
@@ -312,7 +311,7 @@ public class RobotContainer {
                     s_Shooter.run(() -> s_Shooter.setAngleFromPose(s_Swerve.getPose()))
                 )
             ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
-        );
+        );*/
 
         // Set angle to amp
         operatorController.b().toggleOnTrue(
@@ -358,7 +357,7 @@ public class RobotContainer {
         /* Manual Controls */
         // Calibration Mode
         operatorController.povLeft().toggleOnTrue(
-            Commands.parallel(
+            Commands.race( // This is race instead of parallel because one command should not run without the other.
                 s_Shooter.run(() -> s_Shooter.rotateShooter(operatorController.getRightY())),
                 s_Intake.run(() -> s_Intake.rotateIntake(operatorController.getLeftY()))
             )
