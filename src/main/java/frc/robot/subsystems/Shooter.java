@@ -55,6 +55,7 @@ public class Shooter extends SubsystemBase{
   private GenericEntry topShooterSpeed = list.add("Top Shooter Speed", 0.0).getEntry();
   private GenericEntry feederSpeed = list.add("Feeder Speed", 0.0).getEntry();
   private GenericEntry angleRotations = list.add("Angle Rotations", 0.0).getEntry();
+  private GenericEntry angleDegrees = list.add("Angle Degrees", 0.0).getEntry();
   private GenericEntry tx = list.add("Limelight TX", 0.0).getEntry();
   private GenericEntry ty = list.add("Limelight TY", 0.0).getEntry();
 
@@ -218,6 +219,10 @@ public class Shooter extends SubsystemBase{
     angle.getEncoder().setPosition(0);
   }
 
+  public double getAngleDegrees() {
+    return angleDegrees.getDouble(0.0);
+  }
+
   public boolean isAtAngle(){
     return Aiming.approximatelyEqual(calculatedRotations.getDouble(0), angle.getEncoder().getPosition(), 1.0);
   }
@@ -237,6 +242,7 @@ public class Shooter extends SubsystemBase{
     topShooterSpeed.setDouble(topShooter.get());
     feederSpeed.setDouble(feeder.get());
     angleRotations.setDouble(m_angleEncoder.getPosition());
+    angleDegrees.setDouble(m_angleEncoder.getPosition() / ShooterConstants.kDegreesToRotationsConversion + ShooterConstants.kBottomMeasureAngle);
     tx.setDouble(LimelightHelpers.getTX(""));
     ty.setDouble(LimelightHelpers.getTY(""));
 

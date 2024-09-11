@@ -110,17 +110,19 @@ public class RobotContainer {
         }
 
         s_Shooter.setDefaultCommand(
-            // Turn off shooter and move to bottom position
-            s_Shooter.runOnce(() -> s_Shooter.runShooter(0, 0, 0))
-            .andThen(
+            // Stop any shooter rotation, turn off the shooter, and return to bottom position.
+            Commands.sequence(
+                s_Shooter.runOnce(() -> s_Shooter.rotateShooter(0)),
+                s_Shooter.runOnce(() -> s_Shooter.runShooter(0, 0, 0)),
                 s_Shooter.startEnd(() -> s_Shooter.setAngle(ShooterConstants.kShooterMinAngle, false), () -> {})
             )
         );
 
         s_Intake.setDefaultCommand(
-            // Turn off intake and move to top position
-            s_Intake.runOnce(() -> s_Intake.runIntake(0, 0))
-            .andThen(
+            // Stop any intake rotation, turn off intake, and return to top position.
+            Commands.sequence(
+                s_Intake.runOnce(() -> s_Intake.rotateIntake(0)),
+                s_Intake.runOnce(() -> s_Intake.runIntake(0, 0)),
                 s_Intake.startEnd(() -> s_Intake.topPosition(), () -> {})
             )
         );
@@ -229,7 +231,7 @@ public class RobotContainer {
 
         /* IMPORTANT Please see the following URL to get a graphical annotation of which xbox buttons 
             trigger what commands on the operator controller:
-            https://www.padcrafter.com/?rightStickClick=Lock+Speaker+%28using+pose%29&xButton=Lock+Speaker&aButton=Fire&bButton=Set+Angle%3A+Amp&rightStick=Aim+Shooter+%28Calibration+Only%29&rightBumper=Set+Angle%3A+Point+Blank&rightTrigger=Deploy+Intake&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&leftBumper=Set+Angle%3A+Podium&leftStick=Aim+Intake+%28Calibration+Only%29&dpadUp=Reset+Shooter+Encoder&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&startButton=Free+a+Stuck+Note+%28on+shooter%29&backButton=Eject+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&yButton=Manual+Angle+Fire&leftStickClick=Toggle+Auto+Shoot#
+            https://www.padcrafter.com/?dpadRight=New+Amp+Firing+Sequence#?rightStickClick=Lock+Speaker+%28using+pose%29&xButton=Lock+Speaker&aButton=Fire&bButton=Set+Angle%3A+Amp&rightStick=Aim+Shooter+%28Calibration+Only%29&rightBumper=Set+Angle%3A+Point+Blank&rightTrigger=Deploy+Intake&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&leftBumper=Set+Angle%3A+Podium&leftStick=Aim+Intake+%28Calibration+Only%29&dpadUp=Reset+Shooter+Encoder&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&startButton=Free+a+Stuck+Note+%28on+shooter%29&backButton=Eject+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&yButton=Manual+Angle+Fire&leftStickClick=Toggle+Auto+Shoot&dpadRight=N
             Please update this link whenever you change a button.
         */
         
@@ -252,17 +254,6 @@ public class RobotContainer {
                     s_Intake.runOnce(() -> s_Intake.midPosition())
                 ),
                 s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, -0.7), () -> {})
-            )
-        );
-
-        // Eject note from intake
-        operatorController.back().toggleOnTrue(
-            Commands.parallel(
-                Commands.sequence(
-                    s_Intake.runOnce(() -> s_Intake.midPosition()),
-                    s_Intake.runOnce(() -> s_Intake.runIntake(-1, -1))
-                ),
-                s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, 1), () -> {})
             )
         );
 
@@ -353,6 +344,23 @@ public class RobotContainer {
             ampModeActivated)
         );
 
+        // Experimental Amp Shooting Sequence
+        operatorController.povRight().toggleOnTrue(
+            Commands.sequence(
+                // Tuck note into shooter
+                s_Shooter.startEnd(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), () -> {})
+                .withTimeout(0.05),
+                // Ramp up
+                s_Shooter.startEnd(() -> s_Shooter.runShooter(0.2, 0.2, 0), () -> {})
+                .withTimeout(1.0),
+                // Slowly raise the pitch of the shooter until it reaches the correct angle
+                s_Shooter.startEnd(() -> s_Shooter.rotateShooter(0.2), () -> {})
+                .until(() -> s_Shooter.getAngleDegrees() >= 52.0),
+                // Shoot into amp, and stop before the shooter raises too high up
+                s_Shooter.startEnd(() -> s_Shooter.runShooter(0.2, 0.2, -0.5), () -> {})
+                .until(() -> s_Shooter.getAngleDegrees() >= 80.0)
+            )
+        );
 
         /* Manual Controls */
         // Calibration Mode
@@ -393,6 +401,17 @@ public class RobotContainer {
             )
         );
 
+
+        // Eject note from intake
+        operatorController.back().toggleOnTrue(
+            Commands.parallel(
+                Commands.sequence(
+                    s_Intake.runOnce(() -> s_Intake.midPosition()),
+                    s_Intake.runOnce(() -> s_Intake.runIntake(-1, -1))
+                ),
+                s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, 1), () -> {})
+            )
+        );
 
         // Free a stuck note on the top of the robot
         operatorController.start().whileTrue(
