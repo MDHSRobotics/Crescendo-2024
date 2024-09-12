@@ -50,7 +50,7 @@ public class Shooter extends SubsystemBase{
       .withWidget(BuiltInWidgets.kCameraStream)
       .withSize(4, 4);
 
-  private ShuffleboardLayout list = tab.getLayout("Shooter Info", BuiltInLayouts.kList).withSize(3, 4);
+  private ShuffleboardLayout list = tab.getLayout("Shooter Info", BuiltInLayouts.kList).withSize(3, 5);
   private GenericEntry bottomShooterSpeed = list.add("Bottom Shooter Speed", 0.0).getEntry();
   private GenericEntry topShooterSpeed = list.add("Top Shooter Speed", 0.0).getEntry();
   private GenericEntry feederSpeed = list.add("Feeder Speed", 0.0).getEntry();
