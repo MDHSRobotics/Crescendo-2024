@@ -38,10 +38,11 @@ public class Aiming {
      * @return The new shooter pitch in degrees that points the shooter at the speaker.
      */
     public static double getPitch(Translation3d goalPose, Pose2d robotPose) {
-        // Must find the (x,y) coordinate of the shooter's pivot point first. If you need to draw this out to understand, go to https://www.desmos.com/calculator/1hg0vdgcf4
+        // Must find the (x,y) coordinate of the shooter's pivot point first.
+        // If you don't understand this, go to "src\main\java\frc\math\PivotCorrectionExplanation.png"
         double robotHeading = robotPose.getRotation().getRadians();
-        double xCorrection = ShooterConstants.kPivotDistanceM * Math.cos(Math.PI + robotHeading);
-        double yCorrection = ShooterConstants.kPivotDistanceM * Math.sin(Math.PI + robotHeading);
+        double xCorrection = ShooterConstants.kPivotDistanceM * Math.cos(robotHeading);
+        double yCorrection = ShooterConstants.kPivotDistanceM * Math.sin(robotHeading);
 
         // Find the pitch of the vector
         Translation3d robotTranslation = new Translation3d(
