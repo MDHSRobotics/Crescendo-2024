@@ -200,7 +200,7 @@ public class Shooter extends SubsystemBase{
     double rotations = ShooterConstants.kDegreesToRotationsConversion * (targetAngle - ShooterConstants.kBottomMeasureAngle);
 
     //Set the rotations
-    if (rotations > -45.8 && rotations < 0){
+    if (rotations > -45.8 && rotations <= 0){
       m_pidController.setReference(rotations, CANSparkMax.ControlType.kPosition);
     }
 

@@ -65,7 +65,7 @@ public final class Constants {
 
         //The max and min angles of the shooter in degrees
         public static final double kShooterMaxAngle = 90;
-        public static final double kShooterMinAngle = 19.5;
+        public static final double kShooterMinAngle = 23;
 
         // Height of the shooter from the ground in inches
         public static final double kPivotHeight = 12.375; //w1
