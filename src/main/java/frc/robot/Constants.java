@@ -114,3 +114,11 @@ public final class Constants {
         public static final int kStrobeLength = 40;
     }
 }
+
+/*
+CAN Sequence
+-RoboRIO
+- Shooter Top Motor - kTopID
+-Shooter Bottom Motor - kBottomID
+
+ */

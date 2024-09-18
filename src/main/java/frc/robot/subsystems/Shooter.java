@@ -45,10 +45,11 @@ public class Shooter extends SubsystemBase{
   /* Shuffleboard Logging */
   private ShuffleboardTab tab = Shuffleboard.getTab("Shooter");
 
+  /* This is causing errors upon redeploy, because the NT entry doesn't always reset.
   private ComplexWidget cameraView =
     tab.addCamera("Limelight", "limelight", "10.41.41.11:5800")
       .withWidget(BuiltInWidgets.kCameraStream)
-      .withSize(4, 4);
+      .withSize(4, 4);*/
 
   private ShuffleboardLayout list = tab.getLayout("Shooter Info", BuiltInLayouts.kList).withSize(3, 5);
   private GenericEntry bottomShooterSpeed = list.add("Bottom Shooter Speed", 0.0).getEntry();
