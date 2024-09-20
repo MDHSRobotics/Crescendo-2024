@@ -22,6 +22,7 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -258,23 +259,32 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     /* Shuffleboard logging. We avoid overriding periodic() because it runs even when the robot is disabled. */
     public void logData() {
         // Subsystem data
-        xPosition.setDouble(getPose().getX());
-        yPosition.setDouble(getPose().getY());
-        xVelocity.setDouble(getRobotRelativeSpeeds().vxMetersPerSecond);
-        yVelocity.setDouble(getRobotRelativeSpeeds().vyMetersPerSecond);
+        Pose2d pose = getPose();
+        xPosition.setDouble(pose.getX());
+        yPosition.setDouble(pose.getY());
+        ChassisSpeeds speeds = getRobotRelativeSpeeds();
+        xVelocity.setDouble(speeds.vxMetersPerSecond);
+        yVelocity.setDouble(speeds.vyMetersPerSecond);
         yaw.setDouble(getRobotYaw());
-        yawRate.setDouble(Math.toDegrees(getRobotRelativeSpeeds().omegaRadiansPerSecond));
+        yawRate.setDouble(Math.toDegrees(speeds.omegaRadiansPerSecond));
         //rawYawRate.setDouble(-m_pigeon2.getRate()); // Negative so that counterclockwise is positive like getRobotRelativeSpeeds().omegaRadiansPerSecond
         driveWheelRotations.setDouble(m_canCoder.getPositionSinceBoot().getValueAsDouble());
 
         /* Update yaw for Limelight Megatag2 */
         LimelightHelpers.SetRobotOrientation("", yaw.getDouble(0.0), yawRate.getDouble(0.0), 0.0, 0.0, 0.0, 0.0);
         
-        /* Add Limelight Bot Pose to Pose Estimation */
+        /* Add Limelight Bot Pose to Pose Estimation and logs */
         LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("");
         if (limelightMeasurement != null) {
             if((limelightMeasurement.tagCount >= 1) && (Math.abs(yawRate.getDouble(0.0)) < 720)) { // if our angular velocity is greater than 720 degrees per second, ignore vision updates
+                // Add camera pose to pose estimation
                 addVisionMeasurement(limelightMeasurement.pose, limelightMeasurement.timestampSeconds);
+                // Add camera pose to logs
+                SignalLogger.writeDoubleArray("camera pose", new double[] {
+                    limelightMeasurement.pose.getX(),
+                    limelightMeasurement.pose.getY(),
+                    limelightMeasurement.pose.getRotation().getDegrees()
+                }, "", Timer.getFPGATimestamp() - limelightMeasurement.timestampSeconds);
             }
         } else {
             DriverStation.reportWarning("Could not add limelight measurement to pose estimation, make sure limelight is properly connected and configured", false);
