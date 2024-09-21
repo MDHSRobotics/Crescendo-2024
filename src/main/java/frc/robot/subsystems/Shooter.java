@@ -61,12 +61,12 @@ public class Shooter extends SubsystemBase{
   private GenericEntry ty = list.add("Limelight TY", 0.0).getEntry();
 
   private GenericEntry shootSpeedTopAdjustment =
-    tab.add("Top Shooter Speed Multiplier", 1)
+    tab.addPersistent("Top Shooter Speed Multiplier", 1)
       .withWidget(BuiltInWidgets.kNumberSlider)
       .withProperties(Map.of("min", 0, "max", 1))
       .getEntry();
   private GenericEntry shootSpeedBotAdjustment =
-    tab.add("Bottom Shooter Speed Multiplier", 1)
+    tab.addPersistent("Bottom Shooter Speed Multiplier", 1)
       .withWidget(BuiltInWidgets.kNumberSlider)
       .withProperties(Map.of("min", 0, "max", 1))
       .getEntry();
@@ -85,27 +85,28 @@ public class Shooter extends SubsystemBase{
       
   private ShuffleboardTab mainTab = Shuffleboard.getTab("Main");
   private GenericEntry adjustment = 
-    mainTab.add("Adjustment Angle", 4)
+    mainTab.addPersistent("Adjustment Angle", 4)
+    .withPosition(2, 0)
     .getEntry();
   private GenericEntry atSpeed =
     mainTab.add("At Speed", false)
-    .withSize(2, 2)
+    .withSize(1, 1)
     .getEntry();
   private GenericEntry isAtAngle =
     mainTab.add("At Angle", false)
-    .withSize(2, 2)
+    .withSize(1, 1)
     .getEntry();
   private GenericEntry seeTag =
     mainTab.add("Sees Tag ", false)
-    .withSize(2, 2)
+    .withSize(1, 1)
     .getEntry();
   private GenericEntry txCorrect =
     mainTab.add("TX Correct", false)
-    .withSize(2, 2)
+    .withSize(1, 1)
     .getEntry();
   private GenericEntry ready =
     mainTab.add("Ready", false)
-    .withSize(4, 4)
+    .withSize(2, 2)
     .getEntry();
 
 

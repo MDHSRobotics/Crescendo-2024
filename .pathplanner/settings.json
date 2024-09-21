@@ -7,7 +7,10 @@
     "Note Backups",
     "Starting Positions to Shoot"
   ],
-  "autoFolders": [],
+  "autoFolders": [
+    "New Autos",
+    "Old Autos"
+  ],
   "defaultMaxVel": 5.2,
   "defaultMaxAccel": 3.0,
   "defaultMaxAngVel": 540.0,

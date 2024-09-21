@@ -5,9 +5,11 @@ import java.util.function.Supplier;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
-import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModule;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 
@@ -50,7 +52,12 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
 
     private boolean m_autoRotationOverride = false;
     
-    private CANcoder m_canCoder; // Temporary variable for finding kCoupleRatio. Remove after finished.
+    // Temporary variables for finding kCoupleRatio. Remove after finished.
+    private TalonFX m_driveMotor = Modules[0].getDriveMotor();
+    private TalonFX m_steerMotor = Modules[0].getSteerMotor();
+    // Temporary variables for finding kSlipCurrentA. Remove after finished.
+    private double m_voltage = 0;
+    private final VoltageOut m_request = new VoltageOut(0);
     
     private final SwerveRequest.ApplyChassisSpeeds AutoRequest = new SwerveRequest.ApplyChassisSpeeds();
 
@@ -96,15 +103,22 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
 
     /* Shuffleboard logging */
     private ShuffleboardTab tab = Shuffleboard.getTab("Swerve");
-    private ShuffleboardLayout list = tab.getLayout("Kinematics+Odometry", BuiltInLayouts.kList).withSize(3, 4);
-    private GenericEntry xPosition = list.add("X Position", 0.0).getEntry();
-    private GenericEntry yPosition = list.add("Y Position", 0.0).getEntry();
-    private GenericEntry xVelocity = list.add("X Velocity", 0.0).getEntry();
-    private GenericEntry yVelocity = list.add("Y Velocity", 0.0).getEntry();
-    private GenericEntry yaw = list.add("Yaw", 0.0).getEntry();
-    private GenericEntry yawRate = list.add("Yaw Rate", 0.0).getEntry();
+    private ShuffleboardLayout odometryList = tab.getLayout("Kinematics+Odometry", BuiltInLayouts.kList).withSize(3, 4);
+    private GenericEntry xPosition = odometryList.add("X Position", 0.0).getEntry();
+    private GenericEntry yPosition = odometryList.add("Y Position", 0.0).getEntry();
+    private GenericEntry xVelocity = odometryList.add("X Velocity", 0.0).getEntry();
+    private GenericEntry yVelocity = odometryList.add("Y Velocity", 0.0).getEntry();
+    private GenericEntry yaw = odometryList.add("Yaw", 0.0).getEntry();
+    private GenericEntry yawRate = odometryList.add("Yaw Rate", 0.0).getEntry();
     //private GenericEntry rawYawRate = list.add("Raw Yaw Rate", 0.0).getEntry();
-    private GenericEntry driveWheelRotations = tab.add("Drive Wheel Rotations", 0.0).withSize(2, 1).getEntry();
+
+    private ShuffleboardLayout cameraList = tab.getLayout("Limelight-Estimated Pose", BuiltInLayouts.kList).withSize(3, 2);
+    private GenericEntry camXPosition = cameraList.add("X Position", 0.0).getEntry();
+    private GenericEntry camYPosition = cameraList.add("Y Position", 0.0).getEntry();
+    private GenericEntry camYaw = cameraList.add("Yaw", 0.0).getEntry();
+
+    // Temporary entry for finding kCoupleRatio. Remove after finished.
+    private GenericEntry coupleRatio = tab.add("CoupleRatio", 0.0).withSize(2, 1).getEntry();
 
 
     public Swerve(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency, SwerveModuleConstants... modules) {
@@ -116,8 +130,6 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
 
         // Set the pose estimator's trust of poses from the Limelight
         setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
-        
-        m_canCoder = getModule(0).getCANcoder(); // Temporary variable for finding kCoupleRatio. Remove after finished.
     }
     
     public Swerve(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
@@ -129,8 +141,6 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
 
         // Set the pose estimator's trust of poses from the Limelight
         setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
-        
-        m_canCoder = getModule(0).getCANcoder(); // Temporary variable for finding kCoupleRatio. Remove after finished.
     }
 
     private void configurePathPlanner() {
@@ -255,6 +265,13 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         m_autoRotationOverride = override;
     }
 
+    // Temporary method for applying voltage to find kSlipCurrentA. Remove after finished.
+    public void applyIncreasingVoltage() {
+        m_voltage += 0.01;
+        for (SwerveModule module : Modules) {
+            module.getDriveMotor().setControl(m_request.withOutput(m_voltage));
+        }
+    } 
 
     /* Shuffleboard logging. We avoid overriding periodic() because it runs even when the robot is disabled. */
     public void logData() {
@@ -268,7 +285,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         yaw.setDouble(getRobotYaw());
         yawRate.setDouble(Math.toDegrees(speeds.omegaRadiansPerSecond));
         //rawYawRate.setDouble(-m_pigeon2.getRate()); // Negative so that counterclockwise is positive like getRobotRelativeSpeeds().omegaRadiansPerSecond
-        driveWheelRotations.setDouble(m_canCoder.getPositionSinceBoot().getValueAsDouble());
+        coupleRatio.setDouble(m_driveMotor.getPosition().getValue()/m_steerMotor.getPosition().getValue());
 
         /* Update yaw for Limelight Megatag2 */
         LimelightHelpers.SetRobotOrientation("", yaw.getDouble(0.0), yawRate.getDouble(0.0), 0.0, 0.0, 0.0, 0.0);
@@ -279,6 +296,10 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
             if((limelightMeasurement.tagCount >= 1) && (Math.abs(yawRate.getDouble(0.0)) < 720)) { // if our angular velocity is greater than 720 degrees per second, ignore vision updates
                 // Add camera pose to pose estimation
                 addVisionMeasurement(limelightMeasurement.pose, limelightMeasurement.timestampSeconds);
+                // Add camera pose to Shuffleboard
+                camXPosition.setDouble(limelightMeasurement.pose.getX());
+                camYPosition.setDouble(limelightMeasurement.pose.getY());
+                camYaw.setDouble(limelightMeasurement.pose.getRotation().getDegrees());
                 // Add camera pose to logs
                 SignalLogger.writeDoubleArray("camera pose", new double[] {
                     limelightMeasurement.pose.getX(),

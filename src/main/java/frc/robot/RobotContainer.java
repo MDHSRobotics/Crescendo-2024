@@ -194,7 +194,7 @@ public class RobotContainer {
 
         /* IMPORTANT Please see the following URL to get a graphical annotation of which xbox buttons 
             trigger what commands on the driver controller:
-        https://www.padcrafter.com/index.php?templates=Driver+Controller&leftBumper=Climb+Down&dpadRight=&dpadLeft=&aButton=Brake+%28cross+wheels%29&yButton=Right+Climb+Up&dpadDown=Tell+Human+Player+to+Amplify&dpadUp=Tell+Human+Player+to+Coopertition&xButton=Left+Climb+Up&bButton=&leftStick=Drive+Robot+in+this+Direction&rightStick=Rotate+Robot&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&rightTrigger=Fast+Mode&leftTrigger=Slow+Mode&rightBumper=Climb+Up&startButton=Reset+Field+Oriented+Drive&plat=1&backButton=
+        https://www.padcrafter.com/index.php?templates=Driver+Controller&leftBumper=Climb+Down&dpadRight=SysId+Backward&dpadLeft=SysId+Forward&aButton=Brake+%28cross+wheels%29&yButton=Right+Climb+Up&dpadDown=Tell+Human+Player+to+Amplify&dpadUp=Tell+Human+Player+to+Coopertition&xButton=Left+Climb+Up&bButton=&leftStick=Drive+Robot+in+this+Direction&rightStick=Rotate+Robot&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&rightTrigger=Fast+Mode&leftTrigger=Slow+Mode&rightBumper=Climb+Up&startButton=Reset+Field+Oriented+Drive&plat=1&backButton=&rightStickClick=Apply+increasing+voltage
         Whenever you edit a button binding, please update this URL
         */
 
@@ -202,8 +202,8 @@ public class RobotContainer {
         // If the operator locks onto the speaker, the wheels will stop braking.
         driverController.cross().whileTrue(s_Swerve.applyRequest(() -> brake).withInterruptBehavior(InterruptionBehavior.kCancelSelf));
 
-        // Reset the field-centric heading on left bumper press. For pose estimation to start working again, drive to an Apriltag.
-        driverController.options().onTrue(s_Swerve.runOnce(() -> s_Swerve.seedFieldRelative()));
+        // Reset the field-centric heading on left bumper press. For pose estimation to start working again, drive to an Apriltag. Do not uncomment this until you finish SysId.
+        //driverController.options().onTrue(s_Swerve.runOnce(() -> s_Swerve.seedFieldRelative()));
 
         // LED communication
         driverController.povUp().onTrue(s_Led.run(() -> s_Led.blink(0, 0, 255, 400)).withTimeout(5)); // Coopertition
@@ -218,11 +218,14 @@ public class RobotContainer {
         driverController.R2().onTrue(new InstantCommand(() -> m_slowMode = false, new Subsystem[0])); // no subsystems required
         driverController.L2().onTrue(new InstantCommand(() -> m_slowMode = true, new Subsystem[0])); // no subsystems required
 
-        // SysId Controls
-        driverController.touchpad().and(driverController.povUp()).whileTrue(s_Swerve.sysIdDynamic(Direction.kForward));
-        driverController.touchpad().and(driverController.povUp()).whileTrue(s_Swerve.sysIdDynamic(Direction.kReverse));
-        driverController.options().and(driverController.povUp()).whileTrue(s_Swerve.sysIdQuasistatic(Direction.kForward));
-        driverController.options().and(driverController.povUp()).whileTrue(s_Swerve.sysIdQuasistatic(Direction.kReverse));
+        // Temporary control for finding kSlipCurrentA. Remove after finished.
+        driverController.L3().whileTrue(s_Swerve.run(s_Swerve::applyIncreasingVoltage));
+
+        // SysId Controls. Comment out after finished.
+        driverController.touchpad().and(driverController.povLeft()).whileTrue(s_Swerve.sysIdDynamic(Direction.kForward));
+        driverController.touchpad().and(driverController.povRight()).whileTrue(s_Swerve.sysIdDynamic(Direction.kReverse));
+        driverController.options().and(driverController.povLeft()).whileTrue(s_Swerve.sysIdQuasistatic(Direction.kForward));
+        driverController.options().and(driverController.povRight()).whileTrue(s_Swerve.sysIdQuasistatic(Direction.kReverse));
     }
 
     private void configureOperatorButtonBindings() {
@@ -231,16 +234,16 @@ public class RobotContainer {
 
         /* IMPORTANT Please see the following URL to get a graphical annotation of which xbox buttons 
             trigger what commands on the operator controller:
-            https://www.padcrafter.com/?dpadRight=New+Amp+Firing+Sequence#?rightStickClick=Lock+Speaker+%28using+pose%29&xButton=Lock+Speaker&aButton=Fire&bButton=Set+Angle%3A+Amp&rightStick=Aim+Shooter+%28Calibration+Only%29&rightBumper=Set+Angle%3A+Point+Blank&rightTrigger=Deploy+Intake&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&leftBumper=Set+Angle%3A+Podium&leftStick=Aim+Intake+%28Calibration+Only%29&dpadUp=Reset+Shooter+Encoder&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&startButton=Free+a+Stuck+Note+%28on+shooter%29&backButton=Eject+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&yButton=Manual+Angle+Fire&leftStickClick=Toggle+Auto+Shoot&dpadRight=N
+            https://www.padcrafter.com/?dpadRight=New+Amp+Firing+Sequence&dpadUp=Reset+Shooter+Encoder&leftStick=Aim+Intake+%28Calibration+Only%29&leftStickClick=&leftBumper=Prepare+intake+for+amp+spit&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&backButton=Eject+Intake&startButton=Free+a+Stuck+Note+%28on+shooter%29&rightStickClick=Lock+Speaker+%28using+pose%29&rightStick=Aim+Shooter+%28Calibration+Only%29&aButton=Fire&bButton=Set+Angle%3A+Amp&xButton=Lock+Speaker&yButton=Manual+Angle+Fire&rightBumper=Intake+Amp+Spit&rightTrigger=Deploy+Intake#?rightStickClick=Lock+Speaker+%28using+pose%29&xButton=Lock+Speaker&aButton=Fire&bButton=Set+Angle%3A+Amp&rightStick=Aim+Shooter+%28Calibration+Only%29&rightBumper=Set+Angle%3A+Point+Blank&rightTrigger=Deploy+Intake&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&leftBumper=Set+Angle%3A+Podium&leftStick=Aim+Intake+%28Calibration+Only%29&dpadUp=Reset+Shooter+Encoder&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&startButton=Free+a+Stuck+Note+%28on+shooter%29&backButton=Eject+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&yButton=Manual+Angle+Fire&leftStickClick=Toggle+Auto+Shoot
             Please update this link whenever you change a button.
         */
         
         // Run intake at bottom position
         operatorController.rightTrigger().toggleOnTrue(
-            Commands.parallel(
+            Commands.race(
                 Commands.sequence(
                     s_Intake.runOnce(() -> s_Intake.runIntake(1, 1)),
-                    s_Intake.runOnce(() -> s_Intake.bottomPosition())
+                    s_Intake.run(() -> s_Intake.bottomPosition())
                 ),
                 s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, -0.7), () -> {})
             )
@@ -248,10 +251,10 @@ public class RobotContainer {
 
         // Run intake at mid position
         operatorController.leftTrigger().toggleOnTrue(
-            Commands.parallel(
+            Commands.race(
                 Commands.sequence(
                     s_Intake.runOnce(() -> s_Intake.runIntake(1, 1)),
-                    s_Intake.runOnce(() -> s_Intake.midPosition())
+                    s_Intake.run(() -> s_Intake.midPosition())
                 ),
                 s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, -0.7), () -> {})
             )
@@ -281,7 +284,7 @@ public class RobotContainer {
             ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
         );
         
-        // Lock on to speaker (using pose estimation)
+        // Lock on to speaker (using pose estimation). Do not use until you have verified the accuracy of pose data in AdvantageScope.
         /*operatorController.rightStick().toggleOnTrue(
             Commands.parallel(
                 s_Swerve.applyRequest(() -> driveFacingAngle
@@ -316,10 +319,10 @@ public class RobotContainer {
             )
         );
 
-        // Toggle Auto Shoot
-        operatorController.leftStick().onTrue(
+        // Toggle Auto Shoot. Disabled until we have more buttons available.
+        /*operatorController.leftStick().onTrue(
             new InstantCommand(() -> m_autoshoot = !m_autoshoot, new Subsystem[0]) // no subsystems required
-        );
+        );*/
 
 
         // Shoot in amp or speaker, depending on the amp angle mode
@@ -344,8 +347,8 @@ public class RobotContainer {
             ampModeActivated)
         );
 
-        // Experimental Amp Shooting Sequence
-        operatorController.povRight().toggleOnTrue(
+        // Experimental Amp Shooting Sequence. Only use this if intake amp spitting doesn't work.
+        /*operatorController.povRight().toggleOnTrue(
             Commands.sequence(
                 // Tuck note into shooter
                 s_Shooter.startEnd(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), () -> {})
@@ -360,6 +363,36 @@ public class RobotContainer {
                 s_Shooter.startEnd(() -> s_Shooter.runShooter(0.2, 0.2, -0.5), () -> {})
                 .until(() -> s_Shooter.getAngleDegrees() >= 80.0)
             )
+        );*/
+
+        // Prepare intake for amp spit
+        operatorController.leftBumper().toggleOnTrue(
+            Commands.sequence(
+                // Turn off intake and feeder
+                s_Intake.runOnce(() -> s_Intake.runIntake(0, 0)),
+                s_Shooter.runOnce(() -> s_Shooter.runShooter(0, 0, 0)),
+                // Make sure it's at the bottom
+                s_Intake.startEnd(s_Intake::bottomPosition, () -> {})
+                .withTimeout(0.5),
+                // Spit into the ground
+                Commands.parallel(
+                    s_Intake.runOnce(() -> s_Intake.runIntake(-1, -1)),
+                    s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, 1), () -> {})
+                    .withTimeout(0.5)
+                ),
+                // Turn off intake and feeder, and wait for them to fully stop
+                Commands.parallel(
+                    s_Intake.runOnce(() -> s_Intake.runIntake(0, 0)),
+                    s_Shooter.runOnce(() -> s_Shooter.runShooter(0, 0, 0))
+                ),
+                // Raise to amp position
+                s_Intake.run(s_Intake::ampPosition)
+            )
+        );
+        
+        // Intake Amp Spit
+        operatorController.rightBumper().toggleOnTrue(
+            s_Intake.startEnd(s_Intake::ampSpit, () -> {})
         );
 
         /* Manual Controls */
@@ -375,18 +408,18 @@ public class RobotContainer {
         operatorController.povDown().onTrue(s_Intake.runOnce(() -> s_Intake.resetEncoders()));
 
         // Point Blank Shooting Angle
-        operatorController.rightBumper()
+        /*operatorController.rightBumper()
         .onTrue(
             new InstantCommand(() -> m_isAmp = false, new Subsystem[0]) // no subsystems required
             .andThen(s_Shooter.startEnd(() -> s_Shooter.setAngle(51, false), () -> {}))
-        );
+        );*/
 
         // Podium Shooting Angle
-        operatorController.leftBumper()
+        /*operatorController.leftBumper()
         .onTrue(
             new InstantCommand(() -> m_isAmp = false, new Subsystem[0]) // no subsystems required
             .andThen(s_Shooter.startEnd(() -> s_Shooter.setAngle(36, false), () -> {}))
-        );
+        );*/
 
         // Manual shoot
         operatorController.y().onTrue(
@@ -402,12 +435,12 @@ public class RobotContainer {
         );
 
 
-        // Eject note from intake
+        // Fully eject note from intake
         operatorController.back().toggleOnTrue(
-            Commands.parallel(
+            Commands.race(
                 Commands.sequence(
-                    s_Intake.runOnce(() -> s_Intake.midPosition()),
-                    s_Intake.runOnce(() -> s_Intake.runIntake(-1, -1))
+                    s_Intake.runOnce(() -> s_Intake.runIntake(-1, -1)),
+                    s_Intake.run(s_Intake::midPosition)
                 ),
                 s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, 1), () -> {})
             )

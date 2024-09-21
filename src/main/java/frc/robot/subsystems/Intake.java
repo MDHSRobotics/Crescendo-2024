@@ -37,16 +37,19 @@ public class Intake extends SubsystemBase{
     private GenericEntry intakeSpeed = list.add("Intake Speed", 0.0).getEntry();
     private GenericEntry conveyorSpeed = list.add("Conveyer Speed", 0.0).getEntry();
 
-    private GenericEntry intakeTopRotations =
-      tab.add("Intake Top Rotations", 0.0)
+    private GenericEntry intakeTopRotations = tab.addPersistent("Top Rotations", 0.0)
         .withSize(2, 1)
         .getEntry();
-    private GenericEntry intakeBottomRotations =
-      tab.add("Intake Bottom Rotations", 34.0)
+    private GenericEntry intakeBottomRotations = tab.addPersistent("Bottom Rotations", 34.0)
         .withSize(2, 1)
         .getEntry();
-    private GenericEntry intakeMidPositions =
-      tab.add("Intake Mid Rotations", 30.0)
+    private GenericEntry intakeMidRotations = tab.addPersistent("Mid Rotations", 30.0)
+        .withSize(2, 1)
+        .getEntry();
+    public GenericEntry intakeAmpRotations = tab.addPersistent("Amp Rotations", 30.0)
+        .withSize(2, 1)
+        .getEntry();
+    public GenericEntry ampSpitPower = tab.addPersistent("Amp Spit Power", 0.5)
         .withSize(2, 1)
         .getEntry();
 
@@ -85,6 +88,11 @@ public class Intake extends SubsystemBase{
         conveyor.set(conveyerSpeed);
     }
 
+    public void ampSpit() {
+        intake.set(ampSpitPower.getDouble(0));
+        conveyor.set(ampSpitPower.getDouble(0));
+    }
+
     public void rotateIntake(double angleSpeed) {
         rightAngle.set(angleSpeed);
     }
@@ -98,7 +106,11 @@ public class Intake extends SubsystemBase{
     }
 
     public void midPosition(){
-        m_pidController.setReference(intakeMidPositions.getDouble(0), CANSparkMax.ControlType.kPosition);
+        m_pidController.setReference(intakeMidRotations.getDouble(0), CANSparkMax.ControlType.kPosition);
+    }
+
+    public void ampPosition() {
+        m_pidController.setReference(intakeAmpRotations.getDouble(0), CANSparkMax.ControlType.kPosition);
     }
     
     
