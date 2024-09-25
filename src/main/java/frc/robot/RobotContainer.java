@@ -376,23 +376,28 @@ public class RobotContainer {
                 .withTimeout(0.5),
                 // Spit into the ground
                 Commands.parallel(
-                    s_Intake.runOnce(() -> s_Intake.runIntake(-1, -1)),
+                    s_Intake.runOnce(() -> s_Intake.runIntake(-0.2, -0.2)),
                     s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, 1), () -> {})
                     .withTimeout(0.5)
                 ),
                 // Turn off intake and feeder, and wait for them to fully stop
                 Commands.parallel(
                     s_Intake.runOnce(() -> s_Intake.runIntake(0, 0)),
-                    s_Shooter.runOnce(() -> s_Shooter.runShooter(0, 0, 0))
+                    s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, 0), () -> {})
+                    .withTimeout(0.5)
                 ),
                 // Raise to amp position
-                s_Intake.run(s_Intake::ampPosition)
+                s_Intake.run(s_Intake::topPosition)
             )
         );
         
         // Intake Amp Spit
         operatorController.rightBumper().toggleOnTrue(
-            s_Intake.startEnd(s_Intake::ampSpit, () -> {})
+            Commands.sequence(
+                s_Intake.startEnd(s_Intake::ampFastSpit, () -> {})
+                .withTimeout(0.05),
+                s_Intake.startEnd(s_Intake::ampPosition, () -> {})
+            )
         );
 
         /* Manual Controls */

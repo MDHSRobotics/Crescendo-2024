@@ -32,7 +32,7 @@ public class Intake extends SubsystemBase{
     /* Shuffleboard Values */
     private ShuffleboardTab tab = Shuffleboard.getTab("Intake");
 
-    private ShuffleboardLayout list = tab.getLayout("Intake Info", BuiltInLayouts.kList).withSize(3, 2);
+    private ShuffleboardLayout list = tab.getLayout("Intake Info", BuiltInLayouts.kList).withSize(3, 4);
     private GenericEntry angleRotations = list.add("Angle Rotations", 0.0).getEntry();
     private GenericEntry intakeSpeed = list.add("Intake Speed", 0.0).getEntry();
     private GenericEntry conveyorSpeed = list.add("Conveyer Speed", 0.0).getEntry();
@@ -46,12 +46,13 @@ public class Intake extends SubsystemBase{
     private GenericEntry intakeMidRotations = tab.addPersistent("Mid Rotations", 30.0)
         .withSize(2, 1)
         .getEntry();
-    public GenericEntry intakeAmpRotations = tab.addPersistent("Amp Rotations", 30.0)
+    public GenericEntry intakeAmpRotations = tab.addPersistent("Amp Rotations", 1.0)
         .withSize(2, 1)
         .getEntry();
-    public GenericEntry ampSpitPower = tab.addPersistent("Amp Spit Power", 0.5)
+    public GenericEntry ampFastSpitPower = tab.addPersistent("Amp Fast Spit Power", -0.2)
         .withSize(2, 1)
-        .getEntry();
+        .getEntry();    
+    
 
     public Intake(){
         intake = new CANSparkFlex(IntakeConstants.kIntakeID, MotorType.kBrushless);
@@ -88,9 +89,9 @@ public class Intake extends SubsystemBase{
         conveyor.set(conveyerSpeed);
     }
 
-    public void ampSpit() {
-        intake.set(ampSpitPower.getDouble(0));
-        conveyor.set(ampSpitPower.getDouble(0));
+    public void ampFastSpit() {
+        intake.set(ampFastSpitPower.getDouble(0));
+        conveyor.set(ampFastSpitPower.getDouble(0));
     }
 
     public void rotateIntake(double angleSpeed) {
