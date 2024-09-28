@@ -45,7 +45,7 @@ public class Shooter extends SubsystemBase{
   /* Shuffleboard Logging */
   private ShuffleboardTab tab = Shuffleboard.getTab("Shooter");
 
-  /* This is causing errors upon redeploy, because the NT entry doesn't always reset.
+  /* This is causing occasional errors upon code redeploy, because the NT entry doesn't always reset.
   private ComplexWidget cameraView =
     tab.addCamera("Limelight", "limelight", "10.41.41.11:5800")
       .withWidget(BuiltInWidgets.kCameraStream)
@@ -211,7 +211,7 @@ public class Shooter extends SubsystemBase{
     if (isAngleCalculated) {
       calculatedAngle.setDouble(targetAngle);
     } else {
-      // Update the calculated values so it doesn't appear to be aiming
+      // Update the calculated values to 0 so it doesn't appear to be aiming
       calculatedAngle.setDouble(0);
       calculatedDistance.setDouble(0);
     }
@@ -230,7 +230,7 @@ public class Shooter extends SubsystemBase{
   }
 
   public boolean tagInSight(){
-    return (LimelightHelpers.getFiducialID("") == 4 || LimelightHelpers.getFiducialID("") == 7);
+    return (LimelightHelpers.getFiducialID("limelight") == 4 || LimelightHelpers.getFiducialID("limelight") == 7);
   }
 
   public boolean isReady(){
@@ -245,14 +245,14 @@ public class Shooter extends SubsystemBase{
     feederSpeed.setDouble(feeder.get());
     angleRotations.setDouble(m_angleEncoder.getPosition());
     angleDegrees.setDouble(m_angleEncoder.getPosition() / ShooterConstants.kDegreesToRotationsConversion + ShooterConstants.kBottomMeasureAngle);
-    tx.setDouble(LimelightHelpers.getTX(""));
-    ty.setDouble(LimelightHelpers.getTY(""));
+    tx.setDouble(LimelightHelpers.getTX("limelight"));
+    ty.setDouble(LimelightHelpers.getTY("limelight"));
 
     // Widget data
     atSpeed.setBoolean(topShooter.getEncoder().getVelocity() < -3800);
     isAtAngle.setBoolean(isAtAngle());
     seeTag.setBoolean(tagInSight());
-    txCorrect.setBoolean(Aiming.approximatelyEqual(LimelightHelpers.getTX(""), 0, 2.5));
+    txCorrect.setBoolean(Aiming.approximatelyEqual(LimelightHelpers.getTX("limelight"), 0, 2.5));
     ready.setBoolean(isReady());
   }
 }

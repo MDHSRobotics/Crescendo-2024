@@ -194,7 +194,7 @@ public class RobotContainer {
 
         /* IMPORTANT Please see the following URL to get a graphical annotation of which xbox buttons 
             trigger what commands on the driver controller:
-        https://www.padcrafter.com/index.php?templates=Driver+Controller&leftBumper=Climb+Down&dpadRight=SysId+Backward&dpadLeft=SysId+Forward&aButton=Brake+%28cross+wheels%29&yButton=Right+Climb+Up&dpadDown=Tell+Human+Player+to+Amplify&dpadUp=Tell+Human+Player+to+Coopertition&xButton=Left+Climb+Up&bButton=&leftStick=Drive+Robot+in+this+Direction&rightStick=Rotate+Robot&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&rightTrigger=Fast+Mode&leftTrigger=Slow+Mode&rightBumper=Climb+Up&startButton=Reset+Field+Oriented+Drive&plat=1&backButton=&rightStickClick=Apply+increasing+voltage
+        https://www.padcrafter.com/?dpadRight=New+Amp+Firing+Sequence&dpadUp=Reset+Shooter+Encoder&leftStick=Aim+Intake+%28Calibration+Only%29&leftStickClick=Lock+Note&leftBumper=Prepare+intake+for+amp+spit&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&backButton=Eject+Intake&startButton=Free+a+Stuck+Note+%28on+shooter%29&rightStickClick=Lock+Speaker+%28using+pose%29&rightStick=Aim+Shooter+%28Calibration+Only%29&aButton=Fire&bButton=Set+Angle%3A+Amp&xButton=Lock+Speaker&yButton=Manual+Angle+Fire&rightBumper=Intake+Amp+Spit&rightTrigger=Deploy+Intake&templates=Controller+Scheme+1#?rightStickClick=Lock+Speaker+%28using+pose%29&xButton=Lock+Speaker&aButton=Fire&bButton=Set+Angle%3A+Amp&rightStick=Aim+Shooter+%28Calibration+Only%29&rightBumper=Set+Angle%3A+Point+Blank&rightTrigger=Deploy+Intake&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&leftBumper=Set+Angle%3A+Podium&leftStick=Aim+Intake+%28Calibration+Only%29&dpadUp=Reset+Shooter+Encoder&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&startButton=Free+a+Stuck+Note+%28on+shooter%29&backButton=Eject+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&yButton=Manual+Angle+Fire&leftStickClick=Toggle+Auto+Shoot
         Whenever you edit a button binding, please update this URL
         */
 
@@ -267,7 +267,7 @@ public class RobotContainer {
                 s_Swerve.applyRequest(() -> driveFacingAngle
                     .withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
                     .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
-                    .withTargetDirection(Rotation2d.fromDegrees(s_Swerve.getRobotYaw() - LimelightHelpers.getTX("")))),
+                    .withTargetDirection(Rotation2d.fromDegrees(s_Swerve.getRobotYaw() - LimelightHelpers.getTX("limelight")))),
 
                 Commands.sequence(
                     // Set firing mode to speaker
@@ -304,6 +304,16 @@ public class RobotContainer {
                     // Angle the shooter
                     s_Shooter.run(() -> s_Shooter.setAngleFromPose(s_Swerve.getPose()))
                 )
+            ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
+        );*/
+
+        // Lock onto a note (using backLimelight). Do not use until you have connected the limelight and renamed it to backLimelight.
+        /*operatorController.rightStick().toggleOnTrue(
+            s_Swerve.applyRequest(() -> driveFacingAngle
+                .withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
+                .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
+                .withTargetDirection(Rotation2d.fromDegrees(s_Swerve.getRobotYaw() - LimelightHelpers.getTX("backLimelight")))
+
             ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
         );*/
 

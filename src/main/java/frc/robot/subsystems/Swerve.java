@@ -40,6 +40,8 @@ import frc.robot.generated.TunerConstants;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructPublisher;
 
 /**
  * Class that extends the Phoenix SwerveDrivetrain class and implements subsystem
@@ -101,6 +103,10 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     /* Change this to the sysid routine you want to test */
     private final SysIdRoutine RoutineToApply = SysIdRoutineTranslation;
 
+    /* NetworkTables logging */
+    StructPublisher<Pose2d> camPosepublisher = NetworkTableInstance.getDefault()
+        .getStructTopic("camPose", Pose2d.struct).publish();
+
     /* Shuffleboard logging */
     private ShuffleboardTab tab = Shuffleboard.getTab("Swerve");
     private ShuffleboardLayout odometryList = tab.getLayout("Kinematics+Odometry", BuiltInLayouts.kList).withSize(3, 4);
@@ -111,11 +117,6 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     private GenericEntry yaw = odometryList.add("Yaw", 0.0).getEntry();
     private GenericEntry yawRate = odometryList.add("Yaw Rate", 0.0).getEntry();
     //private GenericEntry rawYawRate = list.add("Raw Yaw Rate", 0.0).getEntry();
-
-    private ShuffleboardLayout cameraList = tab.getLayout("Limelight-Estimated Pose", BuiltInLayouts.kList).withSize(3, 2);
-    private GenericEntry camXPosition = cameraList.add("X Position", 0.0).getEntry();
-    private GenericEntry camYPosition = cameraList.add("Y Position", 0.0).getEntry();
-    private GenericEntry camYaw = cameraList.add("Yaw", 0.0).getEntry();
 
     // Temporary entry for finding kCoupleRatio. Remove after finished.
     private GenericEntry coupleRatio = tab.add("CoupleRatio", 0.0).withSize(2, 1).getEntry();
@@ -288,18 +289,16 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         coupleRatio.setDouble(m_driveMotor.getPosition().getValue()/m_steerMotor.getPosition().getValue());
 
         /* Update yaw for Limelight Megatag2 */
-        LimelightHelpers.SetRobotOrientation("", yaw.getDouble(0.0), yawRate.getDouble(0.0), 0.0, 0.0, 0.0, 0.0);
+        LimelightHelpers.SetRobotOrientation("limelight", yaw.getDouble(0.0), yawRate.getDouble(0.0), 0.0, 0.0, 0.0, 0.0);
         
         /* Add Limelight Bot Pose to Pose Estimation and logs */
-        LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("");
+        LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
         if (limelightMeasurement != null) {
             if((limelightMeasurement.tagCount >= 1) && (Math.abs(yawRate.getDouble(0.0)) < 720)) { // if our angular velocity is greater than 720 degrees per second, ignore vision updates
                 // Add camera pose to pose estimation
                 addVisionMeasurement(limelightMeasurement.pose, limelightMeasurement.timestampSeconds);
-                // Add camera pose to Shuffleboard
-                camXPosition.setDouble(limelightMeasurement.pose.getX());
-                camYPosition.setDouble(limelightMeasurement.pose.getY());
-                camYaw.setDouble(limelightMeasurement.pose.getRotation().getDegrees());
+                // Add camera pose to SmartDashboard
+                camPosepublisher.set(limelightMeasurement.pose);
                 // Add camera pose to logs
                 SignalLogger.writeDoubleArray("camera pose", new double[] {
                     limelightMeasurement.pose.getX(),
