@@ -263,7 +263,7 @@ public class RobotContainer {
 
         // Lock on to speaker (using limelight)
         operatorController.x().toggleOnTrue(
-            Commands.parallel(
+            Commands.race(
                 s_Swerve.applyRequest(() -> driveFacingAngle
                     .withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
                     .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
@@ -286,7 +286,7 @@ public class RobotContainer {
         
         // Lock on to speaker (using pose estimation). Do not use until you have verified the accuracy of pose data in AdvantageScope.
         /*operatorController.rightStick().toggleOnTrue(
-            Commands.parallel(
+            Commands.race(
                 s_Swerve.applyRequest(() -> driveFacingAngle
                     .withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
                     .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
