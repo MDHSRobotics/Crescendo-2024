@@ -47,7 +47,7 @@ public class Shooter extends SubsystemBase{
 
   /* This is causing occasional errors upon code redeploy, because the NT entry doesn't always reset.
   private ComplexWidget cameraView =
-    tab.addCamera("Limelight", "limelight", "10.41.41.11:5800")
+    tab.addCamera("limelight-front", "limelight-front", "10.41.41.11:5800")
       .withWidget(BuiltInWidgets.kCameraStream)
       .withSize(4, 4);*/
 
@@ -230,7 +230,7 @@ public class Shooter extends SubsystemBase{
   }
 
   public boolean tagInSight(){
-    return (LimelightHelpers.getFiducialID("limelight") == 4 || LimelightHelpers.getFiducialID("limelight") == 7);
+    return (LimelightHelpers.getFiducialID("limelight-front") == 4 || LimelightHelpers.getFiducialID("limelight-front") == 7);
   }
 
   public boolean isReady(){
@@ -245,14 +245,14 @@ public class Shooter extends SubsystemBase{
     feederSpeed.setDouble(feeder.get());
     angleRotations.setDouble(m_angleEncoder.getPosition());
     angleDegrees.setDouble(m_angleEncoder.getPosition() / ShooterConstants.kDegreesToRotationsConversion + ShooterConstants.kBottomMeasureAngle);
-    tx.setDouble(LimelightHelpers.getTX("limelight"));
-    ty.setDouble(LimelightHelpers.getTY("limelight"));
+    tx.setDouble(LimelightHelpers.getTX("limelight-front"));
+    ty.setDouble(LimelightHelpers.getTY("limelight-front"));
 
     // Widget data
     atSpeed.setBoolean(topShooter.getEncoder().getVelocity() < -3800);
     isAtAngle.setBoolean(isAtAngle());
     seeTag.setBoolean(tagInSight());
-    txCorrect.setBoolean(Aiming.approximatelyEqual(LimelightHelpers.getTX("limelight"), 0, 2.5));
+    txCorrect.setBoolean(Aiming.approximatelyEqual(LimelightHelpers.getTX("limelight-front"), 0, 2.5));
     ready.setBoolean(isReady());
   }
 }

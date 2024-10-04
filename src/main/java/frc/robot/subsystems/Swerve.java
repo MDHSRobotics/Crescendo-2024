@@ -289,10 +289,10 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         coupleRatio.setDouble(m_driveMotor.getPosition().getValue()/m_steerMotor.getPosition().getValue());
 
         /* Update yaw for Limelight Megatag2 */
-        LimelightHelpers.SetRobotOrientation("limelight", yaw.getDouble(0.0), yawRate.getDouble(0.0), 0.0, 0.0, 0.0, 0.0);
+        LimelightHelpers.SetRobotOrientation("limelight-front", yaw.getDouble(0.0), yawRate.getDouble(0.0), 0.0, 0.0, 0.0, 0.0);
         
         /* Add Limelight Bot Pose to Pose Estimation and logs */
-        LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
+        LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front");
         if (limelightMeasurement != null) {
             if((limelightMeasurement.tagCount >= 1) && (Math.abs(yawRate.getDouble(0.0)) < 720)) { // if our angular velocity is greater than 720 degrees per second, ignore vision updates
                 // Add camera pose to pose estimation

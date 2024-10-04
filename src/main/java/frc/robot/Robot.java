@@ -121,7 +121,7 @@ public class Robot extends TimedRobot {
 
         // Use a different limelight pipeline depending on alliance.
         // Only necessary in Orange County Regionals, where the lights make Apriltags hard to see.
-        LimelightHelpers.setPipelineIndex("limelight", m_robotContainer.kAlliance == Alliance.Blue ? 1 : 0);
+        LimelightHelpers.setPipelineIndex("limelight-front", m_robotContainer.kAlliance == Alliance.Blue ? 1 : 0);
 
         // Set the starting perspective for driving.
         m_robotContainer.setOperatorPerspective(Rotation2d.fromDegrees(m_robotContainer.kAlliance == Alliance.Blue ? 0 : 180));
