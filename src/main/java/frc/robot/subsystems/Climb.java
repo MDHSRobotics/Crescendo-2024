@@ -20,7 +20,7 @@ public class Climb extends SubsystemBase{
     CANSparkMax rightClimb;
 
     private ShuffleboardTab tab = Shuffleboard.getTab("Climb");
-    private ShuffleboardLayout list = tab.getLayout("Climb Info", BuiltInLayouts.kList).withSize(3, 2);
+    private ShuffleboardLayout list = tab.getLayout("Climb Info", BuiltInLayouts.kList).withSize(3, 3);
     private GenericEntry leftRotations = list.add("Left Rotations", 0.0).getEntry();
     private GenericEntry rightRotations = list.add("Right Rotations", 0.0).getEntry();
 

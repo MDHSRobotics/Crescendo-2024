@@ -59,7 +59,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     private TalonFX m_steerMotor = Modules[0].getSteerMotor();
     // Temporary variables for finding kSlipCurrentA. Remove after finished.
     private double m_voltage = 0;
-    private final VoltageOut m_request = new VoltageOut(0);
+    private final VoltageOut m_request = new VoltageOut(2).withEnableFOC(false);
     
     private final SwerveRequest.ApplyChassisSpeeds AutoRequest = new SwerveRequest.ApplyChassisSpeeds();
 
@@ -116,7 +116,6 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     private GenericEntry yVelocity = odometryList.add("Y Velocity", 0.0).getEntry();
     private GenericEntry yaw = odometryList.add("Yaw", 0.0).getEntry();
     private GenericEntry yawRate = odometryList.add("Yaw Rate", 0.0).getEntry();
-    //private GenericEntry rawYawRate = list.add("Raw Yaw Rate", 0.0).getEntry();
 
     // Temporary entry for finding kCoupleRatio. Remove after finished.
     private GenericEntry coupleRatio = tab.add("CoupleRatio", 0.0).withSize(2, 1).getEntry();
@@ -269,9 +268,8 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     // Temporary method for applying voltage to find kSlipCurrentA. Remove after finished.
     public void applyIncreasingVoltage() {
         m_voltage += 0.01;
-        for (SwerveModule module : Modules) {
-            module.getDriveMotor().setControl(m_request.withOutput(m_voltage));
-        }
+        System.out.println(m_voltage);
+        getModule(0).getDriveMotor().setControl(m_request);
     } 
 
     /* Shuffleboard logging. We avoid overriding periodic() because it runs even when the robot is disabled. */
@@ -285,8 +283,6 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         yVelocity.setDouble(speeds.vyMetersPerSecond);
         yaw.setDouble(getRobotYaw());
         yawRate.setDouble(Math.toDegrees(speeds.omegaRadiansPerSecond));
-        //rawYawRate.setDouble(-m_pigeon2.getRate()); // Negative so that counterclockwise is positive like getRobotRelativeSpeeds().omegaRadiansPerSecond
-        coupleRatio.setDouble(m_driveMotor.getPosition().getValue()/m_steerMotor.getPosition().getValue());
 
         /* Update yaw for Limelight Megatag2 */
         LimelightHelpers.SetRobotOrientation("limelight-front", yaw.getDouble(0.0), yawRate.getDouble(0.0), 0.0, 0.0, 0.0, 0.0);

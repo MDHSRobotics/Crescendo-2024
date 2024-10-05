@@ -147,7 +147,7 @@ public class Robot extends TimedRobot {
         CommandScheduler.getInstance().cancelAll();
 
         // Sets a starting pose for pose estimation to right below the Speaker. Only useful for testing without megatag2. Open this project in PathPlanner for more starting positions.
-        m_robotContainer.setStartingPosition(new Pose2d(0.48, 4.09, new Rotation2d()));
+        m_robotContainer.setStartingPosition(new Pose2d(15.17, 5.55, Rotation2d.fromDegrees(180)));
 
         // Set the starting perspective for driving.
         m_robotContainer.setOperatorPerspective(Rotation2d.fromDegrees(m_robotContainer.kAlliance == Alliance.Blue ? 0 : 180));
