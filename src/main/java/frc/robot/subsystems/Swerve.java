@@ -9,7 +9,6 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModule;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 
@@ -54,12 +53,10 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
 
     private boolean m_autoRotationOverride = false;
     
-    // Temporary variables for finding kCoupleRatio. Remove after finished.
-    private TalonFX m_driveMotor = Modules[0].getDriveMotor();
-    private TalonFX m_steerMotor = Modules[0].getSteerMotor();
     // Temporary variables for finding kSlipCurrentA. Remove after finished.
+    private final TalonFX m_frontRightDriveMotor = new TalonFX(TunerConstants.kFrontRightDriveMotorId);
     private double m_voltage = 0;
-    private final VoltageOut m_request = new VoltageOut(2).withEnableFOC(false);
+    private final VoltageOut m_request = new VoltageOut(0).withEnableFOC(false);
     
     private final SwerveRequest.ApplyChassisSpeeds AutoRequest = new SwerveRequest.ApplyChassisSpeeds();
 
@@ -116,9 +113,6 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     private GenericEntry yVelocity = odometryList.add("Y Velocity", 0.0).getEntry();
     private GenericEntry yaw = odometryList.add("Yaw", 0.0).getEntry();
     private GenericEntry yawRate = odometryList.add("Yaw Rate", 0.0).getEntry();
-
-    // Temporary entry for finding kCoupleRatio. Remove after finished.
-    private GenericEntry coupleRatio = tab.add("CoupleRatio", 0.0).withSize(2, 1).getEntry();
 
 
     public Swerve(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency, SwerveModuleConstants... modules) {
@@ -269,7 +263,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     public void applyIncreasingVoltage() {
         m_voltage += 0.01;
         System.out.println(m_voltage);
-        getModule(0).getDriveMotor().setControl(m_request);
+        m_frontRightDriveMotor.setControl(m_request.withOutput(m_voltage));
     } 
 
     /* Shuffleboard logging. We avoid overriding periodic() because it runs even when the robot is disabled. */

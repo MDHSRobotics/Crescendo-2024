@@ -15,9 +15,9 @@ public class Aiming {
 
     /* Pose Estimation Aiming Methods */
     /**
-     * @param targetPose The 3D position of the target (found in PoseConstants)
+     * @param goalPose The 3D position of the target (found in PoseConstants)
      * @param robotPose The current robot pose given by the swerve subsystem
-     * @return The new robot yaw as a Rotation2d that points the robot at the speaker.
+     * @return The new robot yaw as a Rotation2d that points the robot at the target.
      */
     public static Rotation2d getYaw(Translation3d goalPose, Pose2d robotPose) {
         // Find the yaw of the vector between the two points
@@ -33,9 +33,9 @@ public class Aiming {
     }
 
     /**
-     * @param targetPose The 3D position of the target, given by the swerve subsystem
+     * @param goalPose The 3D position of the target, given by the swerve subsystem
      * @param robotPose The current robot pose given by the swerve subsystem
-     * @return The new shooter pitch in degrees that points the shooter at the speaker.
+     * @return The new shooter pitch in degrees that points the shooter at the target.
      */
     public static double getPitch(Translation3d goalPose, Pose2d robotPose) {
         // Must find the (x,y) coordinate of the shooter's pivot point first.
