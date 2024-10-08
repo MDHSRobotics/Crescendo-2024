@@ -25,9 +25,7 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -101,18 +99,12 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     private final SysIdRoutine RoutineToApply = SysIdRoutineTranslation;
 
     /* NetworkTables logging */
-    StructPublisher<Pose2d> camPosepublisher = NetworkTableInstance.getDefault()
-        .getStructTopic("camPose", Pose2d.struct).publish();
+    NetworkTableInstance inst = NetworkTableInstance.getDefault();
+    StructPublisher<Pose2d> camPosepublisher = inst.getStructTopic("camPose", Pose2d.struct).publish();
 
     /* Shuffleboard logging */
     private ShuffleboardTab tab = Shuffleboard.getTab("Swerve");
-    private ShuffleboardLayout odometryList = tab.getLayout("Kinematics+Odometry", BuiltInLayouts.kList).withSize(3, 4);
-    private GenericEntry xPosition = odometryList.add("X Position", 0.0).getEntry();
-    private GenericEntry yPosition = odometryList.add("Y Position", 0.0).getEntry();
-    private GenericEntry xVelocity = odometryList.add("X Velocity", 0.0).getEntry();
-    private GenericEntry yVelocity = odometryList.add("Y Velocity", 0.0).getEntry();
-    private GenericEntry yaw = odometryList.add("Yaw", 0.0).getEntry();
-    private GenericEntry yawRate = odometryList.add("Yaw Rate", 0.0).getEntry();
+    private GenericEntry targetYaw = tab.add("Target Yaw", 0.0).getEntry();
 
 
     public Swerve(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency, SwerveModuleConstants... modules) {
@@ -237,10 +229,17 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
      * @return The new robot yaw as a Rotation2d that points the robot at the speaker.
      */
     public Rotation2d getTargetYaw() {
-        if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue) { // If blue alliance:
-            return Aiming.getYaw(PoseConstants.kBlueSpeakerPosition, getPose());
+        Pose2d currentPose = getPose();
+        Rotation2d targetYaw;
+
+        // Calculate the yaw based on alliance
+        if (DriverStation.getAlliance().get() == Alliance.Blue) { // If blue alliance:
+            targetYaw = Aiming.getYaw(PoseConstants.kBlueSpeakerPosition, currentPose);
+        } else {
+            targetYaw = Aiming.getYaw(PoseConstants.kRedSpeakerPosition, currentPose);
         }
-        return Aiming.getYaw(PoseConstants.kRedSpeakerPosition, getPose());
+        this.targetYaw.setDouble(targetYaw.getDegrees());
+        return targetYaw;
     }
 
     public Optional<Rotation2d> getRotationTargetOverride(){
@@ -269,22 +268,17 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     /* Shuffleboard logging. We avoid overriding periodic() because it runs even when the robot is disabled. */
     public void logData() {
         // Subsystem data
-        Pose2d pose = getPose();
-        xPosition.setDouble(pose.getX());
-        yPosition.setDouble(pose.getY());
+        double yawDegrees = getRobotYaw();
         ChassisSpeeds speeds = getRobotRelativeSpeeds();
-        xVelocity.setDouble(speeds.vxMetersPerSecond);
-        yVelocity.setDouble(speeds.vyMetersPerSecond);
-        yaw.setDouble(getRobotYaw());
-        yawRate.setDouble(Math.toDegrees(speeds.omegaRadiansPerSecond));
+        double yawRateDegrees = Math.toDegrees(speeds.omegaRadiansPerSecond);
 
         /* Update yaw for Limelight Megatag2 */
-        LimelightHelpers.SetRobotOrientation("limelight-front", yaw.getDouble(0.0), yawRate.getDouble(0.0), 0.0, 0.0, 0.0, 0.0);
+        LimelightHelpers.SetRobotOrientation("limelight-front", yawDegrees, yawRateDegrees, 0.0, 0.0, 0.0, 0.0);
         
         /* Add Limelight Bot Pose to Pose Estimation and logs */
         LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front");
         if (limelightMeasurement != null) {
-            if((limelightMeasurement.tagCount >= 1) && (Math.abs(yawRate.getDouble(0.0)) < 720)) { // if our angular velocity is greater than 720 degrees per second, ignore vision updates
+            if((limelightMeasurement.tagCount >= 1) && (Math.abs(yawRateDegrees) < 720)) { // if our angular velocity is greater than 720 degrees per second, ignore vision updates
                 // Add camera pose to pose estimation
                 addVisionMeasurement(limelightMeasurement.pose, limelightMeasurement.timestampSeconds);
                 // Add camera pose to SmartDashboard

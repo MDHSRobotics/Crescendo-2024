@@ -83,10 +83,8 @@ public class RobotContainer {
     /* Robot State Triggers */
     private Trigger shooterLimitSwitchPressed = new Trigger(shooterLimitSwitch::get);
     private Trigger climbLimitSwitchPressed = new Trigger(climbLimitSwitch::get);
-    private Trigger ampModeActivated = new Trigger(() -> m_isAmp);
     private Trigger tagIsInSight = new Trigger(s_Shooter::tagInSight);
     private Trigger shooterIsReady = new Trigger(s_Shooter::isReady);
-    private Trigger autoshootEnabled = new Trigger(() -> m_autoshoot);
 
     public Alliance kAlliance;
 
@@ -146,7 +144,7 @@ public class RobotContainer {
         );
 
         // When the shooter is ready and autoshoot is enabled, then shoot
-        shooterIsReady.and(autoshootEnabled).onTrue(
+        shooterIsReady.and(() -> m_autoshoot).onTrue(
             s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.5), () -> {})
             .withTimeout(0.5)
         );
@@ -292,18 +290,18 @@ public class RobotContainer {
                     .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
                     .withTargetDirection(s_Swerve.getTargetYaw())),
 
-                Commands.sequence(
-                    // Set firing mode to speaker
-                    new InstantCommand(() -> m_isAmp = false, new Subsystem[0]), // no subsystems required
-                    // Rev up the shooter
-                    s_Shooter.startEnd(() -> 
-                        s_Shooter.runShooter(-0.2, -0.2, 0.5), () ->
-                        s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, 0))
-                    .withTimeout(0.05),
+                // Commands.sequence(
+                //     // Set firing mode to speaker
+                //     new InstantCommand(() -> m_isAmp = false, new Subsystem[0]), // no subsystems required
+                //     // Rev up the shooter
+                //     s_Shooter.startEnd(() -> 
+                //         s_Shooter.runShooter(-0.2, -0.2, 0.5), () ->
+                //         s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, 0))
+                //     .withTimeout(0.05),
 
                     // Angle the shooter
                     s_Shooter.run(() -> s_Shooter.setAngleFromPose(s_Swerve.getPose()))
-                )
+                // )
             ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
         );
 
@@ -354,7 +352,7 @@ public class RobotContainer {
                 // Speaker:
                 s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.5), () -> {})
                 .withTimeout(0.5),
-            ampModeActivated)
+            () -> m_isAmp)
         );
 
         // Experimental Amp Shooting Sequence. Only use this if intake amp spitting doesn't work.
