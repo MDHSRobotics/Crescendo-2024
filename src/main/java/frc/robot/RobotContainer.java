@@ -216,8 +216,8 @@ public class RobotContainer {
         driverController.R2().onTrue(new InstantCommand(() -> m_slowMode = false, new Subsystem[0])); // no subsystems required
         driverController.L2().onTrue(new InstantCommand(() -> m_slowMode = true, new Subsystem[0])); // no subsystems required
 
-        // Temporary control for finding kSlipCurrentA. Remove after finished.
-        driverController.L3().whileTrue(s_Swerve.run(s_Swerve::applyIncreasingVoltage));
+        // Temporary control for finding kSlipCurrentA.
+        driverController.L3().whileTrue(s_Swerve.runEnd(s_Swerve::applyIncreasingVoltage, s_Swerve::resetVoltage));
 
         // SysId Controls. Comment out after finished.
         driverController.touchpad().and(driverController.povLeft()).whileTrue(s_Swerve.sysIdDynamic(Direction.kForward));

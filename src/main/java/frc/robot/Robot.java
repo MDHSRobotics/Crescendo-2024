@@ -121,7 +121,7 @@ public class Robot extends TimedRobot {
 
         // Use a different limelight pipeline depending on alliance.
         // Only necessary in Orange County Regionals, where the lights make Apriltags hard to see.
-        LimelightHelpers.setPipelineIndex("limelight-front", m_robotContainer.kAlliance == Alliance.Blue ? 1 : 0);
+        // LimelightHelpers.setPipelineIndex("limelight-front", m_robotContainer.kAlliance == Alliance.Blue ? 1 : 0);
 
         // Set the starting perspective for driving.
         m_robotContainer.setOperatorPerspective(Rotation2d.fromDegrees(m_robotContainer.kAlliance == Alliance.Blue ? 0 : 180));
@@ -146,7 +146,7 @@ public class Robot extends TimedRobot {
     public void testInit() {
         CommandScheduler.getInstance().cancelAll();
 
-        // Sets a starting pose for pose estimation to right below the Speaker. Only useful for testing without megatag2. Open this project in PathPlanner for more starting positions.
+        // Sets a starting pose for pose estimation to right below the Speaker. Open this project in PathPlanner for more starting positions.
         m_robotContainer.setStartingPosition(new Pose2d(15.17, 5.55, Rotation2d.fromDegrees(180)));
 
         // Set the starting perspective for driving.

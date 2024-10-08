@@ -51,7 +51,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
 
     private boolean m_autoRotationOverride = false;
     
-    // Temporary variables for finding kSlipCurrentA. Remove after finished.
+    // Temporary variables for finding kSlipCurrentA.
     private final TalonFX m_frontRightDriveMotor = new TalonFX(TunerConstants.kFrontRightDriveMotorId);
     private double m_voltage = 0;
     private final VoltageOut m_request = new VoltageOut(0).withEnableFOC(false);
@@ -258,12 +258,15 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         m_autoRotationOverride = override;
     }
 
-    // Temporary method for applying voltage to find kSlipCurrentA. Remove after finished.
+    // Temporary methods for applying voltage to find kSlipCurrentA.
     public void applyIncreasingVoltage() {
         m_voltage += 0.01;
         System.out.println(m_voltage);
         m_frontRightDriveMotor.setControl(m_request.withOutput(m_voltage));
-    } 
+    }
+    public void resetVoltage() {
+        m_voltage = 0;
+    }
 
     /* Shuffleboard logging. We avoid overriding periodic() because it runs even when the robot is disabled. */
     public void logData() {
