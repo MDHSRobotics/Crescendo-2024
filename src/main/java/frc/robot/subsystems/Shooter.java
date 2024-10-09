@@ -182,11 +182,11 @@ public class Shooter extends SubsystemBase{
     * Angles the shooter to a target based on the given position.
     * @param robotPose The current robot pose given by the swerve subsystem
     */
-  public void setAngleFromPose(Pose2d robotPose) {
+  public void setAngleFromPose(Pose2d robotPose, Alliance alliance) {
     double targetPitch;
 
     // Calculate the angle based on alliance
-    if (DriverStation.getAlliance().get() == Alliance.Blue) { // If blue alliance:
+    if (alliance == Alliance.Blue) { // If blue alliance:
       targetPitch = Aiming.getPitch(PoseConstants.kBlueSpeaker3DPosition, robotPose);
     } else {
       targetPitch = Aiming.getPitch(PoseConstants.kRedSpeaker3DPosition, robotPose);

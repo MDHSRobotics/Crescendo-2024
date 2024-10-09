@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -67,7 +68,6 @@ public class RobotContainer {
     private final SwerveRequest.FieldCentricFacingAngle driveFacingAngle = new SwerveRequest.FieldCentricFacingAngle()
         .withDeadband(SwerveSpeedConstants.MaxSpeed * Constants.stickDeadband)
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
-    private final PhoenixPIDController m_yawController = new PhoenixPIDController(0.15, 0, 0);
 
 
     // Set up telemetry.
@@ -87,6 +87,8 @@ public class RobotContainer {
     private Trigger tagIsInSight = new Trigger(s_Shooter::tagInSight);
     private Trigger shooterIsReady = new Trigger(s_Shooter::isReady);
 
+    public Alliance kAlliance = DriverStation.getAlliance().orElse(Alliance.Blue);
+
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
 
@@ -100,7 +102,8 @@ public class RobotContainer {
             );
         }
 
-        driveFacingAngle.HeadingController = m_yawController;
+        // Set the PID controller for swerve drive aiming
+        driveFacingAngle.HeadingController.setPID(0.15, 0, 0);
 
         s_Swerve.registerTelemetry(logger::telemeterize);
 
@@ -287,7 +290,7 @@ public class RobotContainer {
                 s_Swerve.applyRequest(() -> driveFacingAngle
                     .withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
                     .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
-                    .withTargetDirection(s_Swerve.getTargetYaw(DriverStation.getAlliance().get()))),
+                    .withTargetDirection(s_Swerve.getTargetYaw(kAlliance))),
 
 
                 // Commands.sequence(
@@ -300,7 +303,7 @@ public class RobotContainer {
                 //     .withTimeout(0.05),
 
                     // Angle the shooter
-                    s_Shooter.run(() -> s_Shooter.setAngleFromPose(s_Swerve.getPose()))
+                    s_Shooter.run(() -> s_Shooter.setAngleFromPose(s_Swerve.getPose(), kAlliance))
                 // )
             ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
         );
@@ -490,7 +493,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("Enable Auto Aim",
             Commands.parallel(
                 s_Swerve.runOnce(() -> s_Swerve.setAutoRotationOverride(true)),
-                s_Shooter.run(() -> s_Shooter.setAngleFromPose(s_Swerve.getPose())).withInterruptBehavior(InterruptionBehavior.kCancelSelf)
+                s_Shooter.run(() -> s_Shooter.setAngleFromPose(s_Swerve.getPose(), kAlliance)).withInterruptBehavior(InterruptionBehavior.kCancelSelf)
             )
         );
 
