@@ -2,7 +2,6 @@ package frc.robot;
 
 import com.ctre.phoenix6.SignalLogger;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -52,7 +51,7 @@ public class Robot extends TimedRobot {
 
         // Use a different limelight pipeline depending on alliance.
         // Only necessary in Orange County Regionals, where the lights make Apriltags hard to see.
-        // LimelightHelpers.setPipelineIndex("limelight-front", m_robotContainer.kAlliance == Alliance.Blue ? 1 : 0);
+        // LimelightHelpers.setPipelineIndex("limelight-front", DriverStation.getAlliance().get() == Alliance.Blue ? 1 : 0);
         LimelightHelpers.setPipelineIndex("limelight-front", 0);
     }
 
@@ -124,7 +123,7 @@ public class Robot extends TimedRobot {
         CommandScheduler.getInstance().cancelAll();
 
         // Set the starting perspective for driving.
-        m_robotContainer.setOperatorPerspective(Rotation2d.fromDegrees(m_robotContainer.kAlliance == Alliance.Blue ? 0 : 180));
+        m_robotContainer.setOperatorPerspective(Rotation2d.fromDegrees(DriverStation.getAlliance().get() == Alliance.Blue ? 0 : 180));
 
         // Start logging data from Swerve and Telemetry
         SignalLogger.start();
@@ -147,7 +146,7 @@ public class Robot extends TimedRobot {
         CommandScheduler.getInstance().cancelAll();
 
         // Set the starting perspective for driving.
-        m_robotContainer.setOperatorPerspective(Rotation2d.fromDegrees(m_robotContainer.kAlliance == Alliance.Blue ? 0 : 180));
+        m_robotContainer.setOperatorPerspective(Rotation2d.fromDegrees(DriverStation.getAlliance().get() == Alliance.Blue ? 0 : 180));
 
         // Start logging Start logging data from Swerve and Telemetry
         SignalLogger.start();

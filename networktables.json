@@ -86,5 +86,13 @@
     "properties": {
       "persistent": true
     }
+  },
+  {
+    "name": "/Shuffleboard/Intake/Eject Rotations",
+    "type": "double",
+    "value": 30.0,
+    "properties": {
+      "persistent": true
+    }
   }
 ]

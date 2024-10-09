@@ -228,17 +228,15 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     /**
      * @return The new robot yaw as a Rotation2d that points the robot at the speaker.
      */
-    public Rotation2d getTargetYaw() {
+    public Rotation2d getTargetYaw(Alliance alliance) {
         Pose2d currentPose = getPose();
         Rotation2d targetYaw;
 
         // Calculate the yaw based on alliance
-        if (DriverStation.getAlliance().get() == Alliance.Blue) { // If blue alliance:
-            targetYaw = Aiming.getYaw(PoseConstants.kBlueSpeaker3DPosition, currentPose);
-            System.out.println("Getting yaw for blue");
+        if (alliance == Alliance.Blue) { // If blue alliance:
+            targetYaw = Aiming.getYaw(PoseConstants.kBlueSpeaker2DPosition, currentPose);
         } else {
-            targetYaw = Aiming.getYaw(PoseConstants.kRedSpeaker3DPosition, currentPose);
-            System.out.println("Getting yaw for red");
+            targetYaw = Aiming.getYaw(PoseConstants.kRedSpeaker2DPosition, currentPose);
         }
         this.targetYaw.setDouble(targetYaw.getDegrees());
         return targetYaw;
@@ -248,7 +246,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         // Some condition that should decide if we want to override rotation
         if(m_autoRotationOverride) {
             // Return an optional containing the rotation override (this should be a field relative rotation)
-            return Optional.of(getTargetYaw());
+            return Optional.of(getTargetYaw(DriverStation.getAlliance().get()));
         } else {
             // return an empty optional when we don't want to override the path's rotation
             return Optional.empty();

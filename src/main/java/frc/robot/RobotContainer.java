@@ -2,7 +2,6 @@ package frc.robot;
 
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.SteerRequestType;
 import com.ctre.phoenix6.mechanisms.swerve.utility.PhoenixPIDController;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -13,7 +12,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -88,8 +86,6 @@ public class RobotContainer {
     private Trigger climbLimitSwitchPressed = new Trigger(climbLimitSwitch::get);
     private Trigger tagIsInSight = new Trigger(s_Shooter::tagInSight);
     private Trigger shooterIsReady = new Trigger(s_Shooter::isReady);
-
-    public final Alliance kAlliance = DriverStation.getAlliance().get();
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
@@ -267,7 +263,8 @@ public class RobotContainer {
                 s_Swerve.applyRequest(() -> driveFacingAngle
                     .withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
                     .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
-                    .withCenterOfRotation(kAlliance == Alliance.Blue ? PoseConstants.kBlueSpeaker2DPosition : PoseConstants.kRedSpeaker2DPosition)),
+                    .withTargetDirection(Rotation2d.fromDegrees(s_Swerve.getRobotYaw() - LimelightHelpers.getTX("limelight-front")))),
+
 
                 Commands.sequence(
                     // Set firing mode to speaker
@@ -290,7 +287,8 @@ public class RobotContainer {
                 s_Swerve.applyRequest(() -> driveFacingAngle
                     .withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
                     .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
-                    .withCenterOfRotation(kAlliance == Alliance.Blue ? PoseConstants.kBlueSpeaker2DPosition : PoseConstants.kRedSpeaker2DPosition)),
+                    .withTargetDirection(s_Swerve.getTargetYaw(DriverStation.getAlliance().get()))),
+
 
                 // Commands.sequence(
                 //     // Set firing mode to speaker

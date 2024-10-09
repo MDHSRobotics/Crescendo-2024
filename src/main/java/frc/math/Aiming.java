@@ -6,6 +6,7 @@ import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import frc.robot.Constants.PoseConstants;
 import frc.robot.Constants.ShooterConstants;
@@ -15,21 +16,19 @@ public class Aiming {
 
     /* Pose Estimation Aiming Methods */
     /**
-     * @param goalPose The 3D position of the target (found in PoseConstants)
+     * @param goalPose The 2D position of the target (found in PoseConstants)
      * @param robotPose The current robot pose given by the swerve subsystem
      * @return The new robot yaw as a Rotation2d that points the robot at the target.
      */
-    public static Rotation2d getYaw(Translation3d goalPose, Pose2d robotPose) {
-        // Find the yaw of the vector between the two points
-        Translation3d robotTranslation = new Translation3d(
-            goalPose.getX() - robotPose.getX(),
-            goalPose.getY() - robotPose.getY(),
-            goalPose.getZ() - ShooterConstants.kPivotHeightM); // The x, y, and z distance to the speaker
-        Vector<N3> facingSpeakerVector = robotTranslation.toVector();
-        Rotation3d robotRotation = new Rotation3d(PoseConstants.facingForwardVector, facingSpeakerVector); // Rotation from forward to facing the speaker.
-        Rotation2d robotYaw = new Rotation2d(robotRotation.getZ());
+    public static Rotation2d getYaw(Translation2d goalPose, Pose2d robotPose) {
+        // Find the angle of the vector between the two points
+        double xDistance = goalPose.getX() - robotPose.getX();
+        double yDistance = goalPose.getY() - robotPose.getY();
 
-        return robotYaw;
+        double yawRadians = Math.atan2(yDistance, xDistance);
+        Rotation2d targetYaw = Rotation2d.fromRadians(yawRadians);
+
+        return targetYaw;
     }
 
     /**

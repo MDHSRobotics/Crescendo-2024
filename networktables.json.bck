@@ -42,7 +42,47 @@
   {
     "name": "/Shuffleboard/Intake/Intake Mid Rotations",
     "type": "double",
-    "value": 30.0,
+    "value": 33.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Shuffleboard/Intake/Top Rotations",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Shuffleboard/Intake/Bottom Rotations",
+    "type": "double",
+    "value": 34.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Shuffleboard/Intake/Mid Rotations",
+    "type": "double",
+    "value": 33.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Shuffleboard/Intake/Amp Rotations",
+    "type": "double",
+    "value": 1.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Shuffleboard/Intake/Amp Fast Spit Power",
+    "type": "double",
+    "value": -0.2,
     "properties": {
       "persistent": true
     }
