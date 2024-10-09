@@ -234,9 +234,11 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
 
         // Calculate the yaw based on alliance
         if (DriverStation.getAlliance().get() == Alliance.Blue) { // If blue alliance:
-            targetYaw = Aiming.getYaw(PoseConstants.kBlueSpeakerPosition, currentPose);
+            targetYaw = Aiming.getYaw(PoseConstants.kBlueSpeaker3DPosition, currentPose);
+            System.out.println("Getting yaw for blue");
         } else {
-            targetYaw = Aiming.getYaw(PoseConstants.kRedSpeakerPosition, currentPose);
+            targetYaw = Aiming.getYaw(PoseConstants.kRedSpeaker3DPosition, currentPose);
+            System.out.println("Getting yaw for red");
         }
         this.targetYaw.setDouble(targetYaw.getDegrees());
         return targetYaw;

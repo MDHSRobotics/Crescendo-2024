@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.IntakeConstants;
-import frc.robot.LimelightHelpers;
 
 public class Intake extends SubsystemBase{
 
@@ -47,7 +46,10 @@ public class Intake extends SubsystemBase{
     private GenericEntry intakeBottomRotations = tab.addPersistent("Bottom Rotations", 34.0)
         .withSize(2, 1)
         .getEntry();
-    private GenericEntry intakeMidRotations = tab.addPersistent("Mid Rotations", 30.0)
+    private GenericEntry intakeMidRotations = tab.addPersistent("Mid Rotations", 33.0)
+        .withSize(2, 1)
+        .getEntry();
+    private GenericEntry intakeEjectRotations = tab.addPersistent("Eject Rotations", 30.0)
         .withSize(2, 1)
         .getEntry();
     public GenericEntry intakeAmpRotations = tab.addPersistent("Amp Rotations", 1.0)
@@ -112,6 +114,10 @@ public class Intake extends SubsystemBase{
 
     public void midPosition(){
         m_pidController.setReference(intakeMidRotations.getDouble(0), CANSparkMax.ControlType.kPosition);
+    }
+
+    public void ejectPosition() {
+        m_pidController.setReference(intakeEjectRotations.getDouble(0), CANSparkMax.ControlType.kPosition);
     }
 
     public void ampPosition() {
