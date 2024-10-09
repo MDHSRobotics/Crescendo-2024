@@ -96,8 +96,8 @@ public class Robot extends TimedRobot {
     public void autonomousInit() {
         CommandScheduler.getInstance().cancelAll();
 
-        // Start logging data from Swerve and Telemetry
-        SignalLogger.start();
+        // Start logging data from Swerve and Telemetry.
+        //SignalLogger.start();
         // Start logging all other data (like Shuffleboard values)
         DataLogManager.start();
 
@@ -126,7 +126,7 @@ public class Robot extends TimedRobot {
         m_robotContainer.setOperatorPerspective(Rotation2d.fromDegrees(DriverStation.getAlliance().get() == Alliance.Blue ? 0 : 180));
 
         // Start logging data from Swerve and Telemetry
-        SignalLogger.start();
+        //SignalLogger.start();
         // Start logging all other data (like Shuffleboard values)
         DataLogManager.start();
         // Record both DS control and joystick data
@@ -149,7 +149,7 @@ public class Robot extends TimedRobot {
         m_robotContainer.setOperatorPerspective(Rotation2d.fromDegrees(DriverStation.getAlliance().get() == Alliance.Blue ? 0 : 180));
 
         // Start logging Start logging data from Swerve and Telemetry
-        SignalLogger.start();
+        //SignalLogger.start();
         // Start logging all other data (like Shuffleboard values)
         DataLogManager.start();
         // Record both DS control and joystick data
