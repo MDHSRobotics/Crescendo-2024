@@ -187,9 +187,9 @@ public class Shooter extends SubsystemBase{
 
     // Calculate the angle based on alliance
     if (DriverStation.getAlliance().get() == Alliance.Blue) { // If blue alliance:
-      targetPitch = Aiming.getPitch(PoseConstants.kBlueSpeakerPosition, robotPose);
+      targetPitch = Aiming.getPitch(PoseConstants.kBlueSpeaker3DPosition, robotPose);
     } else {
-      targetPitch = Aiming.getPitch(PoseConstants.kRedSpeakerPosition, robotPose);
+      targetPitch = Aiming.getPitch(PoseConstants.kRedSpeaker3DPosition, robotPose);
     }
 
     // Set the angle

@@ -2,6 +2,8 @@ package frc.robot;
 
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.SteerRequestType;
+import com.ctre.phoenix6.mechanisms.swerve.utility.PhoenixPIDController;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -67,6 +69,7 @@ public class RobotContainer {
     private final SwerveRequest.FieldCentricFacingAngle driveFacingAngle = new SwerveRequest.FieldCentricFacingAngle()
         .withDeadband(SwerveSpeedConstants.MaxSpeed * Constants.stickDeadband)
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+    private final PhoenixPIDController m_yawController = new PhoenixPIDController(0.15, 0, 0);
 
 
     // Set up telemetry.
@@ -86,7 +89,7 @@ public class RobotContainer {
     private Trigger tagIsInSight = new Trigger(s_Shooter::tagInSight);
     private Trigger shooterIsReady = new Trigger(s_Shooter::isReady);
 
-    public Alliance kAlliance;
+    public final Alliance kAlliance = DriverStation.getAlliance().get();
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
@@ -100,6 +103,8 @@ public class RobotContainer {
                         .withRotationalRate(-driverController.getRightX() * SwerveSpeedConstants.MaxAngularRate * (m_slowMode ? 0.2 : 1.0))) // Rotation speed
             );
         }
+
+        driveFacingAngle.HeadingController = m_yawController;
 
         s_Swerve.registerTelemetry(logger::telemeterize);
 
@@ -163,9 +168,6 @@ public class RobotContainer {
         /* Auto Chooser */
         autoChooser = AutoBuilder.buildAutoChooser(); // Default auto will be `Commands.none()`
         Shuffleboard.getTab("Main").add("Select your Auto:", autoChooser).withSize(2, 1);
-
-        // Save the current alliance for use in Robot.java
-        kAlliance = DriverStation.getAlliance().orElse(Alliance.Blue);
     }
 
     /**
@@ -200,8 +202,8 @@ public class RobotContainer {
         // If the operator locks onto the speaker, the wheels will stop braking.
         driverController.cross().whileTrue(s_Swerve.applyRequest(() -> brake).withInterruptBehavior(InterruptionBehavior.kCancelSelf));
 
-        // Reset the field-centric heading on left bumper press. For pose estimation to start working again, drive to an Apriltag. Do not uncomment this until you finish SysId.
-        //driverController.options().onTrue(s_Swerve.runOnce(() -> s_Swerve.seedFieldRelative()));
+        // Reset the field-centric heading on left bumper press. THIS WILL BREAK POSE ESTIMATION.
+        // driverController.options().onTrue(s_Swerve.runOnce(() -> s_Swerve.seedFieldRelative()));
 
         // LED communication
         driverController.povUp().onTrue(s_Led.run(() -> s_Led.blink(0, 0, 255, 400)).withTimeout(5)); // Coopertition
@@ -265,7 +267,7 @@ public class RobotContainer {
                 s_Swerve.applyRequest(() -> driveFacingAngle
                     .withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
                     .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
-                    .withTargetDirection(Rotation2d.fromDegrees(s_Swerve.getRobotYaw() - LimelightHelpers.getTX("limelight-front")))),
+                    .withCenterOfRotation(kAlliance == Alliance.Blue ? PoseConstants.kBlueSpeaker2DPosition : PoseConstants.kRedSpeaker2DPosition)),
 
                 Commands.sequence(
                     // Set firing mode to speaker
@@ -288,7 +290,7 @@ public class RobotContainer {
                 s_Swerve.applyRequest(() -> driveFacingAngle
                     .withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
                     .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
-                    .withTargetDirection(s_Swerve.getTargetYaw())),
+                    .withCenterOfRotation(kAlliance == Alliance.Blue ? PoseConstants.kBlueSpeaker2DPosition : PoseConstants.kRedSpeaker2DPosition)),
 
                 // Commands.sequence(
                 //     // Set firing mode to speaker
@@ -453,7 +455,7 @@ public class RobotContainer {
             Commands.race(
                 Commands.sequence(
                     s_Intake.runOnce(() -> s_Intake.runIntake(-1, -1)),
-                    s_Intake.run(s_Intake::midPosition)
+                    s_Intake.run(s_Intake::ejectPosition)
                 ),
                 s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, 1), () -> {})
             )
