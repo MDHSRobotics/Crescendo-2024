@@ -248,7 +248,7 @@ public class RobotContainer {
         // IMPORTANT Please see the following URL to get a graphical annotation of which xbox buttons 
         //           trigger what commands on the driver controller:
         //
-        // https://www.padcrafter.com/index.php?templates=Driver+Controller&leftBumper=Reset+field+oriented+drive&dpadRight=Tell+human+player+to+amplify&dpadLeft=Tell+human+player+to+coopertition&aButton=Climb+down&yButton=Climb+motor1+and+motor2&dpadDown=&dpadUp=&xButton=Climb+motor2&bButton=Climb+motor1&leftStick=Field+oriented+drive+direction%2Fvelocity&rightStick=Robot+rotation&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&rightTrigger=Fast+mode&leftTrigger=Slow+mode
+        // https://www.padcrafter.com/index.php?templates=Driver+Controller&leftBumper=Reset+field+oriented+drive&dpadRight=Right+Climb+Up&dpadLeft=Left+Climb+Up&aButton=&yButton=&dpadDown=Climb+Down&dpadUp=Climb+Up&xButton=&bButton=&leftStick=Field+oriented+drive+direction%2Fvelocity&rightStick=Robot+rotation&col=%23242424%2C%23606A6E%2C%23FFFFFF&rightTrigger=Fast+mode&leftTrigger=Slow+mode&plat=1
 
         //
         // Whenever you edit a button binding, please update this URL
@@ -257,13 +257,13 @@ public class RobotContainer {
         driverController.L1().onTrue(s_Swerve.runOnce(() -> s_Swerve.seedFieldRelative()));
 
         // LED communication
-        driverController.R1().onTrue(new RunCommand(()-> s_Led.blink(0, 0, 255, 400), s_Led).withTimeout(5));
-        driverController.povRight().onTrue(new RunCommand(()-> s_Led.blink(255, 255, 0, 1000), s_Led).withTimeout(5));
+        //driverController.R1().onTrue(new RunCommand(()-> s_Led.blink(0, 0, 255, 400), s_Led).withTimeout(5));
+        //driverController.povRight().onTrue(new RunCommand(()-> s_Led.blink(255, 255, 0, 1000), s_Led).withTimeout(5));
         
         // Climb
         driverController.povLeft().whileTrue(new RunCommand(() -> s_Climb.runClimb(0,1), s_Climb));
         driverController.povDown().whileTrue(new RunCommand(() -> s_Climb.runClimb(-1, -1), s_Climb).until(climbLimitSwitch::get));
-        driverController.R3().whileTrue(new RunCommand(() -> s_Climb.runClimb(1, 1), s_Climb));
+        driverController.povUp().whileTrue(new RunCommand(() -> s_Climb.runClimb(1, 1), s_Climb));
         driverController.povRight().whileTrue(new RunCommand(() -> s_Climb.runClimb(1, 0), s_Climb));
 
         driverController.R2().onTrue(new InstantCommand(() -> m_slowMode = false));
