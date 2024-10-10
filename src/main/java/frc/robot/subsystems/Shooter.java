@@ -112,10 +112,10 @@ public class Shooter extends SubsystemBase{
     angle.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
     feeder.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
 
-    topShooter.setOpenLoopRampRate(0.1);
-    bottomShooter.setOpenLoopRampRate(0.1);
-    angle.setOpenLoopRampRate(0.1);
-    feeder.setOpenLoopRampRate(0.1);
+    topShooter.setOpenLoopRampRate(0.2);
+    bottomShooter.setOpenLoopRampRate(0.2);
+    angle.setOpenLoopRampRate(0.2);
+    feeder.setOpenLoopRampRate(0.2);
     
     SmartDashboard.putNumber("Angle 1 rotations", angle.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).getPosition());
     SmartDashboard.putNumber("Angle 2 rotations", angle.getEncoder().getPosition());
@@ -172,8 +172,8 @@ public class Shooter extends SubsystemBase{
       double angle = Aiming.getPitch(adjustedDistance, heightDifference);
 
       // set the angle
-      setAngle(Math.toDegrees(angle) + adjustment.getDouble(4));
-      m_lastAngle = Math.toDegrees(Math.toDegrees(angle) + adjustment.getDouble(4));
+      setAngle(Math.toDegrees(angle) + adjustment.getDouble(2));
+      m_lastAngle = Math.toDegrees(Math.toDegrees(angle) + adjustment.getDouble(2));
       
       calculatedDistance.setDouble(horizontalDistance);
     }else{

@@ -59,10 +59,10 @@ public class Intake extends SubsystemBase{
         intake.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
         conveyor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
 
-        leftAngle.setOpenLoopRampRate(0.1);
-        rightAngle.setOpenLoopRampRate(0.1);
-        intake.setOpenLoopRampRate(0.1);
-        conveyor.setOpenLoopRampRate(0.1);
+        leftAngle.setOpenLoopRampRate(0.2);
+        rightAngle.setOpenLoopRampRate(0.2);
+        intake.setOpenLoopRampRate(0.2);
+        conveyor.setOpenLoopRampRate(0.2);
 
         leftAngle.follow(rightAngle, true);
     }
