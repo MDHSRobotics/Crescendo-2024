@@ -99,7 +99,7 @@ public class Robot extends TimedRobot {
         // Start logging data from Swerve and Telemetry.
         //SignalLogger.start();
         // Start logging all other data (like Shuffleboard values)
-        DataLogManager.start();
+        //DataLogManager.start();
 
         m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
@@ -131,9 +131,9 @@ public class Robot extends TimedRobot {
         // Start logging data from Swerve and Telemetry
         //SignalLogger.start();
         // Start logging all other data (like Shuffleboard values)
-        DataLogManager.start();
+        //DataLogManager.start();
         // Record both DS control and joystick data
-        DriverStation.startDataLog(DataLogManager.getLog());
+        //DriverStation.startDataLog(DataLogManager.getLog());
         
         // Update the alliance
         m_robotContainer.kAlliance = DriverStation.getAlliance().get();
@@ -157,9 +157,9 @@ public class Robot extends TimedRobot {
         // Start logging Start logging data from Swerve and Telemetry
         //SignalLogger.start();
         // Start logging all other data (like Shuffleboard values)
-        DataLogManager.start();
+        //DataLogManager.start();
         // Record both DS control and joystick data
-        DriverStation.startDataLog(DataLogManager.getLog());
+        //DriverStation.startDataLog(DataLogManager.getLog());
         
         // Update the alliance
         m_robotContainer.kAlliance = DriverStation.getAlliance().get();
