@@ -11,17 +11,14 @@ import com.revrobotics.CANSparkBase.IdleMode;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
-import edu.wpi.first.wpilibj.shuffleboard.ComplexWidget;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.revrobotics.CANSparkLowLevel.MotorType;
-import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 
 import frc.math.Aiming;
 import frc.robot.LimelightHelpers;
@@ -44,13 +41,6 @@ public class Shooter extends SubsystemBase{
 
   /* Shuffleboard Logging */
   private ShuffleboardTab tab = Shuffleboard.getTab("Shooter");
-
-  /* This is causing occasional errors upon code redeploy, because the NT entry doesn't always reset.
-  private ComplexWidget cameraView =
-    tab.addCamera("limelight-front", "limelight-front", "10.41.41.11:5800")
-      .withWidget(BuiltInWidgets.kCameraStream)
-      .withSize(4, 4);*/
-
   private ShuffleboardLayout list = tab.getLayout("Shooter Info", BuiltInLayouts.kList).withSize(3, 5);
   private GenericEntry bottomShooterSpeed = list.add("Bottom Shooter Speed", 0.0).getEntry();
   private GenericEntry topShooterSpeed = list.add("Top Shooter Speed", 0.0).getEntry();

@@ -17,6 +17,7 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.util.*;
 
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.Units;
@@ -50,6 +51,11 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     private double m_lastSimTime;
 
     private boolean m_autoRotationOverride = false;
+
+    // PID Controller for deciding the rotational rate of the robot during aiming.
+    private PIDController m_rotationalRateController = new PIDController(0.15, 0, 0);
+    // PID Controller for deciding the rotational rate of the robot during note aiming.
+    //private PIDController m_noteRotationalRateController = new PIDController(0.15, 0, 0);
     
     // Temporary variables for finding kSlipCurrentA.
     private final TalonFX m_frontRightDriveMotor = new TalonFX(TunerConstants.kFrontRightDriveMotorId);
@@ -114,6 +120,9 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
             startSimThread();
         }
 
+        // Add the PID controller to Shuffleboard for easy tuning
+        //tab.add("Note Rotational Rate PID", m_noteRotationalRateController);
+
         // Set the pose estimator's trust of poses from the Limelight
         setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
     }
@@ -124,6 +133,9 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        
+        // Add the PID controller to Shuffleboard for easy tuning
+        //tab.add("Note Rotational Rate PID", m_noteRotationalRateController);
 
         // Set the pose estimator's trust of poses from the Limelight
         setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
@@ -197,6 +209,20 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         // System.out.println("Drive Robot Relative speeds: " + speeds.toString());
       }
 
+    public Optional<Rotation2d> getRotationTargetOverride(){
+        // Some condition that should decide if we want to override rotation
+        if(m_autoRotationOverride) {
+            // Return an optional containing the rotation override (this should be a field relative rotation)
+            return Optional.of(getTargetYaw(DriverStation.getAlliance().get()));
+        } else {
+            // return an empty optional when we don't want to override the path's rotation
+            return Optional.empty();
+        }
+    }
+
+    public void setAutoRotationOverride(boolean override){
+        m_autoRotationOverride = override;
+    }
 
     // Simulation
     private void startSimThread() {
@@ -242,20 +268,23 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         return targetYaw;
     }
 
-    public Optional<Rotation2d> getRotationTargetOverride(){
-        // Some condition that should decide if we want to override rotation
-        if(m_autoRotationOverride) {
-            // Return an optional containing the rotation override (this should be a field relative rotation)
-            return Optional.of(getTargetYaw(DriverStation.getAlliance().get()));
-        } else {
-            // return an empty optional when we don't want to override the path's rotation
-            return Optional.empty();
-        }
+    public double calculateTagRotationalRate() {
+        double tx = LimelightHelpers.getTX("limelight-front");
+        return m_rotationalRateController.calculate(tx, 0);
     }
 
+    public double calculateNoteRotationalRate() {
+        double tx = LimelightHelpers.getTX("limelight-back");
+        return m_rotationalRateController.calculate(tx, 0);
+        //return m_noteRotationalRateController.calculate(tx, 0);
+    }
 
-    public void setAutoRotationOverride(boolean override){
-        m_autoRotationOverride = override;
+    public Rotation2d getNoteTargetDirection() {
+        // Gets the target direction of the note by offsetting the current gyro angle by the tx.
+        double currentYaw = m_pigeon2.getAngle();
+        double tx = LimelightHelpers.getTX("limelight-back");
+        Rotation2d targetDirection = Rotation2d.fromDegrees(currentYaw - tx);
+        return targetDirection;
     }
 
     // Temporary methods for applying voltage to find kSlipCurrentA.

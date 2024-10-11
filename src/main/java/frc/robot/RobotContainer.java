@@ -2,7 +2,6 @@ package frc.robot;
 
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
-import com.ctre.phoenix6.mechanisms.swerve.utility.PhoenixPIDController;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -26,7 +25,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-
 import frc.robot.Constants.*;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
@@ -164,6 +162,9 @@ public class RobotContainer {
         // Register the autonomous commands for Pathplanner
         registerPathplannerCommands();
 
+        // Add the target direction PID Controller to Shuffleboard
+        Shuffleboard.getTab("Swerve").add("Target Direction PID", driveFacingAngle.HeadingController);
+
         /* Auto Chooser */
         autoChooser = AutoBuilder.buildAutoChooser(); // Default auto will be `Commands.none()`
         Shuffleboard.getTab("Main").add("Select your Auto:", autoChooser).withSize(2, 1);
@@ -263,11 +264,10 @@ public class RobotContainer {
         // Lock on to speaker (using limelight)
         operatorController.x().toggleOnTrue(
             Commands.race(
-                s_Swerve.applyRequest(() -> driveFacingAngle
+                s_Swerve.applyRequest(() -> drive
                     .withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
                     .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
-                    .withTargetDirection(Rotation2d.fromDegrees(s_Swerve.getRobotYaw() - LimelightHelpers.getTX("limelight-front")))),
-
+                    .withRotationalRate(s_Swerve.calculateTagRotationalRate())),
 
                 Commands.sequence(
                     // Set firing mode to speaker
@@ -292,7 +292,6 @@ public class RobotContainer {
                     .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
                     .withTargetDirection(s_Swerve.getTargetYaw(kAlliance))),
 
-
                 // Commands.sequence(
                 //     // Set firing mode to speaker
                 //     new InstantCommand(() -> m_isAmp = false, new Subsystem[0]), // no subsystems required
@@ -310,10 +309,10 @@ public class RobotContainer {
 
         // Lock onto a note (using limelight-back).
         operatorController.rightStick().toggleOnTrue(
-            s_Swerve.applyRequest(() -> driveFacingAngle
+            s_Swerve.applyRequest(() -> drive
                 .withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
                 .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
-                .withTargetDirection(Rotation2d.fromDegrees(s_Swerve.getRobotYaw() - LimelightHelpers.getTX("limelight-back")))
+                .withRotationalRate(s_Swerve.calculateNoteRotationalRate())
 
             ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
         );
