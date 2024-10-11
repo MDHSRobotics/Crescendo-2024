@@ -308,15 +308,15 @@ public class RobotContainer {
             ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
         );
 
-        // Lock onto a note (using limelight-back). Do not use until you have connected the limelight and renamed it to limelight-back.
-        /*operatorController.rightStick().toggleOnTrue(
+        // Lock onto a note (using limelight-back).
+        operatorController.rightStick().toggleOnTrue(
             s_Swerve.applyRequest(() -> driveFacingAngle
                 .withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
                 .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
                 .withTargetDirection(Rotation2d.fromDegrees(s_Swerve.getRobotYaw() - LimelightHelpers.getTX("limelight-back")))
 
             ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
-        );*/
+        );
 
         // Set angle to amp
         operatorController.b().toggleOnTrue(
