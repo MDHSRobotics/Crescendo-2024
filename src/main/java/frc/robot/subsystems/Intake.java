@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
+import frc.robot.LimelightHelpers;
 import frc.robot.Constants.IntakeConstants;
 
 public class Intake extends SubsystemBase{
@@ -130,7 +130,11 @@ public class Intake extends SubsystemBase{
         m_rightAngleEncoder.setPosition(0);
     }
 
-    
+    public boolean noteInSight() {
+        boolean noteIsInSight = LimelightHelpers.getTX("limelight-back") != 0;
+        return noteIsInSight;
+    }
+
     /* Shuffleboard logging. We avoid overriding periodic() because it runs even when the robot is disabled. */
     public void logData() {
         // Subsystem data

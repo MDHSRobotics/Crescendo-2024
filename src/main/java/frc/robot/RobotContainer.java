@@ -59,7 +59,7 @@ public class RobotContainer {
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
         .withDeadband(SwerveSpeedConstants.MaxSpeed * Constants.stickDeadband)
-        .withRotationalDeadband(SwerveSpeedConstants.MaxAngularRate * Constants.stickDeadband) // Add a 10% deadband
+        .withRotationalDeadband(SwerveSpeedConstants.MaxAngularRate * 0.06) // Add a 10% deadband
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // I want field-centric driving in open loop
 
     private final SwerveRequest.FieldCentricFacingAngle driveFacingAngle = new SwerveRequest.FieldCentricFacingAngle()
@@ -83,6 +83,7 @@ public class RobotContainer {
     private final Trigger shooterLimitSwitchPressed = new Trigger(shooterLimitSwitch::get);
     private final Trigger climbLimitSwitchPressed = new Trigger(climbLimitSwitch::get);
     private final Trigger tagIsInSight = new Trigger(s_Shooter::tagInSight);
+    private final Trigger noteIsInSight = new Trigger(s_Intake::noteInSight);
     private final Trigger shooterIsReady = new Trigger(s_Shooter::isReady);
 
     public Alliance kAlliance = DriverStation.getAlliance().orElse(Alliance.Blue);
@@ -101,7 +102,8 @@ public class RobotContainer {
         }
 
         // Set the PID controller for swerve drive aiming
-        driveFacingAngle.HeadingController.setPID(0.15, 0, 0);
+        driveFacingAngle.HeadingController.setPID(3, 0, 0);
+        driveFacingAngle.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
 
         s_Swerve.registerTelemetry(logger::telemeterize);
 
@@ -140,9 +142,22 @@ public class RobotContainer {
         // LEDs glow orange for 3 secs whenever a note is picked up.
         shooterLimitSwitchPressed.onTrue(s_Led.run(() -> s_Led.setColor(255, 20, 0)).withTimeout(3));
 
-        // When a tag is in sight but the shooter is not ready, blink the LEDs red
-        tagIsInSight.and(shooterIsReady.negate()).toggleOnTrue(
+        // While a tag is in sight but the shooter is not ready, blink the LEDs red
+        tagIsInSight.and(shooterIsReady.negate()).whileTrue(
             s_Led.run(() -> s_Led.blink(255, 0, 0, 300))
+        );
+
+        // When a note is in sight and the driver is not rotating the robot, automatically lock on the note and blink the LEDs orange
+        noteIsInSight.and(tagIsInSight.negate()).whileTrue(
+            Commands.parallel(
+                s_Swerve.applyRequest(() -> drive
+                    .withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
+                    .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
+                    .withRotationalRate(s_Swerve.calculateNoteRotationalRate())
+                ),
+                s_Led.run(() -> s_Led.blink(255, 20, 0, 300))
+            ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband).andThen(new InstantCommand(() -> System.out.println("Stick moved"), new Subsystem[0]))
+            //lockOnNoteCommmand
         );
 
         // When the shooter is ready and autoshoot is enabled, then shoot
@@ -241,7 +256,7 @@ public class RobotContainer {
                     s_Intake.runOnce(() -> s_Intake.runIntake(1, 1)),
                     s_Intake.run(() -> s_Intake.bottomPosition())
                 ),
-                s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, -0.7), () -> {})
+                s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, -0.6), () -> {})
             )
         );
 
@@ -252,7 +267,7 @@ public class RobotContainer {
                     s_Intake.runOnce(() -> s_Intake.runIntake(1, 1)),
                     s_Intake.run(() -> s_Intake.midPosition())
                 ),
-                s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, -0.7), () -> {})
+                s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, -0.6), () -> {})
             )
         );
 
@@ -288,30 +303,19 @@ public class RobotContainer {
                     .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
                     .withTargetDirection(s_Swerve.getTargetYaw(kAlliance))),
 
-                // Commands.sequence(
-                //     // Set firing mode to speaker
-                //     new InstantCommand(() -> m_isAmp = false, new Subsystem[0]), // no subsystems required
-                //     // Rev up the shooter
-                //     s_Shooter.startEnd(() -> 
-                //         s_Shooter.runShooter(-0.2, -0.2, 0.5), () ->
-                //         s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, 0))
-                //     .withTimeout(0.05),
+                Commands.sequence(
+                    // Set firing mode to speaker
+                    new InstantCommand(() -> m_isAmp = false, new Subsystem[0]), // no subsystems required
+                    // Rev up the shooter
+                    s_Shooter.startEnd(() -> 
+                        s_Shooter.runShooter(-0.2, -0.2, 0.5), () ->
+                        s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, 0))
+                    .withTimeout(0.05),
 
                     // Angle the shooter
                     s_Shooter.run(() -> s_Shooter.setAngleFromPose(s_Swerve.getPose(), kAlliance))
-                // )
+                )
             ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
-        );
-
-        // Lock onto a note (using limelight-back).
-        operatorController.leftStick().toggleOnTrue(
-            s_Swerve.applyRequest(() -> drive
-                .withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
-                .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
-                .withRotationalRate(s_Swerve.calculateNoteRotationalRate())
-
-            ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
-            //lockOnNoteCommmand
         );
 
         // Set angle to amp
@@ -469,17 +473,25 @@ public class RobotContainer {
     private void registerPathplannerCommands()
     {
         // IMPORTANT: In autonomous, the default subsystem commands do not get scheduled.
+        // Also, commands MUST have an end, or PathPlanner will not continue.
 
-        NamedCommands.registerCommand("Rev Up the Shooter",  
-            // Tuck the note into the shooter, and then ramp up
-            s_Shooter.startEnd(() -> 
-                s_Shooter.runShooter(-0.2, -0.2, 0.5), () -> 
-                s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, 0))
-            .withTimeout(0.05)
+        NamedCommands.registerCommand("Aim the Shooter",  
+            // Tuck the note into the shooter, and then ramp up and aim
+            Commands.sequence(
+                s_Shooter.startEnd(() -> 
+                    s_Shooter.runShooter(-0.2, -0.2, 0.5), () -> 
+                    s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, 0))
+                .withTimeout(0.05),
+                s_Shooter.runOnce(() -> s_Shooter.setAngleFromPose(s_Swerve.getPose(), kAlliance))
+            )
         );
 
         NamedCommands.registerCommand("Run Shooter",
-            s_Shooter.runOnce(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -1.0))
+            s_Shooter.runOnce(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.5))
+        );
+
+        NamedCommands.registerCommand("Shooter Down",
+            s_Shooter.runOnce(() -> s_Shooter.setAngle(ShooterConstants.kShooterMinAngle, false))
         );
 
         NamedCommands.registerCommand("Stop Shooter",

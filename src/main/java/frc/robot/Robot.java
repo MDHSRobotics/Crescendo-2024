@@ -2,6 +2,7 @@ package frc.robot;
 
 import com.ctre.phoenix6.SignalLogger;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -53,6 +54,7 @@ public class Robot extends TimedRobot {
         // Only necessary in Orange County Regionals, where the lights make Apriltags hard to see.
         // LimelightHelpers.setPipelineIndex("limelight-front", m_robotContainer.kAlliance == Alliance.Blue ? 1 : 0);
         LimelightHelpers.setPipelineIndex("limelight-front", 0);
+        LimelightHelpers.setPipelineIndex("limelight-back", 0);
     }
 
 
@@ -95,6 +97,9 @@ public class Robot extends TimedRobot {
     @Override
     public void autonomousInit() {
         CommandScheduler.getInstance().cancelAll();
+        
+        // Update the alliance
+        m_robotContainer.kAlliance = DriverStation.getAlliance().get();
 
         // Start logging data from Swerve and Telemetry.
         //SignalLogger.start();
@@ -108,9 +113,6 @@ public class Robot extends TimedRobot {
             m_autonomousCommand.schedule();
             System.out.println(m_autonomousCommand);
         }
-
-        // Update the alliance
-        m_robotContainer.kAlliance = DriverStation.getAlliance().get();
     }
 
     /**
@@ -124,9 +126,12 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopInit() {
         CommandScheduler.getInstance().cancelAll();
+        
+        // Update the alliance
+        m_robotContainer.kAlliance = DriverStation.getAlliance().get();
 
         // Set the starting perspective for driving.
-        m_robotContainer.setOperatorPerspective(Rotation2d.fromDegrees(DriverStation.getAlliance().get() == Alliance.Blue ? 0 : 180));
+        m_robotContainer.setOperatorPerspective(Rotation2d.fromDegrees(m_robotContainer.kAlliance == Alliance.Blue ? 0 : 180));
 
         // Start logging data from Swerve and Telemetry
         //SignalLogger.start();
@@ -134,9 +139,6 @@ public class Robot extends TimedRobot {
         //DataLogManager.start();
         // Record both DS control and joystick data
         //DriverStation.startDataLog(DataLogManager.getLog());
-        
-        // Update the alliance
-        m_robotContainer.kAlliance = DriverStation.getAlliance().get();
     }
 
     /**
@@ -151,6 +153,12 @@ public class Robot extends TimedRobot {
     public void testInit() {
         CommandScheduler.getInstance().cancelAll();
 
+        // Set the starting position to right below the red speaker.
+        m_robotContainer.setStartingPosition(new Pose2d(15.17, 5.55, Rotation2d.fromDegrees(180)));
+        
+        // Update the alliance
+        m_robotContainer.kAlliance = DriverStation.getAlliance().get();
+
         // Set the starting perspective for driving.
         m_robotContainer.setOperatorPerspective(Rotation2d.fromDegrees(m_robotContainer.kAlliance == Alliance.Blue ? 0 : 180));
 
@@ -160,9 +168,6 @@ public class Robot extends TimedRobot {
         //DataLogManager.start();
         // Record both DS control and joystick data
         //DriverStation.startDataLog(DataLogManager.getLog());
-        
-        // Update the alliance
-        m_robotContainer.kAlliance = DriverStation.getAlliance().get();
     }
 
     /**

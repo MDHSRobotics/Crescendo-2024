@@ -57,7 +57,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     // PID Controller for deciding the rotational rate of the robot during aiming.
     private PIDController m_rotationalRateController = new PIDController(0.15, 0, 0);
     // PID Controller for deciding the rotational rate of the robot during note aiming.
-    //private PIDController m_noteRotationalRateController = new PIDController(0.15, 0, 0);
+    private PIDController m_noteRotationalRateController = new PIDController(0.08, 0, 0);
     
     // Temporary variables for finding kSlipCurrentA.
     private final TalonFX m_frontRightDriveMotor = new TalonFX(TunerConstants.kFrontRightDriveMotorId);
@@ -123,7 +123,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         }
 
         // Add the PID controller to Shuffleboard for easy tuning
-        //tab.add("Note Rotational Rate PID", m_noteRotationalRateController);
+        tab.add("Note Rotational Rate PID", m_noteRotationalRateController);
 
         // Set the pose estimator's trust of poses from the Limelight
         setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
@@ -137,7 +137,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         }
         
         // Add the PID controller to Shuffleboard for easy tuning
-        //tab.add("Note Rotational Rate PID", m_noteRotationalRateController);
+        tab.add("Note Rotational Rate PID", m_noteRotationalRateController);
 
         // Set the pose estimator's trust of poses from the Limelight
         setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
@@ -266,7 +266,13 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         } else {
             targetYaw = Aiming.getYaw(PoseConstants.kRedSpeaker2DPosition, currentPose);
         }
+        // Log the target yaw to Shuffleboard
         this.targetYaw.setDouble(targetYaw.getDegrees());
+        // If the alliance is red, the driveFacingAngle request will incorrectly try to rotate the target direction, so rotate it back
+        if (alliance == Alliance.Red) {
+            targetYaw = targetYaw.rotateBy(Rotation2d.fromDegrees(-180));
+        }
+
         return targetYaw;
     }
 
@@ -279,8 +285,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
 
     public double calculateNoteRotationalRate() {
         double tx = LimelightHelpers.getTX("limelight-back");
-        double output = m_rotationalRateController.calculate(tx, 0);
-        //double output = m_noteRotationalRateController.calculate(tx, 0);
+        double output = m_noteRotationalRateController.calculate(tx, 0);
         double rotationalRate = MathUtil.clamp(output, -SwerveSpeedConstants.MaxAngularRate, SwerveSpeedConstants.MaxAngularRate);
         return rotationalRate;
     }

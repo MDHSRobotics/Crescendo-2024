@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 
 import frc.math.Aiming;
 import frc.robot.LimelightHelpers;
@@ -115,18 +116,16 @@ public class Shooter extends SubsystemBase{
     topShooter.setIdleMode(IdleMode.kBrake);
     bottomShooter.setIdleMode(IdleMode.kBrake);
 
-    // Uncomment if CAN utilization is too high. Also, consider increasing the period in different ways: https://docs.revrobotics.com/brushless/spark-max/control-interfaces#use-case-examples
-    // topShooter.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
-    // bottomShooter.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
-    // angle.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
-    // feeder.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
+    // Consider increasing the period in different ways: https://docs.revrobotics.com/brushless/spark-max/control-interfaces#use-case-examples
+    topShooter.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
+    bottomShooter.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
+    angle.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
+    feeder.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
 
     topShooter.setOpenLoopRampRate(0.1);
     bottomShooter.setOpenLoopRampRate(0.1);
     angle.setOpenLoopRampRate(0.1);
     feeder.setOpenLoopRampRate(0.1);
-    
-    //shooter2.setIdleMode(IdleMode.kCoast);
   }
 
   public void runShooter(double topPower, double bottomPower, double feed){
@@ -161,7 +160,7 @@ public class Shooter extends SubsystemBase{
       double angle = Aiming.getPitch(adjustedDistance, heightDifference);
 
       // Update the angle
-      m_lastAngle = Math.toDegrees(Math.toDegrees(angle) + adjustment.getDouble(0));
+      m_lastAngle = Math.toDegrees(angle) + adjustment.getDouble(0);
       
       /* Logging */
       calculatedDistance.setDouble(horizontalDistance);
