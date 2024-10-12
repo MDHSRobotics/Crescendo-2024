@@ -16,6 +16,7 @@ import com.pathplanner.lib.auto.*;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.util.*;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -34,6 +35,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.math.Aiming;
 import frc.robot.LimelightHelpers;
 import frc.robot.Constants.PoseConstants;
+import frc.robot.Constants.SwerveSpeedConstants;
 import frc.robot.generated.TunerConstants;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -270,21 +272,17 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
 
     public double calculateTagRotationalRate() {
         double tx = LimelightHelpers.getTX("limelight-front");
-        return m_rotationalRateController.calculate(tx, 0);
+        double output = m_rotationalRateController.calculate(tx, 0);
+        double rotationalRate = MathUtil.clamp(output, -SwerveSpeedConstants.MaxAngularRate, SwerveSpeedConstants.MaxAngularRate);
+        return rotationalRate;
     }
 
     public double calculateNoteRotationalRate() {
         double tx = LimelightHelpers.getTX("limelight-back");
-        return m_rotationalRateController.calculate(tx, 0);
-        //return m_noteRotationalRateController.calculate(tx, 0);
-    }
-
-    public Rotation2d getNoteTargetDirection() {
-        // Gets the target direction of the note by offsetting the current gyro angle by the tx.
-        double currentYaw = m_pigeon2.getAngle();
-        double tx = LimelightHelpers.getTX("limelight-back");
-        Rotation2d targetDirection = Rotation2d.fromDegrees(currentYaw - tx);
-        return targetDirection;
+        double output = m_rotationalRateController.calculate(tx, 0);
+        //double output = m_noteRotationalRateController.calculate(tx, 0);
+        double rotationalRate = MathUtil.clamp(output, -SwerveSpeedConstants.MaxAngularRate, SwerveSpeedConstants.MaxAngularRate);
+        return rotationalRate;
     }
 
     // Temporary methods for applying voltage to find kSlipCurrentA.

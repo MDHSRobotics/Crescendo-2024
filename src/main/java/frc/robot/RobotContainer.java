@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.*;
+import frc.robot.commands.LockOnNoteCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
 
@@ -52,8 +53,8 @@ public class RobotContainer {
     private final LED s_Led = new LED();
     
     /* Limit Switches */
-    DigitalInput shooterLimitSwitch = new DigitalInput(ShooterConstants.kLimitSwitchID);
-    DigitalInput climbLimitSwitch = new DigitalInput(ClimbConstants.kLimitSwitchID);
+    private final DigitalInput shooterLimitSwitch = new DigitalInput(ShooterConstants.kLimitSwitchID);
+    private final DigitalInput climbLimitSwitch = new DigitalInput(ClimbConstants.kLimitSwitchID);
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -61,12 +62,11 @@ public class RobotContainer {
         .withRotationalDeadband(SwerveSpeedConstants.MaxAngularRate * Constants.stickDeadband) // Add a 10% deadband
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // I want field-centric driving in open loop
 
-    private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-
     private final SwerveRequest.FieldCentricFacingAngle driveFacingAngle = new SwerveRequest.FieldCentricFacingAngle()
         .withDeadband(SwerveSpeedConstants.MaxSpeed * Constants.stickDeadband)
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
+    //private final LockOnNoteCommand lockOnNoteCommmand = new LockOnNoteCommand(s_Swerve, drive, driveFacingAngle, driverController);
 
     // Set up telemetry.
     private final Telemetry logger = new Telemetry(SwerveSpeedConstants.MaxSpeed);
@@ -80,10 +80,10 @@ public class RobotContainer {
     private boolean m_autoshoot = false;
 
     /* Robot State Triggers */
-    private Trigger shooterLimitSwitchPressed = new Trigger(shooterLimitSwitch::get);
-    private Trigger climbLimitSwitchPressed = new Trigger(climbLimitSwitch::get);
-    private Trigger tagIsInSight = new Trigger(s_Shooter::tagInSight);
-    private Trigger shooterIsReady = new Trigger(s_Shooter::isReady);
+    private final Trigger shooterLimitSwitchPressed = new Trigger(shooterLimitSwitch::get);
+    private final Trigger climbLimitSwitchPressed = new Trigger(climbLimitSwitch::get);
+    private final Trigger tagIsInSight = new Trigger(s_Shooter::tagInSight);
+    private final Trigger shooterIsReady = new Trigger(s_Shooter::isReady);
 
     public Alliance kAlliance = DriverStation.getAlliance().orElse(Alliance.Blue);
 
@@ -198,10 +198,6 @@ public class RobotContainer {
         Whenever you edit a button binding, please update this URL
         */
 
-        // Brake the robot by crossing the wheels.
-        // If the operator locks onto the speaker, the wheels will stop braking.
-        driverController.cross().whileTrue(s_Swerve.applyRequest(() -> brake).withInterruptBehavior(InterruptionBehavior.kCancelSelf));
-
         // Reset the field-centric heading on left bumper press. THIS WILL BREAK POSE ESTIMATION.
         // driverController.options().onTrue(s_Swerve.runOnce(() -> s_Swerve.seedFieldRelative()));
 
@@ -234,7 +230,7 @@ public class RobotContainer {
 
         /* IMPORTANT Please see the following URL to get a graphical annotation of which xbox buttons 
             trigger what commands on the operator controller:
-            https://www.padcrafter.com/?dpadRight=New+Amp+Firing+Sequence&dpadUp=Reset+Shooter+Encoder&leftStick=Aim+Intake+%28Calibration+Only%29&leftStickClick=&leftBumper=Prepare+intake+for+amp+spit&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&backButton=Eject+Intake&startButton=Free+a+Stuck+Note+%28on+shooter%29&rightStickClick=Lock+Speaker+%28using+pose%29&rightStick=Aim+Shooter+%28Calibration+Only%29&aButton=Fire&bButton=Set+Angle%3A+Amp&xButton=Lock+Speaker&yButton=Manual+Angle+Fire&rightBumper=Intake+Amp+Spit&rightTrigger=Deploy+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF#?rightStickClick=Lock+Speaker+%28using+pose%29&xButton=Lock+Speaker&aButton=Fire&bButton=Set+Angle%3A+Amp&rightStick=Aim+Shooter+%28Calibration+Only%29&rightBumper=Set+Angle%3A+Point+Blank&rightTrigger=Deploy+Intake&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&leftBumper=Set+Angle%3A+Podium&leftStick=Aim+Intake+%28Calibration+Only%29&dpadUp=Reset+Shooter+Encoder&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&startButton=Free+a+Stuck+Note+%28on+shooter%29&backButton=Eject+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&yButton=Manual+Angle+Fire&leftStickClick=Toggle+Auto+Shoot
+            https://www.padcrafter.com/?dpadRight=New+Amp+Firing+Sequence&dpadUp=Reset+Shooter+Encoder&leftStick=Aim+Intake+%28Calibration+Only%29&leftStickClick=Lock+onto+a+note&leftBumper=Prepare+intake+for+amp+spit&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&backButton=Eject+Intake&startButton=Free+a+Stuck+Note+%28on+shooter%29&rightStickClick=Lock+Speaker+%28using+pose%29&rightStick=Aim+Shooter+%28Calibration+Only%29&aButton=Fire&bButton=Set+Angle%3A+Amp&xButton=Lock+Speaker&yButton=Manual+Angle+Fire&rightBumper=Intake+Amp+Spit&rightTrigger=Deploy+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&plat=0#?rightStickClick=Lock+Speaker+%28using+pose%29&xButton=Lock+Speaker&aButton=Fire&bButton=Set+Angle%3A+Amp&rightStick=Aim+Shooter+%28Calibration+Only%29&rightBumper=Set+Angle%3A+Point+Blank&rightTrigger=Deploy+Intake&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&leftBumper=Set+Angle%3A+Podium&leftStick=Aim+Intake+%28Calibration+Only%29&dpadUp=Reset+Shooter+Encoder&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&startButton=Free+a+Stuck+Note+%28on+shooter%29&backButton=Eject+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&yButton=Manual+Angle+Fire&leftStickClick=Toggle+Auto+Shoot
             Please update this link whenever you change a button.
         */
         
@@ -308,13 +304,14 @@ public class RobotContainer {
         );
 
         // Lock onto a note (using limelight-back).
-        operatorController.rightStick().toggleOnTrue(
+        operatorController.leftStick().toggleOnTrue(
             s_Swerve.applyRequest(() -> drive
                 .withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
                 .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
                 .withRotationalRate(s_Swerve.calculateNoteRotationalRate())
 
             ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
+            //lockOnNoteCommmand
         );
 
         // Set angle to amp
