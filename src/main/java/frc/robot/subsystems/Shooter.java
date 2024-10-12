@@ -67,20 +67,21 @@ public class Shooter extends SubsystemBase{
       .getEntry();
   private GenericEntry calculatedAngle =
     tab.add("Calculated angle", 0.0)
+      .withSize(2, 1)
       .getEntry();
   private GenericEntry calculatedRotations =
     tab.add("Calculated Rotations", 0.0)
-      .withSize(2, 1)
+      .withSize(3, 1)
       .getEntry();
       
   private ShuffleboardTab mainTab = Shuffleboard.getTab("Main");
   private GenericEntry adjustment = 
     mainTab.addPersistent("Adjustment Angle", 4)
-    .withPosition(2, 0)
+    .withSize(2, 1)
     .getEntry();
   private GenericEntry atSpeed =
     mainTab.add("At Speed", false)
-    .withSize(1, 1)
+    .withSize(2, 1)
     .getEntry();
   private GenericEntry isAtAngle =
     mainTab.add("At Angle", false)
@@ -88,11 +89,11 @@ public class Shooter extends SubsystemBase{
     .getEntry();
   private GenericEntry seeTag =
     mainTab.add("Sees Tag ", false)
-    .withSize(1, 1)
+    .withSize(2, 1)
     .getEntry();
   private GenericEntry txCorrect =
     mainTab.add("TX Correct", false)
-    .withSize(1, 1)
+    .withSize(2, 1)
     .getEntry();
   private GenericEntry ready =
     mainTab.add("Ready", false)

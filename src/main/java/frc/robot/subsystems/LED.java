@@ -55,7 +55,7 @@ public class LED extends SubsystemBase{
         // Add a command to shuffleboard that lets the user test out colors
         toggleManualColorControl = Commands.startEnd(() -> colorTest(), () -> toggleManualColorControl.setName("Toggle Manual Control: Disabled"), this);
         toggleManualColorControl.setName("Toggle Manual Control: Disabled");
-        tab.add(toggleManualColorControl).withSize(2, 1);
+        tab.add(toggleManualColorControl).withSize(4, 2);
     }
 
     /**

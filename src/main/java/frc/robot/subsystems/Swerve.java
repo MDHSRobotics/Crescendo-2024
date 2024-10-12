@@ -112,7 +112,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
 
     /* Shuffleboard logging */
     private ShuffleboardTab tab = Shuffleboard.getTab("Swerve");
-    private GenericEntry targetYaw = tab.add("Target Yaw", 0.0).getEntry();
+    private GenericEntry targetYaw = tab.add("Target Yaw", 0.0).withSize(2, 1).getEntry();
 
 
     public Swerve(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency, SwerveModuleConstants... modules) {

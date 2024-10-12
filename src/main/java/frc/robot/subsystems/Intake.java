@@ -56,7 +56,7 @@ public class Intake extends SubsystemBase{
         .withSize(2, 1)
         .getEntry();
     public GenericEntry ampFastSpitPower = tab.addPersistent("Amp Fast Spit Power", -0.2)
-        .withSize(2, 1)
+        .withSize(3, 1)
         .getEntry();    
     
 
