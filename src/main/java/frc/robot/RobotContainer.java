@@ -194,7 +194,7 @@ public class RobotContainer {
 
         /* IMPORTANT Please see the following URL to get a graphical annotation of which xbox buttons 
             trigger what commands on the driver controller:
-        https://www.padcrafter.com/index.php?templates=Driver+Controller&leftBumper=Climb+Down&dpadRight=SysId+Backward&dpadLeft=SysId+Forward&aButton=Brake+%28cross+wheels%29&yButton=Right+Climb+Up&dpadDown=Tell+Human+Player+to+Amplify&dpadUp=Tell+Human+Player+to+Coopertition&xButton=Left+Climb+Up&bButton=&leftStick=Drive+Robot+in+this+Direction&rightStick=Rotate+Robot&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&rightTrigger=Fast+Mode&leftTrigger=Slow+Mode&rightBumper=Climb+Up&startButton=Reset+Field+Oriented+Drive&plat=1&backButton=&rightStickClick=Apply+increasing+voltage
+        https://www.padcrafter.com/index.php?templates=Driver+Controller&leftBumper=Climb+Down&dpadRight=SysId+Backward&dpadLeft=SysId+Forward&aButton=&yButton=Right+Climb+Up&dpadDown=Tell+Human+Player+to+Amplify&dpadUp=Tell+Human+Player+to+Coopertition&xButton=Left+Climb+Up&bButton=&leftStick=Field+Oriented+Drive&rightStick=Rotate+Robot&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&rightTrigger=Fast+Mode&leftTrigger=Slow+Mode&rightBumper=Climb+Up&startButton=Reset+Field+Oriented+Drive&plat=1&backButton=&rightStickClick=Apply+increasing+voltage
         Whenever you edit a button binding, please update this URL
         */
 
