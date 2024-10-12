@@ -15,7 +15,7 @@ import frc.robot.subsystems.Swerve;
  * The latter check is necessary because note detection runs at 10 fps, which is slower than the robot period.
  * It's useful to update the drving of the robot every frame,
  * but if we updated the target direction using an up-to-date robot angle and an old TX,
- * we would introduce unfixable error into the PID controller.
+ * we would introduce setpoint overshoot into the PID controller.
  * Since this command needs to track the state of TX, it should be created in its own class.
  */
 public class LockOnNoteCommand extends Command {
