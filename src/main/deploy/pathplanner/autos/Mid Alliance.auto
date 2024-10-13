@@ -1,0 +1,109 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 1.34,
+      "y": 5.53
+    },
+    "rotation": 180.0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "Aim shooter"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Run shooter"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Lower shooter"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Run intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Mid Pickup"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop intake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Raise intake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Aim shooter"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Run shooter"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop shooter"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Lower shooter"
+          }
+        }
+      ]
+    }
+  },
+  "folder": "New Autos",
+  "choreoAuto": false
+}

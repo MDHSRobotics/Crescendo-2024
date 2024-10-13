@@ -3,32 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.6263652527305066,
-        "y": 4.272386237080167
+        "x": 2.53840850538844,
+        "y": 4.265902246090207
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.379691682455893,
-        "y": 2.9995506144858832
+        "x": 0.9112086795602169,
+        "y": 3.1224645306433474
       },
       "isLocked": false,
       "linkedName": "Bottom Note Ending Position"
-    },
-    {
-      "anchor": {
-        "x": 5.014165412941816,
-        "y": 1.5688439069186213
-      },
-      "prevControl": {
-        "x": 4.039505623380988,
-        "y": 1.7925363176374978
-      },
-      "nextControl": {
-        "x": 5.616048924401146,
-        "y": 1.430706707567301
-      },
-      "isLocked": false,
-      "linkedName": null
     },
     {
       "anchor": {
@@ -48,28 +32,12 @@
     },
     {
       "anchor": {
-        "x": 5.625915867211955,
-        "y": 1.6971141634591345
+        "x": 2.4064733843753405,
+        "y": 2.9025726622881822
       },
       "prevControl": {
-        "x": 6.217932435864873,
-        "y": 1.4504405931888795
-      },
-      "nextControl": {
-        "x": 5.03326908381012,
-        "y": 1.9440503232081026
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 4.185342216838282,
-        "y": 2.5259373595670285
-      },
-      "prevControl": {
-        "x": 4.964830698887773,
-        "y": 1.9240538481077343
+        "x": 4.502775862694583,
+        "y": 1.363329583802025
       },
       "nextControl": null,
       "isLocked": false,
@@ -78,13 +46,60 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 2.6,
+      "waypointRelativePos": 1.05,
       "rotationDegrees": 180.0,
       "rotateFast": false
     }
   ],
   "constraintZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "Intake",
+      "waypointRelativePos": 0.7,
+      "command": {
+        "type": "sequential",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "Run intake"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Stop intake",
+      "waypointRelativePos": 1.35,
+      "command": {
+        "type": "sequential",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "Stop intake"
+              }
+            },
+            {
+              "type": "named",
+              "data": {
+                "name": "Raise intake"
+              }
+            },
+            {
+              "type": "named",
+              "data": {
+                "name": "Stop shooter"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 5.2,
     "maxAcceleration": 3.0,

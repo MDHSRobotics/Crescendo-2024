@@ -145,6 +145,11 @@ public class Shooter extends SubsystemBase{
     feeder.set(-feed);
   }
 
+  /** Old method, kept only for old auto */
+  public void runFeed(double power) {
+    feeder.set(-power);
+  }
+
   public void rotateShooter(double angleSpeed){
     angle.set(angleSpeed);
 

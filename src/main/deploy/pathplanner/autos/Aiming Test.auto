@@ -3,7 +3,7 @@
   "startingPose": {
     "position": {
       "x": 1.34,
-      "y": 5.53
+      "y": 5.55
     },
     "rotation": 180.0
   },
@@ -14,37 +14,25 @@
         {
           "type": "named",
           "data": {
-            "name": "Aim the Shooter"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.5
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Run Shooter"
+            "name": "Enable auto aim"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Mid Start"
+            "pathName": "Test Movement"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Stop Shooter"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shooter Down"
+            "name": "Disable auto aim"
           }
         }
       ]

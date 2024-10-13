@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.7743693948926325,
-        "y": 6.90685996756609
+        "x": 3.681846220835299,
+        "y": 7.1391559925977
       },
       "isLocked": false,
       "linkedName": "Top Note Ending Position"
@@ -20,33 +20,86 @@
         "y": 5.722826830269045
       },
       "prevControl": {
-        "x": 8.339325140188743,
-        "y": 5.68335905902581
+        "x": 7.5648105105258985,
+        "y": 6.051698156613482
       },
       "nextControl": {
-        "x": 7.448732904159982,
-        "y": 5.759154142943151
+        "x": 7.991726840596539,
+        "y": 5.599912914111543
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 4.747757957054377,
-        "y": 6.6503194544850635
+        "x": 3.8431002576290867,
+        "y": 6.90685996756609
       },
       "prevControl": {
-        "x": 6.3067349211621515,
-        "y": 6.413512827025654
+        "x": 6.027359483290395,
+        "y": 7.183134366268733
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": "Top Shooting Position"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.95,
+      "rotationDegrees": 180.0,
+      "rotateFast": false
+    }
+  ],
   "constraintZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "Intake",
+      "waypointRelativePos": 0.5,
+      "command": {
+        "type": "sequential",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "Run intake"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Stop intake",
+      "waypointRelativePos": 1.35,
+      "command": {
+        "type": "sequential",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "Stop intake"
+              }
+            },
+            {
+              "type": "named",
+              "data": {
+                "name": "Raise intake"
+              }
+            },
+            {
+              "type": "named",
+              "data": {
+                "name": "Stop shooter"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 5.2,
     "maxAcceleration": 3.0,

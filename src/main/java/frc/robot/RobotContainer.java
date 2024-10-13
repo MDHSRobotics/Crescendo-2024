@@ -18,6 +18,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
@@ -86,6 +88,9 @@ public class RobotContainer {
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
+
+        // Register the autonomous commands for Pathplanner
+        registerPathplannerCommands();
 
         /* Default Commands */
         if (driverController != null) {
@@ -160,9 +165,6 @@ public class RobotContainer {
 
         // Configure the button bindings
         configureButtonBindings();
-
-        // Register the autonomous commands for Pathplanner
-        registerPathplannerCommands();
 
         // Add the target direction PID Controller to Shuffleboard
         Shuffleboard.getTab("Swerve").add("Target Direction PID", driveFacingAngle.HeadingController);
@@ -456,8 +458,9 @@ public class RobotContainer {
     {
         // IMPORTANT: In autonomous, the default subsystem commands do not get scheduled.
         // Also, commands MUST have an end, or PathPlanner will not continue.
-
-        NamedCommands.registerCommand("Aim the Shooter",  
+        
+        /* New Auto Commands */
+        NamedCommands.registerCommand("Aim shooter",  
             // Tuck the note into the shooter, and then ramp up and aim
             Commands.sequence(
                 s_Shooter.startEnd(() -> 
@@ -468,38 +471,132 @@ public class RobotContainer {
             )
         );
 
-        NamedCommands.registerCommand("Run Shooter",
+        NamedCommands.registerCommand("Run shooter",
             s_Shooter.runOnce(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.5))
         );
 
-        NamedCommands.registerCommand("Shooter Down",
-            s_Shooter.runOnce(() -> s_Shooter.setAngle(ShooterConstants.kShooterMinAngle, false))
-        );
-
-        NamedCommands.registerCommand("Stop Shooter",
+        NamedCommands.registerCommand("Stop shooter",
             s_Shooter.runOnce(() -> s_Shooter.runShooter(0, 0, 0))
         );
 
-        NamedCommands.registerCommand("Enable Auto Aim",
+        NamedCommands.registerCommand("Lower shooter",
+            s_Shooter.runOnce(() -> s_Shooter.setAngle(ShooterConstants.kShooterMinAngle, false))
+        );
+
+        NamedCommands.registerCommand("Enable auto aim",
+            s_Swerve.runOnce(() -> s_Swerve.setAutoRotationOverride(true))
+        );
+
+        NamedCommands.registerCommand("Disable auto aim",
+            s_Swerve.runOnce(() -> s_Swerve.setAutoRotationOverride(false))
+        );
+
+        NamedCommands.registerCommand("Run intake", 
             Commands.parallel(
-                s_Swerve.runOnce(() -> s_Swerve.setAutoRotationOverride(true)),
-                s_Shooter.run(() -> s_Shooter.setAngleFromPose(s_Swerve.getPose(), kAlliance)).withInterruptBehavior(InterruptionBehavior.kCancelSelf)
+                Commands.sequence(
+                    s_Intake.runOnce(() -> s_Intake.runIntake(1, 1)),
+                    s_Intake.runOnce(s_Intake::midPosition)
+                ),
+                s_Shooter.runOnce(() -> s_Shooter.runShooter(0, 0, -0.6))
             )
         );
 
-        NamedCommands.registerCommand("Disable Auto Aim",
-            Commands.parallel(
-                s_Swerve.runOnce(() -> s_Swerve.setAutoRotationOverride(false)),
-                s_Shooter.runOnce(() -> s_Shooter.setAngle(ShooterConstants.kShooterMinAngle, false))
+        NamedCommands.registerCommand("Stop intake", 
+            Commands.sequence(
+                s_Intake.runOnce(() -> s_Intake.rotateIntake(0)),
+                s_Intake.runOnce(() -> s_Intake.runIntake(0, 0))
             )
+        );
+
+        NamedCommands.registerCommand("Raise intake",
+            s_Intake.runOnce(s_Intake::topPosition)
+        );
+
+
+        /* Old Auto Commands */
+        NamedCommands.registerCommand("Shoot", 
+            //Shoot
+            new RunCommand(() -> s_Shooter.runShooter(0.7, 0.7, -1), s_Shooter).withTimeout(0.5)
+        );
+
+        NamedCommands.registerCommand("Feeder", 
+            //Shoot
+            new RunCommand(() -> s_Shooter.runShooter(0, 0, -1), s_Shooter).withTimeout(0.5)
+        );
+
+        NamedCommands.registerCommand("Shoot Start",  
+            new SequentialCommandGroup(
+                new RunCommand(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), s_Shooter).withTimeout(0.05),
+                // Ramp up
+                new RunCommand(() -> s_Shooter.runShooter(0.7, 0.7, 0), s_Shooter).withTimeout(1.0),
+                
+                //Shoot
+                new RunCommand(() -> s_Shooter.runShooter(0.7, 0.7, -0.5), s_Shooter).withTimeout(1)
+            )
+        );
+
+        NamedCommands.registerCommand("Angle 25", 
+            //Shoot
+            new RunCommand(() -> s_Shooter.setAngle(40, false), s_Shooter).withTimeout(0.5)
+        );
+
+        NamedCommands.registerCommand("Angle 30", 
+            //Shoot
+            new RunCommand(() -> s_Shooter.setAngle(30, false), s_Shooter).withTimeout(0.5)
+        );
+
+        NamedCommands.registerCommand("Angle 32", 
+            //Shoot
+            new RunCommand(() -> s_Shooter.setAngle(32, false), s_Shooter).withTimeout(0.5)
+        );
+
+        NamedCommands.registerCommand("Angle 35", 
+            //Shoot
+            new RunCommand(() -> s_Shooter.setAngle(35, false), s_Shooter).withTimeout(0.5)
+        );
+
+        NamedCommands.registerCommand("Angle 37", 
+            //Shoot
+            new RunCommand(() -> s_Shooter.setAngle(37, false), s_Shooter).withTimeout(0.5)
+        );
+
+        NamedCommands.registerCommand("Angle 45", 
+            //Shoot
+            new RunCommand(() -> s_Shooter.setAngle(45, false), s_Shooter).withTimeout(0.5)
+        );
+
+        NamedCommands.registerCommand("Angle 51", 
+            //Shoot
+            new RunCommand(() -> s_Shooter.setAngle(51, false), s_Shooter).withTimeout(0.5)
+        );
+
+        NamedCommands.registerCommand("Angle 42", 
+            //Shoot
+            new RunCommand(() -> s_Shooter.setAngle(42, false), s_Shooter).withTimeout(0.5)
+        );
+
+        NamedCommands.registerCommand("Angle 40", 
+            //Shoot
+            new RunCommand(() -> s_Shooter.setAngle(40, false), s_Shooter).withTimeout(0.5)
+        );
+
+        NamedCommands.registerCommand("Feeder On", 
+                //Shoot
+                new RunCommand(() -> s_Shooter.runFeed(-1), s_Shooter).withTimeout(0.5)
+        );
+
+        NamedCommands.registerCommand("Shoot Stop", 
+                //Shoot
+                new RunCommand(() -> s_Shooter.runShooter(0.0, 0.0, 0.0), s_Shooter).withTimeout(0.5)
         );
 
         NamedCommands.registerCommand("Intake Down", 
-            s_Intake.runOnce(() -> s_Intake.bottomPosition())
+                new RunCommand(() -> s_Intake.bottomPosition(), s_Intake).withTimeout(0.5)
         );
 
         NamedCommands.registerCommand("Intake Up", 
-            s_Intake.runOnce(() -> s_Intake.topPosition())
+                //Shoot
+                new RunCommand(() -> s_Intake.topPosition(), s_Intake).withTimeout(0.5)
         );
     }
 
