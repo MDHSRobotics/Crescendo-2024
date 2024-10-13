@@ -12,6 +12,7 @@ public final class Constants {
 
     public class SwerveSpeedConstants {
         public static final double MaxSpeed = TunerConstants.kSpeedAt12VoltsMps;
+        // Max angular rate in radians per second.
         // https://www.chiefdelphi.com/t/how-to-calculate-the-max-free-speed-of-a-swerve/400741/3
         // https://study.com/skill/learn/converting-angular-speed-from-revolutions-per-second-to-radians-per-second-explanation.html#:~:text=Steps%20for%20Converting%20Angular%20Speed,r%20a%20d%201%20revolution%20.
         public static final double MaxAngularRate = 11.89;
@@ -52,8 +53,9 @@ public final class Constants {
         public static final Translation2d kRedSpeaker2DPosition = new Translation2d(16.3, 5.55);
 
         // 3D position of each speaker opening in meters
-        public static final Translation3d kBlueSpeaker3DPosition = new Translation3d(0.25, 5.55, 2.0431125);
-        public static final Translation3d kRedSpeaker3DPosition = new Translation3d(16.3, 5.55, 2.0431125);
+        // Maximum safe height is 2.105025, which is the height of the front of the opening.
+        public static final Translation3d kBlueSpeaker3DPosition = new Translation3d(0.25, 5.55, 2.05);
+        public static final Translation3d kRedSpeaker3DPosition = new Translation3d(16.3, 5.55, 2.05);
     }
 
     public class ShooterConstants {
@@ -109,7 +111,8 @@ public final class Constants {
         public static final int kRightClimbMotorID = 2;
 
         // Limit Switch ID
-        public static final int kLimitSwitchID = 2;
+        public static final int kLeftLimitSwitchID = 2;
+        public static final int kRightLimitSwitchID = 3;
     }
 
     public class LEDConstants {

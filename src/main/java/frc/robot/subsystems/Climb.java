@@ -2,28 +2,22 @@ package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
 
-import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.ClimbConstants;
 
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 
 public class Climb extends SubsystemBase{
 
-    CANSparkMax leftClimb;
-    CANSparkMax rightClimb;
+    private CANSparkMax leftClimb;
+    private CANSparkMax rightClimb;
 
-    private ShuffleboardTab tab = Shuffleboard.getTab("Climb");
-    private ShuffleboardLayout list = tab.getLayout("Climb Info", BuiltInLayouts.kList).withSize(3, 3);
-    private GenericEntry leftRotations = list.add("Left Rotations", 0.0).getEntry();
-    private GenericEntry rightRotations = list.add("Right Rotations", 0.0).getEntry();
-
+    private DigitalInput m_leftlimitSwitch = new DigitalInput(ClimbConstants.kLeftLimitSwitchID);
+    private DigitalInput m_rightlimitSwitch = new DigitalInput(ClimbConstants.kRightLimitSwitchID);
 
     public Climb(){
         leftClimb = new CANSparkMax(ClimbConstants.kLeftClimbMotorID, MotorType.kBrushless);
@@ -31,6 +25,13 @@ public class Climb extends SubsystemBase{
         
         rightClimb.setIdleMode(IdleMode.kBrake);
         leftClimb.setIdleMode(IdleMode.kBrake);
+
+        // CAN optimization: https://docs.revrobotics.com/brushless/spark-max/control-interfaces#periodic-status-frames
+        for (int i = 0; i < 8; ++i) {
+            PeriodicFrame frame = PeriodicFrame.fromId(i);
+            leftClimb.setPeriodicFramePeriod(frame, 500);
+            rightClimb.setPeriodicFramePeriod(frame, 500);
+        }
     }
 
     public void runClimb(double climb1Power, double climb2Power){  
@@ -38,12 +39,11 @@ public class Climb extends SubsystemBase{
         rightClimb.set(climb2Power);
     }
 
-
-    /* Shuffleboard logging. We avoid overriding periodic() because it runs even when the robot is disabled. */
-    public void logData() {
-        // Subsystem data
-        leftRotations.setDouble(leftClimb.getEncoder().getPosition());
-        rightRotations.setDouble(rightClimb.getEncoder().getPosition());
+    /**
+     * @return True if at least one of the switches is pressed, false if both switches are unpressed
+     */
+    public boolean getLimitSwitches() {
+        return m_leftlimitSwitch.get() || m_rightlimitSwitch.get();
     }
 
 }

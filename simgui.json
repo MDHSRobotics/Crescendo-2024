@@ -24,6 +24,7 @@
       "/Shuffleboard/Swerve/Module 1": "Mechanism2d",
       "/Shuffleboard/Swerve/Module 2": "Mechanism2d",
       "/Shuffleboard/Swerve/Module 3": "Mechanism2d",
+      "/Shuffleboard/Swerve/Note Rotational Rate PID": "PIDController",
       "/Shuffleboard/Swerve/Target Direction PID": "PIDController",
       "/SmartDashboard/Auto Mode": "String Chooser",
       "/SmartDashboard/Climb": "Subsystem",

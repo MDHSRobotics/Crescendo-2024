@@ -56,8 +56,6 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
 
     // PID Controller for deciding the rotational rate of the robot during aiming.
     private PIDController m_rotationalRateController = new PIDController(0.15, 0, 0);
-    // PID Controller for deciding the rotational rate of the robot during note aiming.
-    private PIDController m_noteRotationalRateController = new PIDController(0.08, 0, 0);
     
     // Temporary variables for finding kSlipCurrentA.
     private final TalonFX m_frontRightDriveMotor = new TalonFX(TunerConstants.kFrontRightDriveMotorId);
@@ -122,9 +120,6 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
             startSimThread();
         }
 
-        // Add the PID controller to Shuffleboard for easy tuning
-        tab.add("Note Rotational Rate PID", m_noteRotationalRateController);
-
         // Set the pose estimator's trust of poses from the Limelight
         setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
     }
@@ -136,9 +131,6 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
             startSimThread();
         }
         
-        // Add the PID controller to Shuffleboard for easy tuning
-        tab.add("Note Rotational Rate PID", m_noteRotationalRateController);
-
         // Set the pose estimator's trust of poses from the Limelight
         setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
     }
@@ -283,13 +275,6 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         return rotationalRate;
     }
 
-    public double calculateNoteRotationalRate() {
-        double tx = LimelightHelpers.getTX("limelight-back");
-        double output = m_noteRotationalRateController.calculate(tx, 0);
-        double rotationalRate = MathUtil.clamp(output, -SwerveSpeedConstants.MaxAngularRate, SwerveSpeedConstants.MaxAngularRate);
-        return rotationalRate;
-    }
-
     // Temporary methods for applying voltage to find kSlipCurrentA.
     public void applyIncreasingVoltage() {
         m_voltage += 0.01;
@@ -300,7 +285,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         m_voltage = 0;
     }
 
-    /* Shuffleboard logging. We avoid overriding periodic() because it runs even when the robot is disabled. */
+    /** Shuffleboard logging. We avoid overriding periodic() because it runs even when the robot is disabled. */
     public void logData() {
         // Subsystem data
         double yawDegrees = getRobotYaw();

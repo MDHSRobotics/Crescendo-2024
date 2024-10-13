@@ -9,7 +9,6 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -37,6 +36,9 @@ import frc.robot.subsystems.*;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+
+    // Robot Alliance
+    public Alliance kAlliance = DriverStation.getAlliance().orElse(Alliance.Blue);
     
     /* Controllers */
     // If you don't have both XBOX controllers connected, you can temporarily set one or both 
@@ -51,10 +53,6 @@ public class RobotContainer {
     private final Intake s_Intake = new Intake();
     private final Climb s_Climb = new Climb();
     private final LED s_Led = new LED();
-    
-    /* Limit Switches */
-    private final DigitalInput shooterLimitSwitch = new DigitalInput(ShooterConstants.kLimitSwitchID);
-    private final DigitalInput climbLimitSwitch = new DigitalInput(ClimbConstants.kLimitSwitchID);
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -66,8 +64,6 @@ public class RobotContainer {
         .withDeadband(SwerveSpeedConstants.MaxSpeed * Constants.stickDeadband)
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
-    //private final LockOnNoteCommand lockOnNoteCommmand = new LockOnNoteCommand(s_Swerve, drive, driveFacingAngle, driverController);
-
     // Set up telemetry.
     private final Telemetry logger = new Telemetry(SwerveSpeedConstants.MaxSpeed);
 
@@ -75,18 +71,18 @@ public class RobotContainer {
     private final SendableChooser<Command> autoChooser;
 
     /* Robot States */
-    private boolean m_slowMode = false;
+    private double m_speedMultiplier = 1;
     private boolean m_isAmp = false;
-    private boolean m_autoshoot = false;
 
     /* Robot State Triggers */
-    private final Trigger shooterLimitSwitchPressed = new Trigger(shooterLimitSwitch::get);
-    private final Trigger climbLimitSwitchPressed = new Trigger(climbLimitSwitch::get);
-    private final Trigger tagIsInSight = new Trigger(s_Shooter::tagInSight);
+    private final Trigger shooterLimitSwitchPressed = new Trigger(s_Shooter::getLimitSwitch);
+    private final Trigger climbLimitSwitchesPressed = new Trigger(s_Climb::getLimitSwitches);
+    private final Trigger tagIsInSight = new Trigger(() -> s_Shooter.tagInSight(kAlliance));
     private final Trigger noteIsInSight = new Trigger(s_Intake::noteInSight);
-    private final Trigger shooterIsReady = new Trigger(s_Shooter::isReady);
+    private final Trigger shooterIsReady = new Trigger(() -> s_Shooter.isReady(kAlliance));
 
-    public Alliance kAlliance = DriverStation.getAlliance().orElse(Alliance.Blue);
+    /* Commands */
+    private final LockOnNoteCommand lockOnNoteCommmand = new LockOnNoteCommand(this, s_Swerve, driveFacingAngle);
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
@@ -95,14 +91,16 @@ public class RobotContainer {
         if (driverController != null) {
             s_Swerve.setDefaultCommand( // Drivetrain will execute this command periodically
                     s_Swerve.applyRequest(() -> drive
-                        .withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Forward and backward speed
-                        .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Left and right speed
-                        .withRotationalRate(-driverController.getRightX() * SwerveSpeedConstants.MaxAngularRate * (m_slowMode ? 0.2 : 1.0))) // Rotation speed
+                        .withVelocityX(getVelocityX()) // Forward and backward speed
+                        .withVelocityY(getVelocityY()) // Left and right speed
+                        .withRotationalRate(getRotationalRate()) // Rotation speed
+                    )
             );
         }
 
         // Set the PID controller for swerve drive aiming
         driveFacingAngle.HeadingController.setPID(3, 0, 0);
+        // Enable continuous angle input, so that the robot doesn't spin around to go from 180 to -180 degrees.
         driveFacingAngle.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
 
         s_Swerve.registerTelemetry(logger::telemeterize);
@@ -147,27 +145,16 @@ public class RobotContainer {
             s_Led.run(() -> s_Led.blink(255, 0, 0, 300))
         );
 
-        // When a note is in sight and the driver is not rotating the robot, automatically lock on the note and blink the LEDs orange
+        // When a note is in sight, the speaker tag isn't in sight, and driver is not rotating the robot, automatically lock on the note and blink the LEDs orange.
         noteIsInSight.and(tagIsInSight.negate()).whileTrue(
             Commands.parallel(
-                s_Swerve.applyRequest(() -> drive
-                    .withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
-                    .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
-                    .withRotationalRate(s_Swerve.calculateNoteRotationalRate())
-                ),
+                lockOnNoteCommmand,
                 s_Led.run(() -> s_Led.blink(255, 20, 0, 300))
-            ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband).andThen(new InstantCommand(() -> System.out.println("Stick moved"), new Subsystem[0]))
-            //lockOnNoteCommmand
-        );
-
-        // When the shooter is ready and autoshoot is enabled, then shoot
-        shooterIsReady.and(() -> m_autoshoot).onTrue(
-            s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.5), () -> {})
-            .withTimeout(0.5)
+            ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
         );
 
         // When the shooter is ready, turn the LEDs green
-        shooterIsReady.toggleOnTrue(
+        shooterIsReady.whileTrue(
             s_Led.startEnd(() -> s_Led.setColor(0, 255, 0), () -> {})
         );
 
@@ -209,7 +196,7 @@ public class RobotContainer {
 
         /* IMPORTANT Please see the following URL to get a graphical annotation of which xbox buttons 
             trigger what commands on the driver controller:
-        https://www.padcrafter.com/index.php?templates=Driver+Controller&leftBumper=Climb+Down&dpadRight=SysId+Backward&dpadLeft=SysId+Forward&aButton=&yButton=Right+Climb+Up&dpadDown=Tell+Human+Player+to+Amplify&dpadUp=Tell+Human+Player+to+Coopertition&xButton=Left+Climb+Up&bButton=&leftStick=Field+Oriented+Drive&rightStick=Rotate+Robot&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&rightTrigger=Fast+Mode&leftTrigger=Slow+Mode&rightBumper=Climb+Up&startButton=Reset+Field+Oriented+Drive&plat=1&backButton=&rightStickClick=Apply+increasing+voltage
+        https://www.padcrafter.com/?dpadRight=New+Amp+Firing+Sequence&dpadUp=Reset+Shooter+Encoder&leftStick=Aim+Intake+%28Calibration+Only%29&leftStickClick=&leftBumper=Prepare+intake+for+amp+spit&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&backButton=Eject+Intake&startButton=Free+a+Stuck+Note+%28on+shooter%29&rightStickClick=Lock+Speaker+using+limelight+%28old%29&rightStick=Aim+Shooter+%28Calibration+Only%29&aButton=Fire&bButton=Set+Angle%3A+Amp&xButton=Lock+Speaker&yButton=Manual+Angle+Fire&rightBumper=Intake+Amp+Spit&rightTrigger=Deploy+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&plat=0#?rightStickClick=Lock+Speaker+%28using+pose%29&xButton=Lock+Speaker&aButton=Fire&bButton=Set+Angle%3A+Amp&rightStick=Aim+Shooter+%28Calibration+Only%29&rightBumper=Set+Angle%3A+Point+Blank&rightTrigger=Deploy+Intake&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&leftBumper=Set+Angle%3A+Podium&leftStick=Aim+Intake+%28Calibration+Only%29&dpadUp=Reset+Shooter+Encoder&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&startButton=Free+a+Stuck+Note+%28on+shooter%29&backButton=Eject+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&yButton=Manual+Angle+Fire&leftStickClick=Toggle+Auto+Shoot
         Whenever you edit a button binding, please update this URL
         */
 
@@ -221,13 +208,13 @@ public class RobotContainer {
         driverController.povDown().onTrue(s_Led.run(() -> s_Led.blink(255, 255, 0, 1000)).withTimeout(5)); // Amplify
         
         // Climb
-        driverController.L1().and(climbLimitSwitchPressed).whileTrue(s_Climb.startEnd(() -> s_Climb.runClimb(-1, -1), () -> {}));
+        driverController.L1().and(climbLimitSwitchesPressed).whileTrue(s_Climb.startEnd(() -> s_Climb.runClimb(-1, -1), () -> {}));
         driverController.R1().whileTrue(s_Climb.startEnd(() -> s_Climb.runClimb(1, 1), () -> {}));
         driverController.square().whileTrue(s_Climb.startEnd(() -> s_Climb.runClimb(1, 0), () -> {}));
         driverController.triangle().whileTrue(s_Climb.startEnd(() -> s_Climb.runClimb(0, 1), () -> {}));
 
-        driverController.R2().onTrue(new InstantCommand(() -> m_slowMode = false, new Subsystem[0])); // no subsystems required
-        driverController.L2().onTrue(new InstantCommand(() -> m_slowMode = true, new Subsystem[0])); // no subsystems required
+        driverController.R2().onTrue(new InstantCommand(() -> m_speedMultiplier = 1, new Subsystem[0])); // no subsystems required
+        driverController.L2().onTrue(new InstantCommand(() -> m_speedMultiplier = 0.2, new Subsystem[0])); // no subsystems required
 
         // Temporary control for finding kSlipCurrentA.
         driverController.L3().whileTrue(s_Swerve.runEnd(s_Swerve::applyIncreasingVoltage, s_Swerve::resetVoltage));
@@ -272,12 +259,12 @@ public class RobotContainer {
         );
 
 
-        // Lock on to speaker (using limelight)
-        operatorController.x().toggleOnTrue(
+        // Lock on to speaker (old method using limelight)
+        operatorController.rightStick().toggleOnTrue(
             Commands.race(
                 s_Swerve.applyRequest(() -> drive
-                    .withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
-                    .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
+                    .withVelocityX(getVelocityX()) // Drive forward with // negative Y (forward)
+                    .withVelocityY(getVelocityY()) // Drive left with negative X (left)
                     .withRotationalRate(s_Swerve.calculateTagRotationalRate())),
 
                 Commands.sequence(
@@ -290,17 +277,17 @@ public class RobotContainer {
                     .withTimeout(0.05),
 
                     // Angle the shooter
-                    s_Shooter.run(() -> s_Shooter.setAngleFromLimelight())
+                    s_Shooter.run(() -> s_Shooter.setAngleFromLimelight(kAlliance))
                 )
             ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
         );
         
-        // Lock on to speaker (using pose estimation).
-        operatorController.rightStick().toggleOnTrue(
+        // Lock on to speaker (new method using pose estimation).
+        operatorController.x().toggleOnTrue(
             Commands.race(
                 s_Swerve.applyRequest(() -> driveFacingAngle
-                    .withVelocityX(-driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive forward with // negative Y (forward)
-                    .withVelocityY(-driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * (m_slowMode ? 0.2 : 1.0)) // Drive left with negative X (left)
+                    .withVelocityX(getVelocityX()) // Drive forward with // negative Y (forward)
+                    .withVelocityY(getVelocityY()) // Drive left with negative X (left)
                     .withTargetDirection(s_Swerve.getTargetYaw(kAlliance))),
 
                 Commands.sequence(
@@ -329,11 +316,6 @@ public class RobotContainer {
                 s_Led.startEnd(() -> s_Led.setColor(255, 0, 0), () -> {})
             )
         );
-
-        // Toggle Auto Shoot. Disabled until we have more buttons available.
-        /*operatorController.leftStick().onTrue(
-            new InstantCommand(() -> m_autoshoot = !m_autoshoot, new Subsystem[0]) // no subsystems required
-        );*/
 
 
         // Shoot in amp or speaker, depending on the amp angle mode
@@ -530,6 +512,21 @@ public class RobotContainer {
         return autoChooser.getSelected();
     }
 
+    public double getVelocityX() {
+        double velocityX = -driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * m_speedMultiplier;
+        return velocityX;
+    }
+
+    public double getVelocityY() {
+        double velocityY = -driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * m_speedMultiplier;
+        return velocityY;
+    }
+
+    public double getRotationalRate() {
+        double rotationalRate = -driverController.getRightX() * SwerveSpeedConstants.MaxAngularRate * m_speedMultiplier;
+        return rotationalRate;
+    }
+
     public void setStartingPosition(Pose2d startingPosition) {
         s_Swerve.seedFieldRelative(startingPosition);
     }
@@ -542,6 +539,5 @@ public class RobotContainer {
         s_Swerve.logData();
         s_Shooter.logData();
         s_Intake.logData();
-        s_Climb.logData();
     }
 }

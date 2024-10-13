@@ -11,6 +11,8 @@ import com.revrobotics.CANSparkBase.IdleMode;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
@@ -37,6 +39,8 @@ public class Shooter extends SubsystemBase{
   private SparkPIDController m_pidController;
 
   private RelativeEncoder m_angleEncoder;
+
+  private final DigitalInput m_limitSwitch = new DigitalInput(ShooterConstants.kLimitSwitchID);
 
   private double m_lastAngle = 23;
 
@@ -116,11 +120,18 @@ public class Shooter extends SubsystemBase{
     topShooter.setIdleMode(IdleMode.kBrake);
     bottomShooter.setIdleMode(IdleMode.kBrake);
 
-    // Consider increasing the period in different ways: https://docs.revrobotics.com/brushless/spark-max/control-interfaces#use-case-examples
+    // CAN optimization: https://docs.revrobotics.com/brushless/spark-max/control-interfaces#periodic-status-frames
     topShooter.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
+    topShooter.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 500);
+    topShooter.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 500);
     bottomShooter.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
-    angle.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
+    bottomShooter.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 500);
+    bottomShooter.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 500);
+    angle.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 500);
+    angle.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 500);
     feeder.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 40);
+    feeder.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 500);
+    feeder.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 500);
 
     topShooter.setOpenLoopRampRate(0.1);
     bottomShooter.setOpenLoopRampRate(0.1);
@@ -143,8 +154,8 @@ public class Shooter extends SubsystemBase{
   }
 
   //adjust the angle of the shooter
-  public void setAngleFromLimelight(){
-    if(tagInSight()){
+  public void setAngleFromLimelight(Alliance alliance) {
+    if(tagInSight(alliance)){
       // calculate the distance
       double horizontalDistance = Aiming.calculateDistance(
           LimelightConstants.kLimelightLensHeightInches, 
@@ -219,15 +230,26 @@ public class Shooter extends SubsystemBase{
     return Aiming.approximatelyEqual(calculatedRotations.getDouble(0), angle.getEncoder().getPosition(), 1.0);
   }
 
-  public boolean tagInSight(){
-    return (LimelightHelpers.getFiducialID("limelight-front") == 4 || LimelightHelpers.getFiducialID("limelight-front") == 7);
+  public boolean tagInSight(Alliance alliance) {
+    double tagID = LimelightHelpers.getFiducialID("limelight-front");
+    if (alliance == Alliance.Blue && tagID == 7) {
+      return true;
+    } else if (alliance == Alliance.Red && tagID == 4) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
-  public boolean isReady(){
-    return tagInSight() && atSpeed.getBoolean(false) && isAtAngle.getBoolean(false) && txCorrect.getBoolean(false);
+  public boolean isReady(Alliance alliance) {
+    return tagInSight(alliance) && atSpeed.getBoolean(false) && isAtAngle.getBoolean(false) && txCorrect.getBoolean(false);
   }
 
-  /* Shuffleboard logging. We avoid overriding periodic() because it runs even when the robot is disabled. */
+  public boolean getLimitSwitch() {
+    return m_limitSwitch.get();
+  }
+
+  /** Shuffleboard logging. We avoid overriding periodic() because it runs even when the robot is disabled. */
   public void logData() {
     // Listed data
     bottomShooterSpeed.setDouble(bottomShooter.get());
@@ -241,8 +263,8 @@ public class Shooter extends SubsystemBase{
     // Widget data
     atSpeed.setBoolean(topShooter.getEncoder().getVelocity() < -3800);
     isAtAngle.setBoolean(isAtAngle());
-    seeTag.setBoolean(tagInSight());
+    seeTag.setBoolean(tagInSight(DriverStation.getAlliance().get()));
     txCorrect.setBoolean(Aiming.approximatelyEqual(LimelightHelpers.getTX("limelight-front"), 0, 2.5));
-    ready.setBoolean(isReady());
+    ready.setBoolean(isReady(DriverStation.getAlliance().get()));
   }
 }

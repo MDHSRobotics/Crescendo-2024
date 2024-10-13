@@ -75,10 +75,18 @@ public class Intake extends SubsystemBase{
         m_pidController = rightAngle.getPIDController();
         m_pidController.setP(0.1);
 
-        // Consider increasing the period in different ways: https://docs.revrobotics.com/brushless/spark-max/control-interfaces#use-case-examples
-        leftAngle.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 100);
+        // CAN optimization: https://docs.revrobotics.com/brushless/spark-max/control-interfaces#periodic-status-frames
+        intake.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 500);
+        intake.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 500);
+        conveyor.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 500);
+        conveyor.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 500);
         leftAngle.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 500);
         leftAngle.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 500);
+        leftAngle.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 500);
+        leftAngle.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 500);
+        rightAngle.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 500);
+        rightAngle.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 500);
+        
 
         leftAngle.setOpenLoopRampRate(0.1);
         rightAngle.setOpenLoopRampRate(0.1);
@@ -135,7 +143,7 @@ public class Intake extends SubsystemBase{
         return noteIsInSight;
     }
 
-    /* Shuffleboard logging. We avoid overriding periodic() because it runs even when the robot is disabled. */
+    /** Shuffleboard logging. We avoid overriding periodic() because it runs even when the robot is disabled. */
     public void logData() {
         // Subsystem data
         angleRotations.setDouble(rightAngle.getEncoder().getPosition());
