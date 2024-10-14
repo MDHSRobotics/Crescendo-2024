@@ -54,7 +54,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
 
     private boolean m_autoRotationOverride = false;
 
-    // PID Controller for deciding the rotational rate of the robot during aiming.
+    // Old PID Controller for deciding the rotational rate of the robot during aiming.
     private PIDController m_rotationalRateController = new PIDController(0.15, 0, 0);
     
     // Temporary variables for finding kSlipCurrentA.
@@ -301,7 +301,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
             if((limelightMeasurement.tagCount >= 1) && (Math.abs(yawRateDegrees) < 720)) { // if our angular velocity is greater than 720 degrees per second, ignore vision updates
                 // Add camera pose to pose estimation
                 addVisionMeasurement(limelightMeasurement.pose, limelightMeasurement.timestampSeconds);
-                // Add camera pose to SmartDashboard
+                // Add camera pose to NetworkTables
                 camPosepublisher.set(limelightMeasurement.pose);
                 // Add camera pose to logs
                 SignalLogger.writeDoubleArray("camera pose", new double[] {
