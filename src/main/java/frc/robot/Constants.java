@@ -56,6 +56,10 @@ public final class Constants {
         // Maximum safe height is 2.105025, which is the height of the front of the opening.
         public static final Translation3d kBlueSpeaker3DPosition = new Translation3d(0.25, 5.55, 2.05);
         public static final Translation3d kRedSpeaker3DPosition = new Translation3d(16.3, 5.55, 2.05);
+
+        // 2D position of each amp area in meters
+        public static final Translation2d kBlueAmp2DPosition = new Translation2d(1.90, 7.30);
+        public static final Translation2d kRedAmp2DPosition = new Translation2d(14.65, 7.30);
     }
 
     public class ShooterConstants {
@@ -93,6 +97,7 @@ public final class Constants {
         public static final double ampTopSpeed = 0.175;
         public static final double ampBottomSpeed = 0.525;
         public static final double speakerSpeed = 0.7;
+        public static final double passingSpeed = 0.5;
     }
 
     public class IntakeConstants {
