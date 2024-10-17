@@ -48,13 +48,23 @@ import edu.wpi.first.networktables.StructPublisher;
  * so it can be used in command-based projects easily.
  */
 public class Swerve extends SwerveDrivetrain implements Subsystem {
+
+    public enum AutoRotationOverride {
+        DISABLED,
+        SPEAKER,
+        NOTE
+    }
+
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
 
-    private boolean m_autoRotationOverride = false;
+    // Variables for deciding autonomous rotation
+    private AutoRotationOverride m_autoRotationOverride = AutoRotationOverride.DISABLED;
+    private double m_previousBackTX;
+    private Rotation2d m_previousAutoRotation = new Rotation2d();
 
-    // Old PID Controller for deciding the rotational rate of the robot during aiming.
+    // Old PID Controller for deciding the rotational rate of the robot during speaker aiming.
     private PIDController m_rotationalRateController = new PIDController(0.15, 0, 0);
     
     // Temporary variables for finding kSlipCurrentA.
@@ -203,18 +213,31 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         // System.out.println("Drive Robot Relative speeds: " + speeds.toString());
       }
 
+    /**
+     * 
+     * @return An optional containing the rotation override if a 
+     */
     public Optional<Rotation2d> getRotationTargetOverride(){
-        // Some condition that should decide if we want to override rotation
-        if(m_autoRotationOverride) {
+        if (m_autoRotationOverride == AutoRotationOverride.SPEAKER) {
             // Return an optional containing the rotation override (this should be a field relative rotation)
             return Optional.of(getSpeakerYaw(DriverStation.getAlliance().get()));
+        } else if (m_autoRotationOverride == AutoRotationOverride.NOTE) {
+            double tx = LimelightHelpers.getTX("limelight-back");
+            if (m_previousBackTX != tx) {
+                m_previousBackTX = tx;
+                Rotation2d autoRotation = Rotation2d.fromDegrees(getRobotYaw() - tx);
+                m_previousAutoRotation = autoRotation;
+                return Optional.of(autoRotation);
+            } else {
+                return Optional.of(m_previousAutoRotation);
+            }
         } else {
             // return an empty optional when we don't want to override the path's rotation
             return Optional.empty();
         }
     }
 
-    public void setAutoRotationOverride(boolean override){
+    public void setAutoRotationOverride(AutoRotationOverride override){
         m_autoRotationOverride = override;
     }
 
