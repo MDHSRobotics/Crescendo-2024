@@ -50,8 +50,8 @@ public class Robot extends TimedRobot {
         // Set the log path for SysId
         SignalLogger.setPath("/logs");
 
-        // Use a different limelight pipeline depending on alliance.
-        // Only necessary in Orange County Regionals, where the lights make Apriltags hard to see.
+        // Set the limelight pipeline.
+        // In Orange County Regionals, the lights make Apriltags hard to see, so we may change the front to use a separate pipeline.
         // LimelightHelpers.setPipelineIndex("limelight-front", m_robotContainer.kAlliance == Alliance.Blue ? 1 : 0);
         LimelightHelpers.setPipelineIndex("limelight-front", 0);
         LimelightHelpers.setPipelineIndex("limelight-back", 0);
@@ -88,7 +88,16 @@ public class Robot extends TimedRobot {
     }
 
     @Override
-    public void disabledPeriodic() {
+    public void disabledExit() {
+        // Update the alliance
+        m_robotContainer.kAlliance = DriverStation.getAlliance().get();
+
+        // Start logging data from Swerve and Telemetry.java
+        SignalLogger.start();
+        // Start logging NetworkTables (including Shuffleboard)
+        DataLogManager.start();
+        // Record joystick data
+        DriverStation.startDataLog(DataLogManager.getLog());
     }
 
     /**
@@ -97,14 +106,6 @@ public class Robot extends TimedRobot {
     @Override
     public void autonomousInit() {
         CommandScheduler.getInstance().cancelAll();
-        
-        // Update the alliance
-        m_robotContainer.kAlliance = DriverStation.getAlliance().get();
-
-        // Start logging data from Swerve and Telemetry.
-        //SignalLogger.start();
-        // Start logging all other data (like Shuffleboard values)
-        //DataLogManager.start();
 
         m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
@@ -126,19 +127,9 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopInit() {
         CommandScheduler.getInstance().cancelAll();
-        
-        // Update the alliance
-        m_robotContainer.kAlliance = DriverStation.getAlliance().get();
 
         // Set the starting perspective for driving.
         m_robotContainer.setOperatorPerspective(Rotation2d.fromDegrees(m_robotContainer.kAlliance == Alliance.Blue ? 0 : 180));
-
-        // Start logging data from Swerve and Telemetry
-        //SignalLogger.start();
-        // Start logging all other data (like Shuffleboard values)
-        //DataLogManager.start();
-        // Record both DS control and joystick data
-        //DriverStation.startDataLog(DataLogManager.getLog());
     }
 
     /**
@@ -155,19 +146,9 @@ public class Robot extends TimedRobot {
 
         // Set the starting position to right below the red speaker.
         m_robotContainer.setStartingPosition(new Pose2d(15.17, 5.55, Rotation2d.fromDegrees(180)));
-        
-        // Update the alliance
-        m_robotContainer.kAlliance = DriverStation.getAlliance().get();
 
         // Set the starting perspective for driving.
         m_robotContainer.setOperatorPerspective(Rotation2d.fromDegrees(m_robotContainer.kAlliance == Alliance.Blue ? 0 : 180));
-
-        // Start logging Start logging data from Swerve and Telemetry
-        //SignalLogger.start();
-        // Start logging all other data (like Shuffleboard values)
-        //DataLogManager.start();
-        // Record both DS control and joystick data
-        //DriverStation.startDataLog(DataLogManager.getLog());
     }
 
     /**
