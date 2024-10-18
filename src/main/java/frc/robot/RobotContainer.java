@@ -510,12 +510,16 @@ public class RobotContainer {
             s_Shooter.runOnce(() -> s_Shooter.setAngle(ShooterConstants.kShooterMinAngle, false))
         );
 
-        NamedCommands.registerCommand("Enable auto aim",
-            s_Swerve.runOnce(() -> s_Swerve.setAutoRotationOverride(true))
+        NamedCommands.registerCommand("Enable speaker aim",
+            s_Swerve.runOnce(() -> s_Swerve.setAutoRotationOverride(Swerve.AutoRotationOverride.SPEAKER))
+        );
+
+        NamedCommands.registerCommand("Enable note aim",
+            s_Swerve.runOnce(() -> s_Swerve.setAutoRotationOverride(Swerve.AutoRotationOverride.NOTE))
         );
 
         NamedCommands.registerCommand("Disable auto aim",
-            s_Swerve.runOnce(() -> s_Swerve.setAutoRotationOverride(false))
+            s_Swerve.runOnce(() -> s_Swerve.setAutoRotationOverride(Swerve.AutoRotationOverride.DISABLED))
         );
 
         NamedCommands.registerCommand("Run intake", 

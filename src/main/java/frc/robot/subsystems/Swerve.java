@@ -62,7 +62,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     // Variables for deciding autonomous rotation
     private AutoRotationOverride m_autoRotationOverride = AutoRotationOverride.DISABLED;
     private double m_previousBackTX;
-    private Rotation2d m_previousAutoRotation = new Rotation2d();
+    private Rotation2d m_previousAutoRotation = null;
 
     // Old PID Controller for deciding the rotational rate of the robot during speaker aiming.
     private PIDController m_rotationalRateController = new PIDController(0.15, 0, 0);
@@ -211,34 +211,38 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         setControl(AutoRequest.withSpeeds(speeds));
 
         // System.out.println("Drive Robot Relative speeds: " + speeds.toString());
-      }
+    }
 
     /**
-     * 
-     * @return An optional containing the rotation override if a 
+     * This method is used by PathPlanner to override the target rotation.
+     * The override can be set using a NamedCommand.
+     * <p>
+     * Note override does not override the rotation until a note is seen at least once, and only updates the target rotation when a note is seen and tx updates (to prevent overshooting).
+     * @return An optional either containing the rotation override, or not overriding the rotation.
      */
     public Optional<Rotation2d> getRotationTargetOverride(){
         if (m_autoRotationOverride == AutoRotationOverride.SPEAKER) {
-            // Return an optional containing the rotation override (this should be a field relative rotation)
             return Optional.of(getSpeakerYaw(DriverStation.getAlliance().get()));
-        } else if (m_autoRotationOverride == AutoRotationOverride.NOTE) {
+        } else if (m_autoRotationOverride == AutoRotationOverride.NOTE && m_previousAutoRotation != null) { // If note, AND auto rotation has previously been set:
             double tx = LimelightHelpers.getTX("limelight-back");
-            if (m_previousBackTX != tx) {
+            if (tx != 0 && m_previousBackTX != tx) { // If a note is detected AND tx has updated since last check:
+                // Update the saved TX and rotation, and set the new rotation.
                 m_previousBackTX = tx;
-                Rotation2d autoRotation = Rotation2d.fromDegrees(getRobotYaw() - tx);
-                m_previousAutoRotation = autoRotation;
-                return Optional.of(autoRotation);
+                Rotation2d targetRotation = Rotation2d.fromDegrees(getRobotYaw() - tx);
+                m_previousAutoRotation = targetRotation;
+                return Optional.of(targetRotation);
             } else {
                 return Optional.of(m_previousAutoRotation);
             }
-        } else {
-            // return an empty optional when we don't want to override the path's rotation
+        } else { // Else, we don't want to override the path's rotation.
             return Optional.empty();
         }
     }
 
     public void setAutoRotationOverride(AutoRotationOverride override){
         m_autoRotationOverride = override;
+        // Invalidate the saved note rotation.
+        m_previousAutoRotation = null;
     }
 
     // Simulation
@@ -264,7 +268,6 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     }
 
     public double getRobotYaw(){
-        // System.out.println(m_odometry.getEstimatedPosition().getRotation().getDegrees());
         return getPose().getRotation().getDegrees();
     }
 
