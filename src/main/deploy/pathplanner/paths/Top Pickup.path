@@ -3,50 +3,50 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.34,
-        "y": 5.55
+        "x": 0.6988446409325251,
+        "y": 6.683920394867817
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.3459738631188973,
-        "y": 5.546821904454621
+        "x": 0.6954613240740678,
+        "y": 6.678060318170865
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 2.597046336949817,
-        "y": 5.55
+        "x": 1.604825551993446,
+        "y": 6.683920394867817
       },
       "prevControl": {
-        "x": 2.582386879059473,
-        "y": 5.541275082550166
+        "x": 1.6077878895926525,
+        "y": 6.667120143497867
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Top Pickup End"
     }
   ],
   "rotationTargets": [],
   "constraintZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 2.0,
+    "maxVelocity": 5.0,
     "maxAcceleration": 2.5,
-    "maxAngularVelocity": 540.0,
-    "maxAngularAcceleration": 720.0
+    "maxAngularVelocity": 1080.0,
+    "maxAngularAcceleration": 1440.0
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0,
+    "rotation": -153.8689994550614,
     "rotateFast": false
   },
   "reversed": false,
   "folder": "New Note Backups",
   "previewStartingState": {
-    "rotation": 180.0,
+    "rotation": -120.0,
     "velocity": 0
   },
-  "useDefaultConstraints": false
+  "useDefaultConstraints": true
 }

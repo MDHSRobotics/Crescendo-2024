@@ -2,15 +2,21 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.34,
-      "y": 5.53
+      "x": 0.7,
+      "y": 6.68
     },
-    "rotation": 180.0
+    "rotation": -120.0
   },
   "command": {
     "type": "sequential",
     "data": {
       "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Top Pickup"
+          }
+        },
         {
           "type": "named",
           "data": {
@@ -44,19 +50,25 @@
         {
           "type": "named",
           "data": {
-            "name": "Run intake"
+            "name": "Enable note aim"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": null
+            "name": "Run intake"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Mid Pickup"
+            "pathName": "Top Pickup 2"
           }
         },
         {
@@ -69,6 +81,18 @@
           "type": "named",
           "data": {
             "name": "Raise intake"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Top Pickup 3"
           }
         },
         {
@@ -105,6 +129,12 @@
           "type": "named",
           "data": {
             "name": "Lower shooter"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Disable auto aim"
           }
         }
       ]

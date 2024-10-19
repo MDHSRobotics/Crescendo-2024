@@ -1,8 +1,12 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
 
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.ClimbConstants;
@@ -16,12 +20,25 @@ public class Climb extends SubsystemBase{
     private CANSparkMax leftClimb;
     private CANSparkMax rightClimb;
 
+    private RelativeEncoder leftEncoder;
+    private RelativeEncoder rightEncoder;
+
     private DigitalInput m_leftlimitSwitch = new DigitalInput(ClimbConstants.kLeftLimitSwitchID);
     private DigitalInput m_rightlimitSwitch = new DigitalInput(ClimbConstants.kRightLimitSwitchID);
+
+    /* Shuffleboard Logging */
+    private ShuffleboardTab tab = Shuffleboard.getTab("Climb");
+    // Lowest value is -225
+    private GenericEntry leftRotations = tab.add("Left Rotations", 0.0).getEntry();
+    // Highest value is 225
+    private GenericEntry rightRotations = tab.add("Right Rotations", 0.0).getEntry();
 
     public Climb(){
         leftClimb = new CANSparkMax(ClimbConstants.kLeftClimbMotorID, MotorType.kBrushless);
         rightClimb = new CANSparkMax(ClimbConstants.kRightClimbMotorID, MotorType.kBrushless);
+
+        leftEncoder = leftClimb.getEncoder();
+        rightEncoder = rightClimb.getEncoder();
         
         rightClimb.setIdleMode(IdleMode.kBrake);
         leftClimb.setIdleMode(IdleMode.kBrake);
@@ -49,6 +66,10 @@ public class Climb extends SubsystemBase{
         return m_leftlimitSwitch.get() || m_rightlimitSwitch.get();
     }
 
+    public void logData() {
+        leftRotations.setDouble(leftEncoder.getPosition());
+        rightRotations.setDouble(rightEncoder.getPosition());
+    }
 }
 
 

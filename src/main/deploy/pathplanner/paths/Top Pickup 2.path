@@ -3,32 +3,38 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.48,
-        "y": 4.09478126648561
+        "x": 1.604825551993446,
+        "y": 6.683920394867817
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.1555254879740546,
-        "y": 4.153982923350462
+        "x": 1.6014422351349888,
+        "y": 6.678060318170865
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Top Pickup End"
     },
     {
       "anchor": {
-        "x": 2.093550340946837,
-        "y": 4.331587893945019
+        "x": 2.6679664170139152,
+        "y": 7.016729709135094
       },
       "prevControl": {
-        "x": 1.5114007151091238,
-        "y": 4.1638498661612715
+        "x": 2.6709287546131217,
+        "y": 6.999929457765144
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Bottom Note Starting Position"
+      "linkedName": "Top Pickup 2 End"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.5,
+      "rotationDegrees": 180.0,
+      "rotateFast": false
+    }
+  ],
   "constraintZones": [],
   "eventMarkers": [],
   "globalConstraints": {
@@ -39,13 +45,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 150.4,
+    "rotation": 180.0,
     "rotateFast": false
   },
   "reversed": false,
-  "folder": "Starting Positions to Shoot",
+  "folder": "New Note Backups",
   "previewStartingState": {
-    "rotation": 0,
+    "rotation": -120.0,
     "velocity": 0
   },
   "useDefaultConstraints": true

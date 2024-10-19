@@ -211,7 +211,7 @@ public class RobotContainer {
         driverController.options().onTrue(s_Swerve.runOnce(() -> s_Swerve.seedFieldRelative()));
         
         // Climb
-        driverController.L1().and(climbLimitSwitchesPressed).whileTrue(s_Climb.startEnd(() -> s_Climb.runClimb(-1, -1), () -> {}));
+        driverController.L1().and(climbLimitSwitchesPressed.negate()).whileTrue(s_Climb.startEnd(() -> s_Climb.runClimb(-1, -1), () -> {}));
         driverController.R1().whileTrue(s_Climb.startEnd(() -> s_Climb.runClimb(1, 1), () -> {}));
         driverController.square().whileTrue(s_Climb.startEnd(() -> s_Climb.runClimb(1, 0), () -> {}));
         driverController.triangle().whileTrue(s_Climb.startEnd(() -> s_Climb.runClimb(0, 1), () -> {}));
@@ -489,7 +489,7 @@ public class RobotContainer {
                 s_Shooter.startEnd(() -> 
                     s_Shooter.runShooter(-0.2, -0.2, 0.5), () -> 
                     s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, 0))
-                .withTimeout(0.05),
+                .withTimeout(0.2),
                 s_Shooter.runOnce(() -> s_Shooter.setAngleFromPose(s_Swerve.getPose(), kAlliance))
             )
         );
@@ -524,7 +524,7 @@ public class RobotContainer {
                     s_Intake.runOnce(() -> s_Intake.runIntake(1, 1)),
                     s_Intake.runOnce(s_Intake::midPosition)
                 ),
-                s_Shooter.runOnce(() -> s_Shooter.runShooter(0, 0, -0.6))
+                s_Shooter.runOnce(() -> s_Shooter.runShooter(0, 0, -1))
             )
         );
 
@@ -663,5 +663,6 @@ public class RobotContainer {
         s_Swerve.logData();
         s_Shooter.logData();
         s_Intake.logData();
+        s_Climb.logData();
     }
 }

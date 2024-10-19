@@ -222,6 +222,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
      */
     public Optional<Rotation2d> getRotationTargetOverride(){
         if (m_autoRotationOverride == AutoRotationOverride.SPEAKER) {
+            System.out.println("Speaker aiming");
             return Optional.of(getSpeakerYaw(DriverStation.getAlliance().get(), true));
         } else if (m_autoRotationOverride == AutoRotationOverride.NOTE) {
             double tx = LimelightHelpers.getTX("limelight-back");
