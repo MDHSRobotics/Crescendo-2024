@@ -56,6 +56,10 @@ public class Robot extends TimedRobot {
         LimelightHelpers.setPipelineIndex("limelight-front", 0);
         LimelightHelpers.setPipelineIndex("limelight-back", 0);
 
+        // Our field's amp is not perfectly placed, so we filter it out. REMOVE THIS IN COMPETITION.
+        //int[] validIDs = {3,4};
+        //LimelightHelpers.SetFiducialIDFiltersOverride("limelight-front", validIDs);
+
         // Uncomment this if you want to hide "controller not connected" warnings.
         // DriverStation.silenceJoystickConnectionWarning(true);
     }

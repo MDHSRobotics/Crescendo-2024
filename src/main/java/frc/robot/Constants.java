@@ -53,9 +53,8 @@ public final class Constants {
         public static final Translation2d kRedSpeaker2DPosition = new Translation2d(16.3, 5.55);
 
         // 3D position of each speaker opening in meters
-        // Maximum safe height is 2.105025, which is the height of the front of the opening.
-        public static final Translation3d kBlueSpeaker3DPosition = new Translation3d(0.25, 5.55, 2.05);
-        public static final Translation3d kRedSpeaker3DPosition = new Translation3d(16.3, 5.55, 2.05);
+        public static final Translation3d kBlueSpeaker3DPosition = new Translation3d(0.25, 5.55, 2.35);
+        public static final Translation3d kRedSpeaker3DPosition = new Translation3d(16.3, 5.55, 2.35);
 
         // 2D position of each amp area in meters
         public static final Translation2d kBlueAmp2DPosition = new Translation2d(1.90, 7.30);

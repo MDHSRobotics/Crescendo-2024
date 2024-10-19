@@ -270,10 +270,9 @@ public class RobotContainer {
                     .withVelocityY(getVelocityY()) // Drive left with negative X (left)
                     .withRotationalRate(s_Swerve.calculateTagRotationalRate())),
 
-                // Set firing mode to speaker
-                new InstantCommand(() -> m_isAmp = false, new Subsystem[0]), // no subsystems required
-
                 Commands.sequence(
+                    // Set firing mode to speaker
+                    new InstantCommand(() -> m_isAmp = false, new Subsystem[0]), // no subsystems required
                     // Rev up the shooter
                     s_Shooter.startEnd(() -> 
                         s_Shooter.runShooter(-0.2, -0.2, 0.5), () ->
@@ -292,12 +291,11 @@ public class RobotContainer {
                 s_Swerve.applyRequest(() -> driveFacingAngle
                     .withVelocityX(getVelocityX()) // Drive forward with negative Y (forward)
                     .withVelocityY(getVelocityY()) // Drive left with negative X (left)
-                    .withTargetDirection(s_Swerve.getSpeakerYaw(kAlliance))),
-
-                // Set firing mode to speaker
-                new InstantCommand(() -> m_isAmp = false, new Subsystem[0]), // no subsystems required
+                    .withTargetDirection(s_Swerve.getSpeakerYaw(kAlliance, false))),
 
                 Commands.sequence(
+                    // Set firing mode to speaker
+                    new InstantCommand(() -> m_isAmp = false, new Subsystem[0]), // no subsystems required
                     // Rev up the shooter
                     s_Shooter.startEnd(() -> 
                         s_Shooter.runShooter(-0.2, -0.2, 0.5), () ->
@@ -318,10 +316,9 @@ public class RobotContainer {
                     .withVelocityY(getVelocityY()) // Drive left with negative X (left)
                     .withTargetDirection(s_Swerve.getPassingYaw(kAlliance))),
 
-                // Set firing mode to speaker
-                new InstantCommand(() -> m_isAmp = false, new Subsystem[0]), // no subsystems required
-
                 Commands.sequence(
+                    // Set firing mode to speaker
+                    new InstantCommand(() -> m_isAmp = false, new Subsystem[0]), // no subsystems required
                     // Rev up the shooter
                     s_Shooter.startEnd(() -> 
                         s_Shooter.runShooter(-0.2, -0.2, 0.5), () ->

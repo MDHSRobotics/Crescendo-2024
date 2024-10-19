@@ -222,7 +222,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
      */
     public Optional<Rotation2d> getRotationTargetOverride(){
         if (m_autoRotationOverride == AutoRotationOverride.SPEAKER) {
-            return Optional.of(getSpeakerYaw(DriverStation.getAlliance().get()));
+            return Optional.of(getSpeakerYaw(DriverStation.getAlliance().get(), true));
         } else if (m_autoRotationOverride == AutoRotationOverride.NOTE) {
             double tx = LimelightHelpers.getTX("limelight-back");
             if (tx != 0 && m_previousBackTX != tx) { // If a note is detected AND tx has updated since last check:
@@ -276,7 +276,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     /**
      * @return The new robot yaw as a Rotation2d that points the robot at the speaker.
      */
-    public Rotation2d getSpeakerYaw(Alliance alliance) {
+    public Rotation2d getSpeakerYaw(Alliance alliance, boolean isAuto) {
         Pose2d currentPose = getPose();
         Rotation2d targetYaw;
 
@@ -289,7 +289,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         // Log the target yaw to Shuffleboard
         this.targetYaw.setDouble(targetYaw.getDegrees());
         // If the alliance is red, the driveFacingAngle request will incorrectly try to rotate the target direction, so rotate it back
-        if (alliance == Alliance.Red) {
+        if (alliance == Alliance.Red && !isAuto) {
             targetYaw = targetYaw.rotateBy(Rotation2d.fromDegrees(-180));
         }
 

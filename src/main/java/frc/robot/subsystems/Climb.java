@@ -26,6 +26,9 @@ public class Climb extends SubsystemBase{
         rightClimb.setIdleMode(IdleMode.kBrake);
         leftClimb.setIdleMode(IdleMode.kBrake);
 
+        // Right Climb Spark Max was the only controller with too high of a current limit. You can connect to it and change it, but we just put it here for now.
+        rightClimb.setSmartCurrentLimit(40);
+
         // CAN optimization: https://docs.revrobotics.com/brushless/spark-max/control-interfaces#periodic-status-frames
         for (int i = 0; i < 8; ++i) {
             PeriodicFrame frame = PeriodicFrame.fromId(i);

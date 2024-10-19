@@ -52,13 +52,13 @@ public class TunerConstants {
         );
 
     // Theoretical free speed (m/s) at 12v applied output;
-    // This needs to be tuned to your individual robot
+    // This was tuned to our individual robot
     // Our current free speed is MK4i, L3, Falcon 500, FOC: https://www.swervedrivespecialties.com/products/mk4i-swerve-module
     public static final double kSpeedAt12VoltsMps = 5.27304;
 
     // Every 1 rotation of the azimuth results in kCoupleRatio drive motor turns;
-    // This may need to be tuned to your individual robot
-    private static final double kCoupleRatio = 3.5714285714285716;
+    // This was tuned to our individual robot
+    private static final double kCoupleRatio = 0.5;
 
     private static final double kDriveGearRatio = 6.122448979591837;
     private static final double kSteerGearRatio = 21.428571428571427;

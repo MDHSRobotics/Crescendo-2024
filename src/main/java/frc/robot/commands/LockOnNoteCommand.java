@@ -3,6 +3,7 @@ package frc.robot.commands;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.LimelightHelpers;
 import frc.robot.RobotContainer;
@@ -42,11 +43,17 @@ public class LockOnNoteCommand extends Command {
         if (currentTX != m_previousTX) {
             m_previousTX = currentTX;
 
-            Rotation2d targetDirection = Rotation2d.fromDegrees(m_swerve.getRobotYaw() - currentTX);
+            Rotation2d currentDirection = m_swerve.getPose().getRotation();
+            Rotation2d requiredRotation = Rotation2d.fromDegrees(currentTX);
+            Rotation2d targetDirection = currentDirection.minus(requiredRotation);
+            // Add comment later
+            if (m_robotContainer.kAlliance == Alliance.Red) {
+            targetDirection = targetDirection.rotateBy(Rotation2d.fromDegrees(-180));
+            }
             m_angleRequest.TargetDirection = targetDirection;
         }
 
-        m_swerve.applyRequest(() -> m_angleRequest);
+        m_swerve.setControl(m_angleRequest);
         
     }
 }
