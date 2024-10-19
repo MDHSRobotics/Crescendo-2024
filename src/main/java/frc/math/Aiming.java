@@ -21,7 +21,7 @@ public class Aiming {
      * @return The new robot yaw as a Rotation2d that points the robot at the target.
      */
     public static Rotation2d getYaw(Translation2d goalPose, Pose2d robotPose) {
-        // Find the angle of the vector between the two points
+        // Find the angle of the vector that the goal would make if the robot was the origin
         double xDistance = goalPose.getX() - robotPose.getX();
         double yDistance = goalPose.getY() - robotPose.getY();
 

@@ -55,6 +55,9 @@ public class Robot extends TimedRobot {
         // LimelightHelpers.setPipelineIndex("limelight-front", m_robotContainer.kAlliance == Alliance.Blue ? 1 : 0);
         LimelightHelpers.setPipelineIndex("limelight-front", 0);
         LimelightHelpers.setPipelineIndex("limelight-back", 0);
+
+        // Uncomment this if you want to hide "controller not connected" warnings.
+        // DriverStation.silenceJoystickConnectionWarning(true);
     }
 
 

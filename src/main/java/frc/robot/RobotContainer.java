@@ -43,9 +43,6 @@ public class RobotContainer {
     public Alliance kAlliance = DriverStation.getAlliance().orElse(Alliance.Blue);
     
     /* Controllers */
-    // If you don't have both XBOX controllers connected, you can temporarily set one or both 
-    // of the following variables to null. That will avoid being spammed by warnings about a
-    // controller not connected.
     private final CommandPS4Controller driverController = new CommandPS4Controller(0); 
     private final CommandXboxController operatorController = new CommandXboxController(1);
 
@@ -108,6 +105,8 @@ public class RobotContainer {
         driveFacingAngle.HeadingController.setPID(3, 0, 0);
         // Enable continuous angle input, so that the robot doesn't spin around to go from 180 to -180 degrees.
         driveFacingAngle.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
+        // Add the target direction PID Controller to Shuffleboard
+        Shuffleboard.getTab("Swerve").add("Target Direction PID", driveFacingAngle.HeadingController);
 
         s_Swerve.registerTelemetry(logger::telemeterize);
 
@@ -144,7 +143,10 @@ public class RobotContainer {
 
         /* Trigger-Activated Commands */
         // LEDs glow orange for 3 secs whenever a note is picked up.
-        shooterLimitSwitchPressed.onTrue(s_Led.run(() -> s_Led.setColor(255, 20, 0)).withTimeout(3));
+        shooterLimitSwitchPressed.onTrue(
+            s_Led.startEnd(() -> s_Led.setColor(255, 20, 0), () -> {})
+                .withTimeout(3)
+        );
 
         // While a tag is in sight but the shooter is not ready, blink the LEDs red
         tagIsInSight.and(shooterIsReady.negate()).whileTrue(
@@ -171,9 +173,6 @@ public class RobotContainer {
 
         // Configure the button bindings
         configureButtonBindings();
-
-        // Add the target direction PID Controller to Shuffleboard
-        Shuffleboard.getTab("Swerve").add("Target Direction PID", driveFacingAngle.HeadingController);
 
         /* Auto Chooser */
         autoChooser = AutoBuilder.buildAutoChooser(); // Default auto will be `Commands.none()`
@@ -204,16 +203,12 @@ public class RobotContainer {
 
         /* IMPORTANT Please see the following URL to get a graphical annotation of which xbox buttons 
             trigger what commands on the driver controller:
-        https://www.padcrafter.com/?dpadRight=New+Amp+Firing+Sequence&dpadUp=Reset+Shooter+Encoder&leftStick=Aim+Intake+%28Calibration+Only%29&leftStickClick=&leftBumper=Prepare+intake+for+amp+spit&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&backButton=Eject+Intake&startButton=Free+a+Stuck+Note+%28on+shooter%29&rightStickClick=Lock+Speaker+using+limelight+%28old%29&rightStick=Aim+Shooter+%28Calibration+Only%29&aButton=Fire&bButton=Set+Angle%3A+Amp&xButton=Lock+Speaker&yButton=Manual+Angle+Fire&rightBumper=Intake+Amp+Spit&rightTrigger=Deploy+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&plat=0#?rightStickClick=Lock+Speaker+%28using+pose%29&xButton=Lock+Speaker&aButton=Fire&bButton=Set+Angle%3A+Amp&rightStick=Aim+Shooter+%28Calibration+Only%29&rightBumper=Set+Angle%3A+Point+Blank&rightTrigger=Deploy+Intake&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&leftBumper=Set+Angle%3A+Podium&leftStick=Aim+Intake+%28Calibration+Only%29&dpadUp=Reset+Shooter+Encoder&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&startButton=Free+a+Stuck+Note+%28on+shooter%29&backButton=Eject+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&yButton=Manual+Angle+Fire&leftStickClick=Toggle+Auto+Shoot
+        https://www.padcrafter.com/index.php?templates=Driver+Controller&leftBumper=Climb+Down&dpadRight=&dpadLeft=&aButton=&yButton=Right+Climb+Up&dpadDown=&dpadUp=&xButton=Left+Climb+Up&bButton=&leftStick=Field+Oriented+Drive&rightStick=Rotate+Robot&col=%23242424%2C%23606A6E%2C%23FFFFFF&rightTrigger=Fast+Mode&leftTrigger=Slow+Mode&rightBumper=Climb+Up&startButton=Reset+Field+Oriented+Drive&plat=1&backButton=&rightStickClick=
         Whenever you edit a button binding, please update this URL
         */
 
-        // Reset the field-centric heading on left bumper press. THIS WILL BREAK POSE ESTIMATION.
-        // driverController.options().onTrue(s_Swerve.runOnce(() -> s_Swerve.seedFieldRelative()));
-
-        // LED communication
-        driverController.povUp().onTrue(s_Led.run(() -> s_Led.blink(0, 0, 255, 400)).withTimeout(5)); // Coopertition
-        driverController.povDown().onTrue(s_Led.run(() -> s_Led.blink(255, 255, 0, 1000)).withTimeout(5)); // Amplify
+        // Reset the field-centric heading
+        driverController.options().onTrue(s_Swerve.runOnce(() -> s_Swerve.seedFieldRelative()));
         
         // Climb
         driverController.L1().and(climbLimitSwitchesPressed).whileTrue(s_Climb.startEnd(() -> s_Climb.runClimb(-1, -1), () -> {}));
@@ -225,7 +220,7 @@ public class RobotContainer {
         driverController.L2().onTrue(new InstantCommand(() -> m_speedMultiplier = 0.2, new Subsystem[0])); // no subsystems required
 
         // Temporary control for finding kSlipCurrentA.
-        driverController.L3().whileTrue(s_Swerve.runEnd(s_Swerve::applyIncreasingVoltage, s_Swerve::resetVoltage));
+        driverController.cross().whileTrue(s_Swerve.runEnd(s_Swerve::applyIncreasingVoltage, s_Swerve::resetVoltage));
 
         // SysId Controls. Comment out after finished.
         driverController.touchpad().and(driverController.povLeft()).whileTrue(s_Swerve.sysIdDynamic(Direction.kForward));
@@ -240,7 +235,7 @@ public class RobotContainer {
 
         /* IMPORTANT Please see the following URL to get a graphical annotation of which xbox buttons 
             trigger what commands on the operator controller:
-            https://www.padcrafter.com/?dpadRight=New+Amp+Firing+Sequence&dpadUp=Reset+Shooter+Encoder&leftStick=Aim+Intake+%28Calibration+Only%29&leftStickClick=&leftBumper=Prepare+intake+for+amp+spit&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&backButton=Eject+Intake&startButton=Free+a+Stuck+Note+%28on+shooter%29&rightStickClick=Lock+Speaker+%28using+pose%29&rightStick=Aim+Shooter+%28Calibration+Only%29&aButton=Fire&bButton=Set+Angle%3A+Amp&xButton=Lock+Speaker&yButton=Lock+Amp+%28for+passing%29&rightBumper=Intake+Amp+Spit&rightTrigger=Deploy+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&plat=0#?rightStickClick=Lock+Speaker+%28using+pose%29&xButton=Lock+Speaker&aButton=Fire&bButton=Set+Angle%3A+Amp&rightStick=Aim+Shooter+%28Calibration+Only%29&rightBumper=Set+Angle%3A+Point+Blank&rightTrigger=Deploy+Intake&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&leftBumper=Set+Angle%3A+Podium&leftStick=Aim+Intake+%28Calibration+Only%29&dpadUp=Reset+Shooter+Encoder&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&startButton=Free+a+Stuck+Note+%28on+shooter%29&backButton=Eject+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&yButton=Manual+Angle+Fire&leftStickClick=Toggle+Auto+Shoot
+            https://www.padcrafter.com/?dpadRight=&dpadUp=Reset+Shooter+Encoder&leftStick=Aim+Intake+%28Calibration+Only%29&leftStickClick=&leftBumper=Prepare+intake+for+amp+spit&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&dpadLeft=Toggle+Calibration+Mode&dpadDown=Reset+Intake+Encoder&backButton=%28Hold%29+Eject+Intake&startButton=%28Hold%29+Get+note+off+the+shooter%27s+top&rightStickClick=Lock+Speaker+%28limelight+only%29&rightStick=Aim+Shooter+%28Calibration+Only%29&aButton=Fire&bButton=Set+Angle%3A+Amp&xButton=Lock+Speaker&yButton=Lock+Amp+%28for+passing%29&rightBumper=Intake+Amp+Spit&rightTrigger=Deploy+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&plat=0#?rightStickClick=Lock+Speaker+%28using+pose%29&xButton=Lock+Speaker&aButton=Fire&bButton=Set+Angle%3A+Amp&rightStick=Aim+Shooter+%28Calibration+Only%29&rightBumper=Set+Angle%3A+Point+Blank&rightTrigger=Deploy+Intake&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&leftBumper=Set+Angle%3A+Podium&leftStick=Aim+Intake+%28Calibration+Only%29&dpadUp=Reset+Shooter+Encoder&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&startButton=Free+a+Stuck+Note+%28on+shooter%29&backButton=Eject+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&yButton=Manual+Angle+Fire&leftStickClick=Toggle+Auto+Shoot
             Please update this link whenever you change a button.
         */
         
@@ -271,13 +266,14 @@ public class RobotContainer {
         operatorController.rightStick().toggleOnTrue(
             Commands.race(
                 s_Swerve.applyRequest(() -> drive
-                    .withVelocityX(getVelocityX()) // Drive forward with // negative Y (forward)
+                    .withVelocityX(getVelocityX()) // Drive forward with negative Y (forward)
                     .withVelocityY(getVelocityY()) // Drive left with negative X (left)
                     .withRotationalRate(s_Swerve.calculateTagRotationalRate())),
 
+                // Set firing mode to speaker
+                new InstantCommand(() -> m_isAmp = false, new Subsystem[0]), // no subsystems required
+
                 Commands.sequence(
-                    // Set firing mode to speaker
-                    new InstantCommand(() -> m_isAmp = false, new Subsystem[0]), // no subsystems required
                     // Rev up the shooter
                     s_Shooter.startEnd(() -> 
                         s_Shooter.runShooter(-0.2, -0.2, 0.5), () ->
@@ -294,13 +290,14 @@ public class RobotContainer {
         operatorController.x().toggleOnTrue(
             Commands.race(
                 s_Swerve.applyRequest(() -> driveFacingAngle
-                    .withVelocityX(getVelocityX()) // Drive forward with // negative Y (forward)
+                    .withVelocityX(getVelocityX()) // Drive forward with negative Y (forward)
                     .withVelocityY(getVelocityY()) // Drive left with negative X (left)
                     .withTargetDirection(s_Swerve.getSpeakerYaw(kAlliance))),
 
+                // Set firing mode to speaker
+                new InstantCommand(() -> m_isAmp = false, new Subsystem[0]), // no subsystems required
+
                 Commands.sequence(
-                    // Set firing mode to speaker
-                    new InstantCommand(() -> m_isAmp = false, new Subsystem[0]), // no subsystems required
                     // Rev up the shooter
                     s_Shooter.startEnd(() -> 
                         s_Shooter.runShooter(-0.2, -0.2, 0.5), () ->
@@ -317,13 +314,14 @@ public class RobotContainer {
         operatorController.y().toggleOnTrue(
             Commands.race(
                 s_Swerve.applyRequest(() -> driveFacingAngle
-                    .withVelocityX(getVelocityX()) // Drive forward with // negative Y (forward)
+                    .withVelocityX(getVelocityX()) // Drive forward with negative Y (forward)
                     .withVelocityY(getVelocityY()) // Drive left with negative X (left)
                     .withTargetDirection(s_Swerve.getPassingYaw(kAlliance))),
 
+                // Set firing mode to speaker
+                new InstantCommand(() -> m_isAmp = false, new Subsystem[0]), // no subsystems required
+
                 Commands.sequence(
-                    // Set firing mode to speaker
-                    new InstantCommand(() -> m_isAmp = false, new Subsystem[0]), // no subsystems required
                     // Rev up the shooter
                     s_Shooter.startEnd(() -> 
                         s_Shooter.runShooter(-0.2, -0.2, 0.5), () ->
@@ -336,11 +334,8 @@ public class RobotContainer {
         // Set angle to amp
         operatorController.b().toggleOnTrue(
             Commands.parallel(
-                Commands.sequence(
-                    new InstantCommand(() -> m_isAmp = true, new Subsystem[0]), // no subsystems required
-                    s_Shooter.startEnd(() -> s_Shooter.setAngle(52.0, false), () -> {})
-                ),
-
+                new InstantCommand(() -> m_isAmp = true, new Subsystem[0]), // no subsystems required
+                s_Shooter.startEnd(() -> s_Shooter.setAngle(52.0, false), () -> {}),
                 s_Led.startEnd(() -> s_Led.setColor(255, 0, 0), () -> {})
             )
         );
@@ -348,24 +343,28 @@ public class RobotContainer {
 
         // Shoot in amp or speaker, depending on the amp angle mode
         operatorController.a().onTrue(
-            Commands.either(
-                // Amp:
-                Commands.sequence(
-                    // Tuck note into shooter
-                    s_Shooter.startEnd(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), () -> {})
-                    .withTimeout(0.05),
-                    // Ramp up
-                    s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.ampTopSpeed, ShooterConstants.ampBottomSpeed, 0), () -> {})
-                    .withTimeout(1.0),
-                    // Shoot into amp
-                    s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.ampTopSpeed, ShooterConstants.ampBottomSpeed, -0.5), () -> {})
-                    .withTimeout(0.2)
-                ),
-                
-                // Speaker:
-                s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.5), () -> {})
-                .withTimeout(0.5),
-            () -> m_isAmp)
+            Commands.race(
+                Commands.idle(s_Swerve), // Prevent swerve movement to eliminate momentum.
+                Commands.either(
+                    // Amp:
+                    Commands.sequence(
+                        // Tuck note into shooter
+                        s_Shooter.startEnd(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), () -> {})
+                            .withTimeout(0.05),
+                        // Ramp up
+                        s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.ampTopSpeed, ShooterConstants.ampBottomSpeed, 0), () -> {})
+                            .withTimeout(1.0),
+                        // Shoot into amp
+                        s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.ampTopSpeed, ShooterConstants.ampBottomSpeed, -0.5), () -> {})
+                            .withTimeout(0.2)
+                    ),
+                    // OR
+                    // Speaker:
+                    s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.5), () -> {})
+                        .withTimeout(0.5),
+                    () -> m_isAmp
+                )
+            )
         );
 
         // Experimental Amp Shooting Sequence. Only use this if intake amp spitting doesn't work.
@@ -406,9 +405,7 @@ public class RobotContainer {
                     s_Intake.runOnce(() -> s_Intake.runIntake(0, 0)),
                     s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, 0), () -> {})
                     .withTimeout(0.5)
-                ),
-                // Raise to amp position
-                s_Intake.run(s_Intake::topPosition)
+                )
             )
         );
         
@@ -424,8 +421,10 @@ public class RobotContainer {
 
         /* Manual Controls */
         // Calibration Mode
+        // Warning: We usually set the starting position by hand while the robot is off.
+        // Only use this if you ABSOLUTELY do not have time to do it by hand.
         operatorController.povLeft().toggleOnTrue(
-            Commands.race( // This is race instead of parallel because one command should not run without the other.
+            Commands.parallel(
                 s_Shooter.run(() -> s_Shooter.rotateShooter(operatorController.getRightY())),
                 s_Intake.run(() -> s_Intake.rotateIntake(operatorController.getLeftY()))
             )
@@ -463,7 +462,7 @@ public class RobotContainer {
 
 
         // Fully eject note from intake
-        operatorController.back().toggleOnTrue(
+        operatorController.back().whileTrue(
             Commands.race(
                 Commands.sequence(
                     s_Intake.runOnce(() -> s_Intake.runIntake(-1, -1)),
