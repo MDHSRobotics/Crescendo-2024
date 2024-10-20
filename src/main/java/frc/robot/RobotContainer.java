@@ -649,7 +649,7 @@ public class RobotContainer {
 
     public void logSubsystemData() {
         s_Swerve.logData();
-        s_Shooter.logData();
+        s_Shooter.logData(kAlliance);
         s_Intake.logData();
         s_Climb.logData();
     }

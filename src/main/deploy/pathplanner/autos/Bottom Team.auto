@@ -126,6 +126,79 @@
               }
             ]
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Bottom 5N"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Run intake"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Bottom 5N-2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Bottom 5N-3"
+          }
+        },
+        {
+          "type": "sequential",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Aim shooter"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.5
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Run shooter"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.5
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Stop shooter"
+                }
+              }
+            ]
+          }
         }
       ]
     }

@@ -58,7 +58,7 @@ public class TunerConstants {
 
     // Every 1 rotation of the azimuth results in kCoupleRatio drive motor turns;
     // This was tuned to our individual robot
-    private static final double kCoupleRatio = 0.5;
+    private static final double kCoupleRatio = 0.5; // 3.06122449?
 
     private static final double kDriveGearRatio = 6.122448979591837;
     private static final double kSteerGearRatio = 21.428571428571427;

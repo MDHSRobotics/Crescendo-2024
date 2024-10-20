@@ -56,10 +56,6 @@ public class Robot extends TimedRobot {
         LimelightHelpers.setPipelineIndex("limelight-front", 0);
         LimelightHelpers.setPipelineIndex("limelight-back", 0);
 
-        // Our field's amp is not perfectly placed, so we filter it out. REMOVE THIS IN COMPETITION.
-        //int[] validIDs = {3,4};
-        //LimelightHelpers.SetFiducialIDFiltersOverride("limelight-front", validIDs);
-
         // Uncomment this if you want to hide "controller not connected" warnings.
         // DriverStation.silenceJoystickConnectionWarning(true);
     }
@@ -98,6 +94,14 @@ public class Robot extends TimedRobot {
     public void disabledExit() {
         // Update the alliance
         m_robotContainer.kAlliance = DriverStation.getAlliance().get();
+
+        // Set the priority tag depending on alliance. This means we will get tx and ty from this tag, but limelight pose measurements from all tags.
+        // https://docs.limelightvision.io/docs/docs-limelight/software-change-log#new-feature-priority-id-nt-key-priorityid
+        if (m_robotContainer.kAlliance == Alliance.Blue) {
+            LimelightHelpers.setPriorityTagID("limelight-front", 7);
+        } else {
+            LimelightHelpers.setPriorityTagID("limelight-front", 4);
+        }
 
         // Start logging data from Swerve and Telemetry.java
         SignalLogger.start();

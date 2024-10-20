@@ -255,7 +255,7 @@ public class Shooter extends SubsystemBase{
   }
 
   /** Shuffleboard logging. We avoid overriding periodic() because it runs even when the robot is disabled. */
-  public void logData() {
+  public void logData(Alliance alliance) {
     // Listed data
     bottomShooterSpeed.setDouble(bottomShooter.get());
     topShooterSpeed.setDouble(topShooter.get());
@@ -268,8 +268,8 @@ public class Shooter extends SubsystemBase{
     // Widget data
     atSpeed.setBoolean(topShooter.getEncoder().getVelocity() < -3800);
     isAtAngle.setBoolean(isAtAngle());
-    seeTag.setBoolean(tagInSight(DriverStation.getAlliance().get()));
+    seeTag.setBoolean(tagInSight(alliance));
     txCorrect.setBoolean(Aiming.approximatelyEqual(LimelightHelpers.getTX("limelight-front"), 0, 2.5));
-    ready.setBoolean(isReady(DriverStation.getAlliance().get()));
+    ready.setBoolean(isReady(alliance));
   }
 }
