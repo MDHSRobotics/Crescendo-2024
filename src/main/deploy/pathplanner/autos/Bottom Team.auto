@@ -3,9 +3,9 @@
   "startingPose": {
     "position": {
       "x": 0.7,
-      "y": 6.68
+      "y": 4.41
     },
-    "rotation": -120.0
+    "rotation": 120.0
   },
   "command": {
     "type": "sequential",
@@ -14,7 +14,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Top Pickup"
+            "pathName": "Bottom Pickup"
           }
         },
         {
@@ -69,7 +69,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Top Pickup 2"
+            "pathName": "Bottom Pickup 2"
           }
         },
         {
@@ -87,7 +87,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Top Pickup 3"
+            "pathName": "Bottom Pickup 3"
           }
         },
         {

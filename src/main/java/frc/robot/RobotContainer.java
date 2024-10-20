@@ -499,27 +499,15 @@ public class RobotContainer {
         );
 
         NamedCommands.registerCommand("Stop shooter",
-            s_Shooter.runOnce(() -> s_Shooter.runShooter(0, 0, 0))
-        );
-
-        NamedCommands.registerCommand("Lower shooter",
-            s_Shooter.runOnce(() -> s_Shooter.setAngle(ShooterConstants.kShooterMinAngle, false))
-        );
-
-        NamedCommands.registerCommand("Enable speaker aim",
-            s_Swerve.runOnce(() -> s_Swerve.setAutoRotationOverride(Swerve.AutoRotationOverride.SPEAKER))
-        );
-
-        NamedCommands.registerCommand("Enable note aim",
-            s_Swerve.runOnce(() -> s_Swerve.setAutoRotationOverride(Swerve.AutoRotationOverride.NOTE))
-        );
-
-        NamedCommands.registerCommand("Disable auto aim",
-            s_Swerve.runOnce(() -> s_Swerve.setAutoRotationOverride(Swerve.AutoRotationOverride.DISABLED))
+            Commands.sequence(
+                s_Shooter.runOnce(() -> s_Shooter.runShooter(0, 0, 0)),
+                s_Shooter.runOnce(() -> s_Shooter.setAngle(ShooterConstants.kShooterMinAngle, false))
+            )
         );
 
         NamedCommands.registerCommand("Run intake", 
             Commands.parallel(
+                s_Swerve.runOnce(() -> s_Swerve.setAutoRotationOverride(Swerve.AutoRotationOverride.NOTE)),
                 Commands.sequence(
                     s_Intake.runOnce(() -> s_Intake.runIntake(1, 1)),
                     s_Intake.runOnce(s_Intake::midPosition)
@@ -529,14 +517,14 @@ public class RobotContainer {
         );
 
         NamedCommands.registerCommand("Stop intake", 
-            Commands.sequence(
-                s_Intake.runOnce(() -> s_Intake.rotateIntake(0)),
-                s_Intake.runOnce(() -> s_Intake.runIntake(0, 0))
+            Commands.parallel(
+                s_Swerve.runOnce(() -> s_Swerve.setAutoRotationOverride(Swerve.AutoRotationOverride.DISABLED)),
+                Commands.sequence(
+                    s_Intake.runOnce(() -> s_Intake.rotateIntake(0)),
+                    s_Intake.runOnce(() -> s_Intake.runIntake(0, 0)),
+                    s_Intake.runOnce(s_Intake::topPosition)
+                )
             )
-        );
-
-        NamedCommands.registerCommand("Raise intake",
-            s_Intake.runOnce(s_Intake::topPosition)
         );
 
 

@@ -2,55 +2,56 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.7,
-      "y": 6.68
+      "x": 1.34,
+      "y": 5.55
     },
-    "rotation": -120.0
+    "rotation": 180.0
   },
   "command": {
     "type": "sequential",
     "data": {
       "commands": [
         {
-          "type": "named",
+          "type": "sequential",
           "data": {
-            "name": "Aim shooter"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.5
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Run shooter"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.5
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Lower shooter"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Aim shooter"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.5
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Run shooter"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.5
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Stop shooter"
+                }
+              }
+            ]
           }
         },
         {
           "type": "named",
           "data": {
             "name": "Run intake"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Enable note aim"
           }
         },
         {
@@ -66,9 +67,58 @@
           }
         },
         {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "sequential",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Aim shooter"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.5
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Run shooter"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.5
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Stop shooter"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Middle 3N"
+          }
+        },
+        {
           "type": "named",
           "data": {
-            "name": "Raise intake"
+            "name": "Run intake"
           }
         },
         {
@@ -78,9 +128,15 @@
           }
         },
         {
+          "type": "path",
+          "data": {
+            "pathName": "Middle 3N-2"
+          }
+        },
+        {
           "type": "named",
           "data": {
-            "name": "Aim shooter"
+            "name": "Stop intake"
           }
         },
         {
@@ -90,33 +146,46 @@
           }
         },
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "Run shooter"
+            "pathName": "Middle 3N-3"
           }
         },
         {
-          "type": "wait",
+          "type": "sequential",
           "data": {
-            "waitTime": 0.5
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Stop shooter"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Lower shooter"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Disable auto aim"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Aim shooter"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.5
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Run shooter"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.5
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Stop shooter"
+                }
+              }
+            ]
           }
         }
       ]

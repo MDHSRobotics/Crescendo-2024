@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.6679664170139152,
-        "y": 7.016729709135094
+        "x": 2.6480769219890337,
+        "y": 4.159498742160069
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.664583100155458,
-        "y": 7.010869632438142
+        "x": 2.6480769219890337,
+        "y": 4.150356986682794
       },
       "isLocked": false,
-      "linkedName": "Top Pickup 2 End"
+      "linkedName": "Bottom Pickup 2 End"
     },
     {
       "anchor": {
-        "x": 2.6679664170139152,
-        "y": 7.016729709135094
+        "x": 2.236697925511664,
+        "y": 4.159498742160069
       },
       "prevControl": {
-        "x": 2.6709287546131217,
-        "y": 6.999929457765144
+        "x": 2.245839680988939,
+        "y": 4.159498742160069
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Top Pickup 3 End"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
@@ -39,13 +39,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -145.05,
+    "rotation": 145.89128600322846,
     "rotateFast": false
   },
   "reversed": false,
   "folder": "New Note Backups",
   "previewStartingState": {
-    "rotation": -120.0,
+    "rotation": 180.0,
     "velocity": 0
   },
   "useDefaultConstraints": true

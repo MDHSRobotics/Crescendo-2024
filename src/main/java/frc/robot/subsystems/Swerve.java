@@ -51,7 +51,6 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
 
     public enum AutoRotationOverride {
         DISABLED,
-        SPEAKER,
         NOTE
     }
 
@@ -220,11 +219,8 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
      * Note override does not override the rotation until a note is seen at least once, and only updates the target rotation when a note is seen and tx updates (to prevent overshooting).
      * @return An optional either containing the rotation override, or not overriding the rotation.
      */
-    public Optional<Rotation2d> getRotationTargetOverride(){
-        if (m_autoRotationOverride == AutoRotationOverride.SPEAKER) {
-            System.out.println("Speaker aiming");
-            return Optional.of(getSpeakerYaw(DriverStation.getAlliance().get(), true));
-        } else if (m_autoRotationOverride == AutoRotationOverride.NOTE) {
+    public Optional<Rotation2d> getRotationTargetOverride() {
+        if (m_autoRotationOverride == AutoRotationOverride.NOTE) {
             double tx = LimelightHelpers.getTX("limelight-back");
             if (tx != 0 && m_previousBackTX != tx) { // If a note is detected AND tx has updated since last check:
                 // Update the saved TX and rotation, and set the new rotation.

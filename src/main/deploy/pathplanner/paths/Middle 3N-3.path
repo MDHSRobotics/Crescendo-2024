@@ -1,0 +1,68 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 8.105704941922134,
+        "y": 4.104648209296419
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 8.087421430967584,
+        "y": 4.095506453819144
+      },
+      "isLocked": false,
+      "linkedName": "Middle 3N-2 End"
+    },
+    {
+      "anchor": {
+        "x": 4.878665258444103,
+        "y": 4.104648209296419
+      },
+      "prevControl": {
+        "x": 5.03064050812371,
+        "y": 4.016662538429279
+      },
+      "nextControl": {
+        "x": 4.70497190437588,
+        "y": 4.205207519546443
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 3.900497422375691,
+        "y": 5.549045574705849
+      },
+      "prevControl": {
+        "x": 3.938121176910505,
+        "y": 5.472903123979967
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 5.0,
+    "maxAcceleration": 2.5,
+    "maxAngularVelocity": 1080.0,
+    "maxAngularAcceleration": 1440.0
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 180.0,
+    "rotateFast": false
+  },
+  "reversed": false,
+  "folder": "Middle Note Pickup",
+  "previewStartingState": {
+    "rotation": 180.0,
+    "velocity": 0
+  },
+  "useDefaultConstraints": true
+}
