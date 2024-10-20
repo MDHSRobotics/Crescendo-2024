@@ -335,12 +335,11 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
 
     /** Shuffleboard logging. We avoid overriding periodic() because it runs even when the robot is disabled. */
     public void logData() {
-        // Subsystem data
+        /* Update yaw for Limelight Megatag2 */
         double yawDegrees = getRobotYaw();
         ChassisSpeeds speeds = getRobotRelativeSpeeds();
         double yawRateDegrees = Math.toDegrees(speeds.omegaRadiansPerSecond);
 
-        /* Update yaw for Limelight Megatag2 */
         LimelightHelpers.SetRobotOrientation("limelight-front", yawDegrees, yawRateDegrees, 0.0, 0.0, 0.0, 0.0);
         
         /* Add Limelight Bot Pose to Pose Estimation and logs */

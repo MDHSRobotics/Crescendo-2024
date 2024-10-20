@@ -22,7 +22,7 @@ public class LockOnNoteCommand extends Command {
     private final RobotContainer m_robotContainer;
     private final Swerve m_swerve;
     private final SwerveRequest.FieldCentricFacingAngle m_angleRequest;
-    private double m_previousTX;
+    private double m_previousTX = 0;
 
     public LockOnNoteCommand(RobotContainer robotContainer, Swerve swerve, SwerveRequest.FieldCentricFacingAngle angleRequest) {
         m_robotContainer = robotContainer;
@@ -46,7 +46,7 @@ public class LockOnNoteCommand extends Command {
             Rotation2d currentDirection = m_swerve.getPose().getRotation();
             Rotation2d requiredRotation = Rotation2d.fromDegrees(currentTX);
             Rotation2d targetDirection = currentDirection.minus(requiredRotation);
-            // Add comment later
+            // If the alliance is red, the driveFacingAngle request will incorrectly try to rotate the target direction, so rotate it back
             if (m_robotContainer.kAlliance == Alliance.Red) {
             targetDirection = targetDirection.rotateBy(Rotation2d.fromDegrees(-180));
             }
@@ -54,6 +54,11 @@ public class LockOnNoteCommand extends Command {
         }
 
         m_swerve.setControl(m_angleRequest);
-        
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        // Reset previous TX.
+        m_previousTX = 0;
     }
 }
