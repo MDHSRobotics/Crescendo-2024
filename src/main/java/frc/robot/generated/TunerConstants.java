@@ -37,8 +37,9 @@ public class TunerConstants {
     // This affects the PID/FF gains for the drive motors
     private static final ClosedLoopOutputType driveClosedLoopOutput = ClosedLoopOutputType.Voltage;
 
-    // The stator current at which the wheels start to slip;
+    // The stator current at which the wheels start to slip.
     // This needs to be tuned to your individual robot
+    // https://v6.docs.ctr-electronics.com/en/stable/docs/api-reference/mechanisms/swerve/swerve-builder-api.html#additional-constants
     private static final double kSlipCurrentA = 150.0;
 
     // Default stator current limit recommended by CTRE from the first link
@@ -56,9 +57,15 @@ public class TunerConstants {
     // Our current free speed is MK4i, L3, Falcon 500, FOC: https://www.swervedrivespecialties.com/products/mk4i-swerve-module
     public static final double kSpeedAt12VoltsMps = 5.27304;
 
-    // Every 1 rotation of the azimuth results in kCoupleRatio drive motor turns;
-    // This was tuned to our individual robot
-    private static final double kCoupleRatio = 0.5; // 3.06122449?
+    // Every 1 rotation of the azimuth results in kCoupleRatio drive motor turns.
+    // https://v6.docs.ctr-electronics.com/en/stable/docs/api-reference/mechanisms/swerve/swerve-builder-api.html#additional-constants
+    /* This is what we did to find it:
+     * 1. Put the robot on the cart
+     * 2. Mark the side of the wheel
+     * 3. Apply a VoltageOut request to the front right steer motor to rotate the wheel heading once (you might have to do this in a separate program)
+     * 4. Write down the number of wheel spins and multiply it by kDriveGearRatio
+    */
+    private static final double kCoupleRatio = 3.06122449;
 
     private static final double kDriveGearRatio = 6.122448979591837;
     private static final double kSteerGearRatio = 21.428571428571427;
