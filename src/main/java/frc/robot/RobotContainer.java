@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.*;
@@ -154,7 +155,8 @@ public class RobotContainer {
         );
 
         // When a note is in sight, the speaker tag isn't in sight, and driver is not rotating the robot, automatically lock on the note and blink the LEDs orange.
-        noteIsInSight.and(tagIsInSight.negate()).whileTrue(
+        // According to https://www.chiefdelphi.com/t/what-are-your-programming-horror-stories/473439/15, we also need to make sure this does not run in autonomous.
+        noteIsInSight.and(tagIsInSight.negate()).and(RobotModeTriggers.autonomous().negate()).whileTrue(
             Commands.parallel(
                 lockOnNoteCommmand,
                 s_Led.run(() -> s_Led.blink(255, 20, 0, 300))
@@ -481,6 +483,7 @@ public class RobotContainer {
     {
         // IMPORTANT: In autonomous, the default subsystem commands do not get scheduled.
         // Also, commands MUST have an end, or PathPlanner will not continue.
+        // ALSO, Triggers can still activate in autonomous, so do not add any Trigger-activated commands that require subsystems used in autonomous.
         
         /* New Auto Commands */
         NamedCommands.registerCommand("Aim shooter",  
