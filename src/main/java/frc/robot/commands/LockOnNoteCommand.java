@@ -31,6 +31,12 @@ public class LockOnNoteCommand extends Command {
         m_angleRequest = angleRequest;
     }
 
+    @Override
+    public void initialize() {
+        // Reset the PID controller
+        m_angleRequest.HeadingController.reset();
+    }
+
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {

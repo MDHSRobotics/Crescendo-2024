@@ -102,7 +102,9 @@ public class RobotContainer {
             );
         }
 
-        // Set the PID controller for swerve drive aiming
+        // Set the PID controller for swerve drive aiming.
+        // If you use kI in any PID controller, or kD in a Phoenix PID Controller, you must call reset() before you start aiming to prevent a large spike in output.
+        // https://docs.wpilib.org/en/stable/docs/software/advanced-controls/controllers/pidcontroller.html#resetting-the-controller
         driveFacingAngle.HeadingController.setPID(3, 0, 0);
         // Enable continuous angle input, so that the robot doesn't spin around to go from 180 to -180 degrees.
         driveFacingAngle.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
@@ -290,10 +292,14 @@ public class RobotContainer {
         // Lock on to speaker (new method using pose estimation).
         operatorController.x().toggleOnTrue(
             Commands.race(
-                s_Swerve.applyRequest(() -> driveFacingAngle
+                Commands.sequence(
+                    // Reset the PID controller
+                    s_Swerve.runOnce(() -> driveFacingAngle.HeadingController.reset()),
+                    s_Swerve.applyRequest(() -> driveFacingAngle
                     .withVelocityX(getVelocityX()) // Drive forward with negative Y (forward)
                     .withVelocityY(getVelocityY()) // Drive left with negative X (left)
-                    .withTargetDirection(s_Swerve.getSpeakerYaw(kAlliance, false))),
+                    .withTargetDirection(s_Swerve.getSpeakerYaw(kAlliance, false)))
+                ),
 
                 Commands.sequence(
                     // Set firing mode to speaker
