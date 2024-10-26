@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -84,13 +85,13 @@ public class Robot extends TimedRobot {
         // block in order for anything in the Command-based framework to work.
         CommandScheduler.getInstance().run();
         
-        // Get the voltage going into the PDP, in Volts.
+        // Log the battery voltage going into the roboRIO, in Volts.
+        SmartDashboard.putNumber("Battery Voltage (V)", RobotController.getBatteryVoltage());
+        // Log the voltage going into the PDP, in Volts.
         // The PDP returns the voltage in increments of 0.05 Volts.
-        double voltage = m_pdh.getVoltage();
-        SmartDashboard.putNumber("Voltage (V)", voltage);
-        // Get the total current of all channels.
-        double totalCurrent = m_pdh.getTotalCurrent();
-        SmartDashboard.putNumber("Total Current (A)", totalCurrent);
+        SmartDashboard.putNumber("PDH Voltage (V)", m_pdh.getVoltage());
+        // Log the total current of all PDH channels.
+        SmartDashboard.putNumber("Total Current (A)", m_pdh.getTotalCurrent());
     }
 
     /**
