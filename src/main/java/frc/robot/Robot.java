@@ -6,12 +6,10 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -26,8 +24,6 @@ public class Robot extends TimedRobot {
     private Command m_autonomousCommand;
 
     private RobotContainer m_robotContainer;
-
-    private PowerDistribution m_pdh;
 
     // When connected to the RoboRio, use this constructor because it will use the
     // proper period duration
@@ -52,9 +48,6 @@ public class Robot extends TimedRobot {
         // including flags, sensors, devices, subsystems, commands, shuffleboard,
         // and puts our autonomous chooser on the dashboard.
         m_robotContainer = new RobotContainer();
-
-        // Initialize our PDH for logging voltage and current
-        m_pdh = new PowerDistribution(1, ModuleType.kRev);
 
         // Set the log path for SysId
         SignalLogger.setPath("/logs");
@@ -87,11 +80,6 @@ public class Robot extends TimedRobot {
         
         // Log the battery voltage going into the roboRIO, in Volts.
         SmartDashboard.putNumber("Battery Voltage (V)", RobotController.getBatteryVoltage());
-        // Log the voltage going into the PDP, in Volts.
-        // The PDP returns the voltage in increments of 0.05 Volts.
-        SmartDashboard.putNumber("PDH Voltage (V)", m_pdh.getVoltage());
-        // Log the total current of all PDH channels.
-        SmartDashboard.putNumber("Total Current (A)", m_pdh.getTotalCurrent());
     }
 
     /**

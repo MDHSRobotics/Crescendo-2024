@@ -1,6 +1,5 @@
 package frc.robot.subsystems;
 
-import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.SignalLogger;
@@ -13,7 +12,6 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 
 import com.pathplanner.lib.auto.*;
-import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.util.*;
 
 import edu.wpi.first.math.MathUtil;
@@ -57,11 +55,6 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
-
-    // Variables for deciding autonomous rotation
-    private AutoRotationOverride m_autoRotationOverride = AutoRotationOverride.DISABLED;
-    private double m_previousBackTX;
-    private Rotation2d m_previousNoteRotation = null;
 
     // Old PID Controller for deciding the rotational rate of the robot during speaker aiming.
     private PIDController m_rotationalRateController = new PIDController(0.15, 0, 0);
@@ -168,9 +161,6 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
                     () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
                     this // Reference to this subsystem to set requirements
             );
-        
-        // Set the method that will be used to get rotation overrides
-        PPHolonomicDriveController.setRotationTargetOverride(this::getRotationTargetOverride);
     }
 
     /*
@@ -210,38 +200,6 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         setControl(AutoRequest.withSpeeds(speeds));
 
         // System.out.println("Drive Robot Relative speeds: " + speeds.toString());
-    }
-
-    /**
-     * This method is used by PathPlanner to override the target rotation.
-     * The override can be set using a NamedCommand.
-     * <p>
-     * Note override does not override the rotation until a note is seen at least once, and only updates the target rotation when a note is seen and tx updates (to prevent overshooting).
-     * @return An optional either containing the rotation override, or not overriding the rotation.
-     */
-    public Optional<Rotation2d> getRotationTargetOverride() {
-        if (m_autoRotationOverride == AutoRotationOverride.NOTE) {
-            double tx = LimelightHelpers.getTX("limelight-back");
-            if (tx != 0 && m_previousBackTX != tx) { // If a note is detected AND tx has updated since last check:
-                // Update the saved TX and rotation, and set the new rotation.
-                m_previousBackTX = tx;
-                Rotation2d targetRotation = Rotation2d.fromDegrees(getRobotYaw() - tx);
-                m_previousNoteRotation = targetRotation;
-                return Optional.of(targetRotation);
-            } else if (m_previousNoteRotation != null) { // Else if there is a saved rotation to use:
-                return Optional.of(m_previousNoteRotation);
-            } else { // Else, we don't want to override the path's rotation.
-                return Optional.empty();
-            }
-        } else { // Else, we don't want to override the path's rotation.
-            return Optional.empty();
-        }
-    }
-
-    public void setAutoRotationOverride(AutoRotationOverride override){
-        m_autoRotationOverride = override;
-        // Invalidate the saved note rotation.
-        m_previousNoteRotation = null;
     }
 
     // Simulation

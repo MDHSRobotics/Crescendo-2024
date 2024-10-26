@@ -53,7 +53,14 @@ public class Aiming {
         
         // We take the negative because we want the clockwise angle.
         // https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html#wpilib-coordinate-system
-        return -Math.toDegrees(robotRotation.getY());
+        double targetPitch = -Math.toDegrees(robotRotation.getY());
+        // If the robot is too far away from the speaker, the note will miss due to gravity (even though the angle looks right), so increase the angle a bit
+        double distanceToSpeaker = robotTranslation.getNorm();
+        System.out.println(distanceToSpeaker);
+        if (distanceToSpeaker > 3.8) {
+            targetPitch += distanceToSpeaker * 0.8;
+        }
+        return targetPitch;
     }
 
     /* Limelight Aiming Methods */

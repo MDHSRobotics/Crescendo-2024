@@ -53,8 +53,8 @@ public final class Constants {
         public static final Translation2d kRedSpeaker2DPosition = new Translation2d(16.3, 5.55);
 
         // 3D position of each speaker opening in meters
-        public static final Translation3d kBlueSpeaker3DPosition = new Translation3d(0.25, 5.55, 2.35);
-        public static final Translation3d kRedSpeaker3DPosition = new Translation3d(16.3, 5.55, 2.35);
+        public static final Translation3d kBlueSpeaker3DPosition = new Translation3d(0.25, 5.55, 2.2);
+        public static final Translation3d kRedSpeaker3DPosition = new Translation3d(16.3, 5.55, 2.2);
 
         // 2D position of each amp area in meters
         public static final Translation2d kBlueAmp2DPosition = new Translation2d(1.90, 7.30);
@@ -74,7 +74,7 @@ public final class Constants {
         public static final int kLimitSwitchID = 0;
 
         //The max and min angles of the shooter in degrees
-        public static final double kShooterMaxAngle = 90;
+        public static final double kShooterMaxAngle = 66;
         public static final double kShooterMinAngle = 23;
 
         // Height of the shooter from the ground in inches
@@ -92,6 +92,8 @@ public final class Constants {
         public static final double kDegreesToRotationsConversion = -0.5839;
 
         public static final double ampAngle = 50.0;
+
+        public static final double passingAngle = 55.0;
 
         public static final double ampTopSpeed = 0.175;
         public static final double ampBottomSpeed = 0.525;

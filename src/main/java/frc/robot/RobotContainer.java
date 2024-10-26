@@ -31,6 +31,8 @@ import frc.robot.Constants.*;
 import frc.robot.commands.LockOnNoteCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
+import frc.robot.Elastic.*;
+import frc.robot.Elastic.ElasticNotification.NotificationLevel;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -314,15 +316,20 @@ public class RobotContainer {
                     s_Shooter.run(() -> s_Shooter.setAngleFromPose(s_Swerve.getPose(), kAlliance))
                 )
             ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
+            .andThen(() -> Elastic.sendAlert(new ElasticNotification(NotificationLevel.INFO, "Aiming interrupted/finished", "")), new Subsystem[0])
         );
 
         // Lock on to amp area (for note passing).
         operatorController.y().toggleOnTrue(
             Commands.race(
-                s_Swerve.applyRequest(() -> driveFacingAngle
+                Commands.sequence(
+                    // Reset the PID controller
+                    s_Swerve.runOnce(() -> driveFacingAngle.HeadingController.reset()),
+                    s_Swerve.applyRequest(() -> driveFacingAngle
                     .withVelocityX(getVelocityX()) // Drive forward with negative Y (forward)
                     .withVelocityY(getVelocityY()) // Drive left with negative X (left)
-                    .withTargetDirection(s_Swerve.getPassingYaw(kAlliance))),
+                    .withTargetDirection(s_Swerve.getSpeakerYaw(kAlliance, false)))
+                ),
 
                 Commands.sequence(
                     // Set firing mode to speaker
@@ -331,9 +338,13 @@ public class RobotContainer {
                     s_Shooter.startEnd(() -> 
                         s_Shooter.runShooter(-0.2, -0.2, 0.5), () ->
                         s_Shooter.runShooter(ShooterConstants.passingSpeed, ShooterConstants.passingSpeed, 0))
-                    .withTimeout(0.05)
+                    .withTimeout(0.05),
+
+                    // Angle the shooter
+                    s_Shooter.run(() -> s_Shooter.setAngle(ShooterConstants.passingAngle, false))
                 )
             ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
+            .andThen(() -> Elastic.sendAlert(new ElasticNotification(NotificationLevel.INFO, "Aiming interrupted/finished", "")), new Subsystem[0])
         );
 
         // Set angle to amp
@@ -365,7 +376,7 @@ public class RobotContainer {
                     ),
                     // OR
                     // Speaker:
-                    s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.5), () -> {})
+                    s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.7), () -> {})
                         .withTimeout(0.5),
                     () -> m_isAmp
                 )
@@ -516,7 +527,6 @@ public class RobotContainer {
 
         NamedCommands.registerCommand("Run intake", 
             Commands.parallel(
-                s_Swerve.runOnce(() -> s_Swerve.setAutoRotationOverride(Swerve.AutoRotationOverride.NOTE)),
                 Commands.sequence(
                     s_Intake.runOnce(() -> s_Intake.runIntake(1, 1)),
                     s_Intake.runOnce(s_Intake::midPosition)
@@ -527,7 +537,6 @@ public class RobotContainer {
 
         NamedCommands.registerCommand("Stop intake", 
             Commands.parallel(
-                s_Swerve.runOnce(() -> s_Swerve.setAutoRotationOverride(Swerve.AutoRotationOverride.DISABLED)),
                 Commands.sequence(
                     s_Intake.runOnce(() -> s_Intake.rotateIntake(0)),
                     s_Intake.runOnce(() -> s_Intake.runIntake(0, 0)),

@@ -40,7 +40,7 @@ public class TunerConstants {
     // The stator current at which the wheels start to slip.
     // This needs to be tuned to your individual robot
     // https://v6.docs.ctr-electronics.com/en/stable/docs/api-reference/mechanisms/swerve/swerve-builder-api.html#additional-constants
-    private static final double kSlipCurrentA = 150.0;
+    private static final double kSlipCurrentA = 130.0;
 
     // Default stator current limit recommended by CTRE from the first link
     private static final TalonFXConfiguration steerInitialConfigs = new TalonFXConfiguration()

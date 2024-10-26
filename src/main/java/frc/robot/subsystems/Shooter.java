@@ -268,7 +268,7 @@ public class Shooter extends SubsystemBase{
     atSpeed.setBoolean(topShooter.getEncoder().getVelocity() < -3800);
     isAtAngle.setBoolean(isAtAngle());
     seeTag.setBoolean(tagInSight(alliance));
-    txCorrect.setBoolean(Aiming.approximatelyEqual(LimelightHelpers.getTX("limelight-front"), 0, 2.5));
+    txCorrect.setBoolean(Aiming.approximatelyEqual(LimelightHelpers.getTX("limelight-front"), 0, 3));
     ready.setBoolean(isReady(alliance));
   }
 }

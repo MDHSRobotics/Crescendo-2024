@@ -32,6 +32,8 @@ public class Intake extends SubsystemBase{
     /* Shuffleboard Logging */
     private ShuffleboardTab tab = Shuffleboard.getTab("Intake");
 
+    private GenericEntry noteInSight = tab.add("Note In Sight", false).getEntry();
+
     private ShuffleboardLayout list = tab.getLayout("Intake Info", BuiltInLayouts.kList).withSize(3, 4);
     private GenericEntry angleRotations = list.add("Angle Rotations", 0.0).getEntry();
     private GenericEntry intakeSpeed = list.add("Intake Speed", 0.0).getEntry();
@@ -93,6 +95,9 @@ public class Intake extends SubsystemBase{
         intake.setOpenLoopRampRate(0.1);
         conveyor.setOpenLoopRampRate(0.1);
 
+        leftAngle.setSmartCurrentLimit(40);
+        rightAngle.setSmartCurrentLimit(40);
+
         leftAngle.follow(rightAngle, true);
         
         conveyor.setInverted(true);
@@ -139,7 +144,7 @@ public class Intake extends SubsystemBase{
     }
 
     public boolean noteInSight() {
-        boolean noteIsInSight = LimelightHelpers.getTX("limelight-back") != 0;
+        boolean noteIsInSight = LimelightHelpers.getDetectorClass("limelight-back").equals("note");
         return noteIsInSight;
     }
 
@@ -149,6 +154,7 @@ public class Intake extends SubsystemBase{
         angleRotations.setDouble(rightAngle.getEncoder().getPosition());
         intakeSpeed.setDouble(intake.get());
         conveyorSpeed.setDouble(conveyor.get());
+        noteInSight.setBoolean(noteInSight());
         //backTx.setDouble(LimelightHelpers.getTX("limelight-back"));
         //backTy.setDouble(LimelightHelpers.getTY("limelight-back"));
     }
