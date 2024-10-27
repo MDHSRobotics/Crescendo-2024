@@ -3,7 +3,7 @@
   "startingPose": {
     "position": {
       "x": 0.5,
-      "y": 2.15
+      "y": 4.05
     },
     "rotation": 180.0
   },
@@ -12,15 +12,21 @@
     "data": {
       "commands": [
         {
-          "type": "wait",
+          "type": "path",
           "data": {
-            "waitTime": 10.0
+            "pathName": "Bottom Pickup"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot note"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Lowest Drive Out"
+            "pathName": "Bottom Drive Out"
           }
         }
       ]

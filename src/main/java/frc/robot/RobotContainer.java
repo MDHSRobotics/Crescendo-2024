@@ -68,7 +68,7 @@ public class RobotContainer {
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
     // Set up telemetry.
-    private final Telemetry logger = new Telemetry(SwerveSpeedConstants.MaxSpeed);
+    private final Telemetry logger = new Telemetry();
 
     /* Auto Chooser */
     private final SendableChooser<Command> autoChooser;

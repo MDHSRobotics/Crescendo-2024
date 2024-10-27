@@ -38,6 +38,7 @@ import frc.utils.LimelightHelpers;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 
@@ -107,8 +108,9 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     private final SysIdRoutine RoutineToApply = SysIdRoutineTranslation;
 
     /* NetworkTables logging */
-    NetworkTableInstance inst = NetworkTableInstance.getDefault();
-    StructPublisher<Pose2d> camPosepublisher = inst.getStructTopic("camPose", Pose2d.struct).publish();
+    private final NetworkTableInstance inst = NetworkTableInstance.getDefault();
+    private final NetworkTable table = inst.getTable("Drive");
+    private final StructPublisher<Pose2d> camPosePublisher = table.getStructTopic("camPose", Pose2d.struct).publish();
 
     /* Shuffleboard logging */
     private ShuffleboardTab tab = Shuffleboard.getTab("Swerve");
@@ -179,7 +181,6 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     public Pose2d getPose() {
         SwerveDriveState currentState = getState();
         Pose2d currentPose = currentState.Pose;
-        // System.out.println("Current pos" + currentPose.toString());
 
         return currentPose;
     }
@@ -189,17 +190,12 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         SwerveModuleState[] moduleStates = currentState.ModuleStates;
 
         ChassisSpeeds chassisSpeeds = m_kinematics.toChassisSpeeds(moduleStates);
-         
-        //System.out.println("Getting current robot speeds " + chassisSpeeds.toString());
 
         return chassisSpeeds;
     }
 
     public void driveRobotRelative(ChassisSpeeds speeds){
-
         setControl(AutoRequest.withSpeeds(speeds));
-
-        // System.out.println("Drive Robot Relative speeds: " + speeds.toString());
     }
 
     // Simulation
@@ -220,7 +216,6 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
 
     // Apply a request to the swerve subsystem
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
-
         return run(() -> this.setControl(requestSupplier.get()));
     }
 
@@ -274,6 +269,11 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         return targetYaw;
     }
 
+    /**
+     * Old method used to calculate the rotational rate based on the tx of the speaker.
+     * Only works if a tag is in sight.
+     * @return The rotational rate that rotates the robot to the speaker.
+     */
     public double calculateTagRotationalRate() {
         double tx = LimelightHelpers.getTX("limelight-front");
         double output = m_rotationalRateController.calculate(tx, 0);
@@ -307,7 +307,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
                 // Add camera pose to pose estimation
                 addVisionMeasurement(limelightMeasurement.pose, limelightMeasurement.timestampSeconds);
                 // Add camera pose to NetworkTables
-                camPosepublisher.set(limelightMeasurement.pose);
+                camPosePublisher.set(limelightMeasurement.pose);
                 // Add camera pose to logs
                 SignalLogger.writeDoubleArray("camera pose", new double[] {
                     limelightMeasurement.pose.getX(),

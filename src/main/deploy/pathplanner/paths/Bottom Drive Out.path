@@ -1,0 +1,52 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 1.3956564216023761,
+        "y": 4.15
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 1.3956564216023761,
+        "y": 2.989030066185182
+      },
+      "isLocked": false,
+      "linkedName": "Bottom Pickup End"
+    },
+    {
+      "anchor": {
+        "x": 2.977180119170929,
+        "y": 1.2158534784775594
+      },
+      "prevControl": {
+        "x": 2.927180119170929,
+        "y": 1.2158534784775594
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Bottom Drive Out End"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 5.0,
+    "maxAcceleration": 2.5,
+    "maxAngularVelocity": 1080.0,
+    "maxAngularAcceleration": 1440.0
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 180.0,
+    "rotateFast": false
+  },
+  "reversed": false,
+  "folder": "New Drive Outs",
+  "previewStartingState": {
+    "rotation": 130.89,
+    "velocity": 0
+  },
+  "useDefaultConstraints": true
+}
