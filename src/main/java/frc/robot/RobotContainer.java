@@ -31,8 +31,9 @@ import frc.robot.Constants.*;
 import frc.robot.commands.LockOnNoteCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
-import frc.robot.Elastic.*;
-import frc.robot.Elastic.ElasticNotification.NotificationLevel;
+import frc.utils.Elastic;
+import frc.utils.Elastic.ElasticNotification;
+import frc.utils.Elastic.ElasticNotification.NotificationLevel;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -59,7 +60,7 @@ public class RobotContainer {
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
         .withDeadband(SwerveSpeedConstants.MaxSpeed * Constants.stickDeadband)
-        .withRotationalDeadband(SwerveSpeedConstants.MaxAngularRate * 0.06) // Add a 10% deadband
+        .withRotationalDeadband(SwerveSpeedConstants.MaxAngularRate * 0.06) // Add a 6% deadband
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // I want field-centric driving in open loop
 
     private final SwerveRequest.FieldCentricFacingAngle driveFacingAngle = new SwerveRequest.FieldCentricFacingAngle()
@@ -241,23 +242,12 @@ public class RobotContainer {
 
         /* IMPORTANT Please see the following URL to get a graphical annotation of which xbox buttons 
             trigger what commands on the operator controller:
-            https://www.padcrafter.com/?dpadRight=&dpadUp=Reset+Shooter+Encoder&leftStick=Aim+Intake+%28Calibration+Only%29&leftStickClick=&leftBumper=Prepare+intake+for+amp+spit&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&dpadLeft=Toggle+Calibration+Mode&dpadDown=Reset+Intake+Encoder&backButton=%28Hold%29+Eject+Intake&startButton=%28Hold%29+Get+note+off+the+shooter%27s+top&rightStickClick=Lock+Speaker+%28limelight+only%29&rightStick=Aim+Shooter+%28Calibration+Only%29&aButton=Fire&bButton=Set+Angle%3A+Amp&xButton=Lock+Speaker&yButton=Lock+Amp+%28for+passing%29&rightBumper=Intake+Amp+Spit&rightTrigger=Deploy+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&plat=0#?rightStickClick=Lock+Speaker+%28using+pose%29&xButton=Lock+Speaker&aButton=Fire&bButton=Set+Angle%3A+Amp&rightStick=Aim+Shooter+%28Calibration+Only%29&rightBumper=Set+Angle%3A+Point+Blank&rightTrigger=Deploy+Intake&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&leftBumper=Set+Angle%3A+Podium&leftStick=Aim+Intake+%28Calibration+Only%29&dpadUp=Reset+Shooter+Encoder&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&startButton=Free+a+Stuck+Note+%28on+shooter%29&backButton=Eject+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&yButton=Manual+Angle+Fire&leftStickClick=Toggle+Auto+Shoot
+            https://www.padcrafter.com/?dpadRight=&dpadUp=Reset+Shooter+Encoder&leftStick=Aim+Intake+%28Calibration+Only%29&leftStickClick=&leftBumper=Prepare+intake+for+amp+spit&leftTrigger=&dpadLeft=Toggle+Calibration+Mode&dpadDown=Reset+Intake+Encoder&backButton=%28Hold%29+Eject+Intake&startButton=%28Hold%29+Get+note+off+the+shooter%27s+top&rightStickClick=Lock+Speaker+%28limelight+only%29&rightStick=Aim+Shooter+%28Calibration+Only%29&aButton=Fire&bButton=Set+Angle%3A+Amp&xButton=Lock+Speaker&yButton=Lock+Amp+%28for+passing%29&rightBumper=Intake+Amp+Spit&rightTrigger=Deploy+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&plat=0#?rightStickClick=Lock+Speaker+%28using+pose%29&xButton=Lock+Speaker&aButton=Fire&bButton=Set+Angle%3A+Amp&rightStick=Aim+Shooter+%28Calibration+Only%29&rightBumper=Set+Angle%3A+Point+Blank&rightTrigger=Deploy+Intake&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&leftBumper=Set+Angle%3A+Podium&leftStick=Aim+Intake+%28Calibration+Only%29&dpadUp=Reset+Shooter+Encoder&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&startButton=Free+a+Stuck+Note+%28on+shooter%29&backButton=Eject+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&yButton=Manual+Angle+Fire&leftStickClick=Toggle+Auto+Shoot
             Please update this link whenever you change a button.
         */
         
-        // Run intake at bottom position
-        operatorController.rightTrigger().toggleOnTrue(
-            Commands.race(
-                Commands.sequence(
-                    s_Intake.runOnce(() -> s_Intake.runIntake(1, 1)),
-                    s_Intake.run(() -> s_Intake.bottomPosition())
-                ),
-                s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, -0.6), () -> {})
-            )
-        );
-
         // Run intake at mid position
-        operatorController.leftTrigger().toggleOnTrue(
+        operatorController.rightTrigger().toggleOnTrue(
             Commands.race(
                 Commands.sequence(
                     s_Intake.runOnce(() -> s_Intake.runIntake(1, 1)),
@@ -298,9 +288,9 @@ public class RobotContainer {
                     // Reset the PID controller
                     s_Swerve.runOnce(() -> driveFacingAngle.HeadingController.reset()),
                     s_Swerve.applyRequest(() -> driveFacingAngle
-                    .withVelocityX(getVelocityX()) // Drive forward with negative Y (forward)
-                    .withVelocityY(getVelocityY()) // Drive left with negative X (left)
-                    .withTargetDirection(s_Swerve.getSpeakerYaw(kAlliance, false)))
+                        .withVelocityX(getVelocityX()) // Drive forward with negative Y (forward)
+                        .withVelocityY(getVelocityY()) // Drive left with negative X (left)
+                        .withTargetDirection(s_Swerve.getSpeakerYaw(kAlliance, false)))
                 ),
 
                 Commands.sequence(
@@ -503,44 +493,48 @@ public class RobotContainer {
         // ALSO, Triggers can still activate in autonomous, so do not add any Trigger-activated commands that require subsystems used in autonomous.
         
         /* New Auto Commands */
-        NamedCommands.registerCommand("Aim shooter",  
-            // Tuck the note into the shooter, and then ramp up and aim
+        NamedCommands.registerCommand("Shoot note",  
             Commands.sequence(
+                // Tuck the note into the shooter, then rev up
                 s_Shooter.startEnd(() -> 
-                    s_Shooter.runShooter(-0.2, -0.2, 0.5), () -> 
-                    s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, 0))
-                .withTimeout(0.2),
-                s_Shooter.runOnce(() -> s_Shooter.setAngleFromPose(s_Swerve.getPose(), kAlliance))
-            )
-        );
-
-        NamedCommands.registerCommand("Run shooter",
-            s_Shooter.runOnce(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.5))
-        );
-
-        NamedCommands.registerCommand("Stop shooter",
-            Commands.sequence(
-                s_Shooter.runOnce(() -> s_Shooter.runShooter(0, 0, 0)),
-                s_Shooter.runOnce(() -> s_Shooter.setAngle(ShooterConstants.kShooterMinAngle, false))
+                    s_Shooter.runShooter(-0.2, -0.2, 0.5), () ->
+                    s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, 0)
+                ).withTimeout(0.05),
+                // Angle the shooter
+                s_Shooter.run(() -> s_Shooter.setAngleFromPose(s_Swerve.getPose(), kAlliance))
+                 .withTimeout(1),
+                // Run the shooter
+                s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.7), () -> {})
+                 .withTimeout(0.5),
+                // Lower the shooter
+                s_Shooter.runOnce(() -> s_Shooter.setAngle(ShooterConstants.kShooterMinAngle, false)),
+                // Turn off the shooter
+                s_Shooter.runOnce(() -> s_Shooter.runShooter(0, 0, 0))
             )
         );
 
         NamedCommands.registerCommand("Run intake", 
             Commands.parallel(
+                // Turn on the feeder
+                s_Shooter.runOnce(() -> s_Shooter.runShooter(0, 0, -1)),
+                // Run the intake and lower it
                 Commands.sequence(
                     s_Intake.runOnce(() -> s_Intake.runIntake(1, 1)),
-                    s_Intake.runOnce(s_Intake::midPosition)
-                ),
-                s_Shooter.runOnce(() -> s_Shooter.runShooter(0, 0, -1))
+                    s_Intake.startEnd(s_Intake::midPosition, () -> {})
+                        .withTimeout(0.5)
+                )
             )
         );
 
         NamedCommands.registerCommand("Stop intake", 
             Commands.parallel(
+                // Turn off the feeder
+                s_Shooter.runOnce(() -> s_Shooter.runShooter(0, 0, 0)),
+                // Turn off the intake and raise it
                 Commands.sequence(
-                    s_Intake.runOnce(() -> s_Intake.rotateIntake(0)),
                     s_Intake.runOnce(() -> s_Intake.runIntake(0, 0)),
-                    s_Intake.runOnce(s_Intake::topPosition)
+                    s_Intake.startEnd(s_Intake::topPosition, () -> {})
+                        .withTimeout(0.5)
                 )
             )
         );

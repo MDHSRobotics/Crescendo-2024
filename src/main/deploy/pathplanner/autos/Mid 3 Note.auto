@@ -1,0 +1,85 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 1.34,
+      "y": 5.55
+    },
+    "rotation": 180.0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot note"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Run intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Mid Pickup"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop intake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot note"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Middle 3N"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Run intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Middle 3N-2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Middle 3N-3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot note"
+          }
+        }
+      ]
+    }
+  },
+  "folder": "New Autos",
+  "choreoAuto": false
+}

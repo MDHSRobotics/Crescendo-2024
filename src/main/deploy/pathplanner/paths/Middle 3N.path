@@ -8,24 +8,24 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.01019848810299,
-        "y": 6.188968458115091
+        "x": 2.6663604329435833,
+        "y": 5.622179618524048
       },
       "isLocked": false,
       "linkedName": "Mid Pickup End"
     },
     {
       "anchor": {
-        "x": 4.823814725580453,
-        "y": 4.104648209296419
+        "x": 5.856833094512514,
+        "y": 6.472362877910611
       },
       "prevControl": {
-        "x": 4.827903042916626,
-        "y": 4.096471574624073
+        "x": 4.970082813216852,
+        "y": 6.673481498410659
       },
       "nextControl": {
-        "x": 4.814672970103179,
-        "y": 4.122931720250969
+        "x": 7.087180673105937,
+        "y": 6.19331497348736
       },
       "isLocked": false,
       "linkedName": null
@@ -44,13 +44,7 @@
       "linkedName": "Middle 3N End"
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 1.0,
-      "rotationDegrees": 180.0,
-      "rotateFast": false
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "eventMarkers": [],
   "globalConstraints": {

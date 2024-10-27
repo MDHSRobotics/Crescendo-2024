@@ -1,0 +1,97 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 0.5,
+      "y": 4.05
+    },
+    "rotation": 180.0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Bottom Pickup"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot note"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Run intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Bottom Pickup 2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Bottom Pickup 3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot note"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Bottom 5N"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Run intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Bottom 5N-2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Bottom 5N-3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot note"
+          }
+        }
+      ]
+    }
+  },
+  "folder": "New Autos",
+  "choreoAuto": false
+}

@@ -3,45 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 8.105704941922134,
-        "y": 4.104648209296419
+        "x": 1.6424838194887974,
+        "y": 4.15
       },
       "prevControl": null,
       "nextControl": {
-        "x": 8.087421430967584,
-        "y": 4.095506453819144
+        "x": 1.6924838194887972,
+        "y": 4.15
       },
       "isLocked": false,
-      "linkedName": "Middle 3N-2 End"
+      "linkedName": "Top Pickup 6 End"
     },
     {
       "anchor": {
-        "x": 6.57903177721723,
-        "y": 6.54549692172881
+        "x": 2.6480769219890337,
+        "y": 4.15
       },
       "prevControl": {
-        "x": 6.903291668536121,
-        "y": 6.350311356080545
-      },
-      "nextControl": {
-        "x": 5.637430963057918,
-        "y": 7.1122857613198525
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 3.845646889512042,
-        "y": 5.530762063751299
-      },
-      "prevControl": {
-        "x": 4.01019848810299,
-        "y": 5.631321374001323
+        "x": 2.598076921989034,
+        "y": 4.15
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Bottom Pickup 2 End"
     }
   ],
   "rotationTargets": [],
@@ -59,7 +43,7 @@
     "rotateFast": false
   },
   "reversed": false,
-  "folder": "Middle Note Pickup",
+  "folder": "New Note Backups",
   "previewStartingState": {
     "rotation": 180.0,
     "velocity": 0

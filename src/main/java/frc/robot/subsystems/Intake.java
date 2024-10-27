@@ -14,8 +14,8 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.LimelightHelpers;
 import frc.robot.Constants.IntakeConstants;
+import frc.utils.LimelightHelpers;
 
 public class Intake extends SubsystemBase{
 
@@ -38,9 +38,6 @@ public class Intake extends SubsystemBase{
     private GenericEntry angleRotations = list.add("Angle Rotations", 0.0).getEntry();
     private GenericEntry intakeSpeed = list.add("Intake Speed", 0.0).getEntry();
     private GenericEntry conveyorSpeed = list.add("Conveyer Speed", 0.0).getEntry();
-
-    //private GenericEntry backTx = tab.add("Back Limelight TX", 0.0).getEntry();
-    //private GenericEntry backTy = tab.add("Back Limelight TY", 0.0).getEntry();
 
     private GenericEntry intakeTopRotations = tab.addPersistent("Top Rotations", 0.0)
         .withSize(2, 1)
@@ -155,7 +152,5 @@ public class Intake extends SubsystemBase{
         intakeSpeed.setDouble(intake.get());
         conveyorSpeed.setDouble(conveyor.get());
         noteInSight.setBoolean(noteInSight());
-        //backTx.setDouble(LimelightHelpers.getTX("limelight-back"));
-        //backTy.setDouble(LimelightHelpers.getTY("limelight-back"));
     }
 }

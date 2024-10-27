@@ -4,12 +4,12 @@
     {
       "anchor": {
         "x": 1.3956564216023761,
-        "y": 4.159498742160069
+        "y": 4.15
       },
       "prevControl": null,
       "nextControl": {
         "x": 1.404798177079651,
-        "y": 4.159498742160069
+        "y": 4.15
       },
       "isLocked": false,
       "linkedName": "Bottom Pickup End"
@@ -17,11 +17,11 @@
     {
       "anchor": {
         "x": 2.6480769219890337,
-        "y": 4.159498742160069
+        "y": 4.15
       },
       "prevControl": {
         "x": 2.6389351665117586,
-        "y": 4.159498742160069
+        "y": 4.15
       },
       "nextControl": null,
       "isLocked": false,
@@ -30,7 +30,7 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.4,
+      "waypointRelativePos": 0.0,
       "rotationDegrees": 180.0,
       "rotateFast": false
     }

@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.6988446409325251,
-        "y": 6.683920394867817
+        "x": 0.5,
+        "y": 7.048293472978928
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.6954613240740678,
-        "y": 6.678060318170865
+        "x": 1.0,
+        "y": 7.048293472978928
       },
       "isLocked": false,
       "linkedName": null
@@ -45,7 +45,7 @@
   "reversed": false,
   "folder": "New Note Backups",
   "previewStartingState": {
-    "rotation": -120.0,
+    "rotation": 180.0,
     "velocity": 0
   },
   "useDefaultConstraints": true

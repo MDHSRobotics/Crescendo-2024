@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.7008830053294856,
-        "y": 4.40632614004649
+        "x": 0.49976438482943836,
+        "y": 4.049797676432769
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.6974996884710283,
-        "y": 4.400466063349538
+        "x": 0.5982451601306591,
+        "y": 4.032432858666076
       },
       "isLocked": false,
       "linkedName": null
@@ -17,11 +17,11 @@
     {
       "anchor": {
         "x": 1.3956564216023761,
-        "y": 4.159498742160069
+        "y": 4.15
       },
       "prevControl": {
         "x": 1.3986187592015826,
-        "y": 4.142698490790118
+        "y": 4.13319974863005
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,7 +45,7 @@
   "reversed": false,
   "folder": "New Note Backups",
   "previewStartingState": {
-    "rotation": 120.0,
+    "rotation": 180.0,
     "velocity": 0
   },
   "useDefaultConstraints": true
