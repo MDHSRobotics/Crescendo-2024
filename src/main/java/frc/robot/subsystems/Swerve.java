@@ -226,7 +226,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     /**
      * @return The new robot yaw as a Rotation2d that points the robot at the speaker.
      */
-    public Rotation2d getSpeakerYaw(Alliance alliance, boolean isAuto) {
+    public Rotation2d getSpeakerYaw(Alliance alliance) {
         Pose2d currentPose = getPose();
         Rotation2d targetYaw;
 
@@ -239,7 +239,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         // Log the target yaw to Shuffleboard
         this.targetYaw.setDouble(targetYaw.getDegrees());
         // If the alliance is red, the driveFacingAngle request will incorrectly try to rotate the target direction, so rotate it back
-        if (alliance == Alliance.Red && !isAuto) {
+        if (alliance == Alliance.Red) {
             targetYaw = targetYaw.rotateBy(Rotation2d.fromDegrees(-180));
         }
 

@@ -173,9 +173,12 @@ public class RobotContainer {
             s_Led.startEnd(() -> s_Led.setColor(0, 255, 0), () -> {})
         );
 
-        // When there is 20 seconds left in the match, permanently set the LED color to blue to remove shooting indicators from the operator.
+        // When there is 20 seconds left in the match, permanently set the LED color to blue to remove shooting indicators from the operator, and add an alert to the dashboard.
         matchIsEnding.onTrue(
-            s_Led.startEnd(() -> s_Led.setColor(0, 0, 255), () -> {}).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
+            Commands.parallel(
+                new InstantCommand(() -> Elastic.sendAlert(new ElasticNotification(NotificationLevel.INFO, "Match is about to end!", "")), new Subsystem[0]),
+                s_Led.startEnd(() -> s_Led.setColor(0, 0, 255), () -> {}).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
+            )
         );
 
         // Configure the button bindings
@@ -227,13 +230,13 @@ public class RobotContainer {
         driverController.L2().onTrue(new InstantCommand(() -> m_speedMultiplier = 0.2, new Subsystem[0])); // no subsystems required
 
         // Temporary control for finding kSlipCurrentA.
-        driverController.cross().whileTrue(s_Swerve.runEnd(s_Swerve::applyIncreasingVoltage, s_Swerve::resetVoltage));
+        // driverController.cross().whileTrue(s_Swerve.runEnd(s_Swerve::applyIncreasingVoltage, s_Swerve::resetVoltage));
 
         // SysId Controls. Comment out after finished.
-        driverController.touchpad().and(driverController.povLeft()).whileTrue(s_Swerve.sysIdDynamic(Direction.kForward));
-        driverController.touchpad().and(driverController.povRight()).whileTrue(s_Swerve.sysIdDynamic(Direction.kReverse));
-        driverController.options().and(driverController.povLeft()).whileTrue(s_Swerve.sysIdQuasistatic(Direction.kForward));
-        driverController.options().and(driverController.povRight()).whileTrue(s_Swerve.sysIdQuasistatic(Direction.kReverse));
+        // driverController.touchpad().and(driverController.povLeft()).whileTrue(s_Swerve.sysIdDynamic(Direction.kForward));
+        // driverController.touchpad().and(driverController.povRight()).whileTrue(s_Swerve.sysIdDynamic(Direction.kReverse));
+        // driverController.options().and(driverController.povLeft()).whileTrue(s_Swerve.sysIdQuasistatic(Direction.kForward));
+        // driverController.options().and(driverController.povRight()).whileTrue(s_Swerve.sysIdQuasistatic(Direction.kReverse));
     }
 
     private void configureOperatorButtonBindings() {
@@ -242,12 +245,12 @@ public class RobotContainer {
 
         /* IMPORTANT Please see the following URL to get a graphical annotation of which xbox buttons 
             trigger what commands on the operator controller:
-            https://www.padcrafter.com/?dpadRight=&dpadUp=Reset+Shooter+Encoder&leftStick=Aim+Intake+%28Calibration+Only%29&leftStickClick=&leftBumper=Prepare+intake+for+amp+spit&leftTrigger=&dpadLeft=Toggle+Calibration+Mode&dpadDown=Reset+Intake+Encoder&backButton=%28Hold%29+Eject+Intake&startButton=%28Hold%29+Get+note+off+the+shooter%27s+top&rightStickClick=Lock+Speaker+%28limelight+only%29&rightStick=Aim+Shooter+%28Calibration+Only%29&aButton=Fire&bButton=Set+Angle%3A+Amp&xButton=Lock+Speaker&yButton=Lock+Amp+%28for+passing%29&rightBumper=Intake+Amp+Spit&rightTrigger=Deploy+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&plat=0#?rightStickClick=Lock+Speaker+%28using+pose%29&xButton=Lock+Speaker&aButton=Fire&bButton=Set+Angle%3A+Amp&rightStick=Aim+Shooter+%28Calibration+Only%29&rightBumper=Set+Angle%3A+Point+Blank&rightTrigger=Deploy+Intake&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&leftBumper=Set+Angle%3A+Podium&leftStick=Aim+Intake+%28Calibration+Only%29&dpadUp=Reset+Shooter+Encoder&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&startButton=Free+a+Stuck+Note+%28on+shooter%29&backButton=Eject+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&yButton=Manual+Angle+Fire&leftStickClick=Toggle+Auto+Shoot
+            https://www.padcrafter.com/?dpadRight=&dpadUp=Reset+Shooter+Encoder&leftStick=Aim+Intake+%28Calibration+Only%29&leftStickClick=&leftBumper=Prepare+intake+for+amp+spit&leftTrigger=&dpadLeft=Toggle+Calibration+Mode&dpadDown=Reset+Intake+Encoder&backButton=%28Hold%29+Eject+Intake&startButton=%28Hold%29+Get+note+off+the+shooter%27s+top&rightStickClick=Lock+Speaker+%28limelight+only%29&rightStick=Aim+Shooter+%28Calibration+Only%29&aButton=Fire&bButton=Set+Angle%3A+Amp&xButton=Lock+Speaker&yButton=Lock+Amp+%28for+passing%29&rightBumper=Intake+Amp+Spit&rightTrigger=%28Hold%29+Deploy+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&plat=0#?rightStickClick=Lock+Speaker+%28using+pose%29&xButton=Lock+Speaker&aButton=Fire&bButton=Set+Angle%3A+Amp&rightStick=Aim+Shooter+%28Calibration+Only%29&rightBumper=Set+Angle%3A+Point+Blank&rightTrigger=Deploy+Intake&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&leftBumper=Set+Angle%3A+Podium&leftStick=Aim+Intake+%28Calibration+Only%29&dpadUp=Reset+Shooter+Encoder&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&startButton=Free+a+Stuck+Note+%28on+shooter%29&backButton=Eject+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&yButton=Manual+Angle+Fire&leftStickClick=Toggle+Auto+Shoot
             Please update this link whenever you change a button.
         */
         
         // Run intake at mid position
-        operatorController.rightTrigger().toggleOnTrue(
+        operatorController.rightTrigger().whileTrue(
             Commands.race(
                 Commands.sequence(
                     s_Intake.runOnce(() -> s_Intake.runIntake(1, 1)),
@@ -290,7 +293,7 @@ public class RobotContainer {
                     s_Swerve.applyRequest(() -> driveFacingAngle
                         .withVelocityX(getVelocityX()) // Drive forward with negative Y (forward)
                         .withVelocityY(getVelocityY()) // Drive left with negative X (left)
-                        .withTargetDirection(s_Swerve.getSpeakerYaw(kAlliance, false)))
+                        .withTargetDirection(s_Swerve.getSpeakerYaw(kAlliance)))
                 ),
 
                 Commands.sequence(
@@ -318,7 +321,7 @@ public class RobotContainer {
                     s_Swerve.applyRequest(() -> driveFacingAngle
                     .withVelocityX(getVelocityX()) // Drive forward with negative Y (forward)
                     .withVelocityY(getVelocityY()) // Drive left with negative X (left)
-                    .withTargetDirection(s_Swerve.getSpeakerYaw(kAlliance, false)))
+                    .withTargetDirection(s_Swerve.getSpeakerYaw(kAlliance)))
                 ),
 
                 Commands.sequence(
@@ -331,7 +334,7 @@ public class RobotContainer {
                     .withTimeout(0.05),
 
                     // Angle the shooter
-                    s_Shooter.run(() -> s_Shooter.setAngle(ShooterConstants.passingAngle, false))
+                    s_Shooter.startEnd(() -> s_Shooter.setAngle(ShooterConstants.passingAngle, false), () -> {})
                 )
             ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
             .andThen(() -> Elastic.sendAlert(new ElasticNotification(NotificationLevel.INFO, "Aiming interrupted/finished", "")), new Subsystem[0])
@@ -341,7 +344,7 @@ public class RobotContainer {
         operatorController.b().toggleOnTrue(
             Commands.parallel(
                 new InstantCommand(() -> m_isAmp = true, new Subsystem[0]), // no subsystems required
-                s_Shooter.startEnd(() -> s_Shooter.setAngle(52.0, false), () -> {}),
+                s_Shooter.startEnd(() -> s_Shooter.setAngle(ShooterConstants.ampAngle, false), () -> {}),
                 s_Led.startEnd(() -> s_Led.setColor(255, 0, 0), () -> {})
             )
         );

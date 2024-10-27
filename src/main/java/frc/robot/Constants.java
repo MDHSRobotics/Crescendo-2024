@@ -91,7 +91,7 @@ public final class Constants {
         public static final double kBottomMeasureAngle = 23.0;
         public static final double kDegreesToRotationsConversion = -0.5839;
 
-        public static final double ampAngle = 50.0;
+        public static final double ampAngle = 52.0;
 
         public static final double passingAngle = 55.0;
 
