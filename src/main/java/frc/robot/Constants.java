@@ -4,10 +4,13 @@ import java.util.Map;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N3;
 import frc.robot.generated.TunerConstants;
+import frc.utils.Elastic.ElasticNotification;
+import frc.utils.Elastic.ElasticNotification.NotificationLevel;
 
 public final class Constants {
     public static final double stickDeadband = 0.1;
@@ -50,6 +53,9 @@ public final class Constants {
         // Initial vector of the robot orientation, representing a robot with no rotation.
         public static final Vector<N3> facingForwardVector = VecBuilder.fill(1, 0, 0);
 
+        // Rotation2d of 90 degrees, for amp shooting
+        public static final Rotation2d facingAmpRotation = new Rotation2d(Math.PI/2);
+
         // 2D position of each speaker in meters
         public static final Translation2d kBlueSpeaker2DPosition = new Translation2d(0.25, 5.55);
         public static final Translation2d kRedSpeaker2DPosition = new Translation2d(16.3, 5.55);
@@ -76,7 +82,6 @@ public final class Constants {
 
         //The max and min angles of the shooter in degrees
         public static final double kShooterMaxAngle = 66;
-        public static final double kShooterMinAngle = 23;
 
         // Height of the shooter from the ground in inches
         public static final double kPivotHeight = 12.375; //w1
@@ -142,6 +147,15 @@ public final class Constants {
         ClimbConstants.kLeftClimbMotorID, "Left Climb",
         ClimbConstants.kRightClimbMotorID, "Right Climb"
     );
+
+    /**
+     * Class used for creating our dashboard alerts
+     */
+    public class ElasticAlerts {
+        public static final ElasticNotification aimingInterrupted = new ElasticNotification(NotificationLevel.INFO, "Aiming interrupted/finished", "");
+        public static final ElasticNotification cameraFailure = new ElasticNotification(NotificationLevel.ERROR, "Unable to add camera pose.", "Switch to limelight or point blank aiming.");
+        public static final ElasticNotification matchEnd = new ElasticNotification(NotificationLevel.INFO, "Match is about to end!", "");
+    }
 }
 
 /*

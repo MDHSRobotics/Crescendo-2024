@@ -25,19 +25,18 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.math.Aiming;
+import frc.robot.Constants.ElasticAlerts;
 import frc.robot.Constants.PoseConstants;
 import frc.robot.Constants.SwerveSpeedConstants;
 import frc.robot.generated.TunerConstants;
+import frc.utils.Elastic;
 import frc.utils.LimelightHelpers;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
@@ -48,9 +47,10 @@ import edu.wpi.first.networktables.StructPublisher;
  */
 public class Swerve extends SwerveDrivetrain implements Subsystem {
 
-    public enum AutoRotationOverride {
-        DISABLED,
-        NOTE
+    public enum HeadingTargets {
+        SPEAKER,
+        AMP_AREA,
+        AMP_SHOOTING
     }
 
     private static final double kSimLoopPeriod = 0.005; // 5 ms
@@ -111,11 +111,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     private final NetworkTableInstance inst = NetworkTableInstance.getDefault();
     private final NetworkTable table = inst.getTable("Drive");
     private final StructPublisher<Pose2d> camPosePublisher = table.getStructTopic("camPose", Pose2d.struct).publish();
-
-    /* Shuffleboard logging */
-    private ShuffleboardTab tab = Shuffleboard.getTab("Swerve");
-    private GenericEntry targetYaw = tab.add("Target Yaw", 0.0).withSize(2, 1).getEntry();
-
+    private final StructPublisher<Rotation2d> targetYawPublisher = table.getStructTopic("Target Direction", Rotation2d.struct).publish();
 
     public Swerve(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency, SwerveModuleConstants... modules) {
         super(driveTrainConstants, OdometryUpdateFrequency, modules);
@@ -224,43 +220,44 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     }
 
     /**
-     * @return The new robot yaw as a Rotation2d that points the robot at the speaker.
+     * Finds the robot heading that points the robot at the target.
+     * @param target the target you want to face
+     * @param alliance your current alliance
+     * @see HeadingTargets
+     * @see Alliance
      */
-    public Rotation2d getSpeakerYaw(Alliance alliance) {
+    public Rotation2d getTargetDirection(HeadingTargets target, Alliance alliance) {
         Pose2d currentPose = getPose();
         Rotation2d targetYaw;
 
-        // Calculate the yaw based on alliance
-        if (alliance == Alliance.Blue) { // If blue alliance:
-            targetYaw = Aiming.getYaw(PoseConstants.kBlueSpeaker2DPosition, currentPose);
-        } else {
-            targetYaw = Aiming.getYaw(PoseConstants.kRedSpeaker2DPosition, currentPose);
+        // Calculate the yaw based on alliance and target
+        if (alliance == Alliance.Blue) {
+            switch (target) {
+            case SPEAKER:
+                targetYaw = Aiming.getYaw(PoseConstants.kBlueSpeaker2DPosition, currentPose);
+                break;
+            case AMP_AREA:
+                targetYaw = Aiming.getYaw(PoseConstants.kBlueAmp2DPosition, currentPose);
+                break;
+            default: // AMP_SHOOTING
+                targetYaw = PoseConstants.facingAmpRotation;
+            }
+        } else { // Red alliance:
+            switch (target) {
+            case SPEAKER:
+                targetYaw = Aiming.getYaw(PoseConstants.kRedSpeaker2DPosition, currentPose);
+                break;
+            case AMP_AREA:
+                targetYaw = Aiming.getYaw(PoseConstants.kRedAmp2DPosition, currentPose);
+                break;
+            default: // AMP_SHOOTING
+                targetYaw = PoseConstants.facingAmpRotation;
+            }
         }
-        // Log the target yaw to Shuffleboard
-        this.targetYaw.setDouble(targetYaw.getDegrees());
-        // If the alliance is red, the driveFacingAngle request will incorrectly try to rotate the target direction, so rotate it back
-        if (alliance == Alliance.Red) {
-            targetYaw = targetYaw.rotateBy(Rotation2d.fromDegrees(-180));
-        }
+    
+        // Log the target yaw to NetworkTables
+        targetYawPublisher.set(targetYaw);
 
-        return targetYaw;
-    }
-
-    /**
-     * @return The new robot yaw as a Rotation2d that points the robot at the amp area.
-     */
-    public Rotation2d getPassingYaw(Alliance alliance) {
-        Pose2d currentPose = getPose();
-        Rotation2d targetYaw;
-
-        // Calculate the yaw based on alliance
-        if (alliance == Alliance.Blue) { // If blue alliance:
-            targetYaw = Aiming.getYaw(PoseConstants.kBlueAmp2DPosition, currentPose);
-        } else {
-            targetYaw = Aiming.getYaw(PoseConstants.kRedAmp2DPosition, currentPose);
-        }
-        // Log the target yaw to Shuffleboard
-        this.targetYaw.setDouble(targetYaw.getDegrees());
         // If the alliance is red, the driveFacingAngle request will incorrectly try to rotate the target direction, so rotate it back
         if (alliance == Alliance.Red) {
             targetYaw = targetYaw.rotateBy(Rotation2d.fromDegrees(-180));
@@ -317,6 +314,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
             }
         } else {
             DriverStation.reportWarning("Could not add limelight measurement to pose estimation, make sure limelight is properly connected and configured", false);
+            Elastic.sendAlert(ElasticAlerts.cameraFailure);
         }
     }
 
