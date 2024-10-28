@@ -1,5 +1,7 @@
 package frc.robot;
 
+import java.util.Map;
+
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -66,8 +68,7 @@ public final class Constants {
         /* Motor IDs */
         public static final int kTopID = 3;
         public static final int kBottomID = 4;
-        public static final int kAngleLeftID = 5;
-        public static final int kAngleRightID = 6;
+        public static final int kAngleID = 6;
         public static final int kFeederID = 7;
 
         // Limit Switch ID
@@ -127,6 +128,20 @@ public final class Constants {
 
         public static final int kStrobeLength = 40;
     }
+
+    // This map is used for labelling Spark Maxes and Spark Flexes with URCL.
+    public static final Map<Integer, String> sparkDeviceNames = Map.of(
+        ShooterConstants.kTopID, "Shooter Top",
+        ShooterConstants.kBottomID, "Shooter Bottom",
+        ShooterConstants.kAngleID, "Shooter Angler",
+        ShooterConstants.kFeederID, "Feeder",
+        IntakeConstants.kLeftAngleID, "Intake Left Angler",
+        IntakeConstants.kRightAngleID, "Intake Right Angler",
+        IntakeConstants.kIntakeID, "Intake",
+        IntakeConstants.kConveyorID, "Conveyer",
+        ClimbConstants.kLeftClimbMotorID, "Left Climb",
+        ClimbConstants.kRightClimbMotorID, "Right Climb"
+    );
 }
 
 /*

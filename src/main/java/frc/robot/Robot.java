@@ -1,5 +1,7 @@
 package frc.robot;
 
+import org.littletonrobotics.urcl.URCL;
+
 import com.ctre.phoenix6.SignalLogger;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -52,6 +54,14 @@ public class Robot extends TimedRobot {
 
         // Set the log path for SysId
         SignalLogger.setPath("/logs");
+        // Start logging data from Swerve and Telemetry.java
+        SignalLogger.start();
+        // Start logging NetworkTables (including Shuffleboard)
+        DataLogManager.start();
+        // Record joystick data
+        DriverStation.startDataLog(DataLogManager.getLog());
+        // Start logging REV Spark Max and Spark Flex data
+        URCL.start(Constants.sparkDeviceNames);
 
         // Set the limelight pipeline.
         // In Orange County Regionals, the lights make Apriltags hard to see, so we may change the front to use a separate pipeline.
@@ -89,10 +99,6 @@ public class Robot extends TimedRobot {
     @Override
     public void disabledInit() {
         CommandScheduler.getInstance().cancelAll();
-
-        // Stop logging data
-        SignalLogger.stop();
-        DataLogManager.stop();
     }
 
     @Override
@@ -107,13 +113,6 @@ public class Robot extends TimedRobot {
         } else {
             LimelightHelpers.setPriorityTagID("limelight-front", 4);
         }
-
-        // Start logging data from Swerve and Telemetry.java
-        SignalLogger.start();
-        // Start logging NetworkTables (including Shuffleboard)
-        DataLogManager.start();
-        // Record joystick data
-        DriverStation.startDataLog(DataLogManager.getLog());
     }
 
     /**

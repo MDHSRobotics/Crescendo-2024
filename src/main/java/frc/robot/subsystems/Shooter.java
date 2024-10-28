@@ -108,7 +108,7 @@ public class Shooter extends SubsystemBase{
   public Shooter(){
     topShooter = new CANSparkFlex(ShooterConstants.kTopID, MotorType.kBrushless);
     bottomShooter = new CANSparkFlex(ShooterConstants.kBottomID, MotorType.kBrushless);
-    angle = new CANSparkFlex(ShooterConstants.kAngleRightID, MotorType.kBrushless);
+    angle = new CANSparkFlex(ShooterConstants.kAngleID, MotorType.kBrushless);
     feeder = new CANSparkMax(ShooterConstants.kFeederID, MotorType.kBrushless);
 
     m_angleEncoder = angle.getEncoder();
