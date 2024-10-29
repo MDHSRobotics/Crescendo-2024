@@ -59,12 +59,18 @@ public class RobotContainer {
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
         .withDeadband(SwerveSpeedConstants.MaxSpeed * Constants.stickDeadband)
-        .withRotationalDeadband(SwerveSpeedConstants.MaxAngularRate * 0.06) // Add a 6% deadband
+        .withRotationalDeadband(SwerveSpeedConstants.MaxAngularRate * 0.06) // Add a 6% deadband to prevent joystick drift
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // I want field-centric driving in open loop
 
     private final SwerveRequest.FieldCentricFacingAngle driveFacingAngle = new SwerveRequest.FieldCentricFacingAngle()
         .withDeadband(SwerveSpeedConstants.MaxSpeed * Constants.stickDeadband)
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+
+    private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
+
+    // Point wheels in one direction in preparation for SysId testing.
+    /*private final SwerveRequest.PointWheelsAt pointWheelsAt = new SwerveRequest.PointWheelsAt()
+        .withModuleDirection(Rotation2d.fromDegrees(0));*/
 
     // Set up telemetry.
     private final Telemetry logger = new Telemetry();
@@ -212,9 +218,14 @@ public class RobotContainer {
 
         /* IMPORTANT Please see the following URL to get a graphical annotation of which xbox buttons 
             trigger what commands on the driver controller:
-        https://www.padcrafter.com/index.php?templates=Driver+Controller&leftBumper=Climb+Down&dpadRight=&dpadLeft=&aButton=&yButton=Right+Climb+Up&dpadDown=&dpadUp=&xButton=Left+Climb+Up&bButton=&leftStick=Field+Oriented+Drive&rightStick=Rotate+Robot&col=%23242424%2C%23606A6E%2C%23FFFFFF&rightTrigger=Fast+Mode&leftTrigger=Slow+Mode&rightBumper=Climb+Up&startButton=Reset+Field+Oriented+Drive&plat=1&backButton=&rightStickClick=
+        https://www.padcrafter.com/index.php?templates=Driver+Controller&leftBumper=Climb+Down&dpadRight=&dpadLeft=&aButton=Hold+to+brake&yButton=Right+Climb+Up&dpadDown=&dpadUp=&xButton=Left+Climb+Up&bButton=&leftStick=Field+Oriented+Drive&rightStick=Rotate+Robot&col=%23242424%2C%23606A6E%2C%23FFFFFF&rightTrigger=Fast+Mode&leftTrigger=Slow+Mode&rightBumper=Climb+Up&startButton=Reset+Field+Oriented+Drive&plat=1&backButton=&rightStickClick=
         Whenever you edit a button binding, please update this URL
         */
+
+        // Hold to brake the robot
+        driverController.cross().whileTrue(
+            s_Swerve.applyRequest(() -> brake)
+        );
 
         // Reset the field-centric heading
         driverController.options().onTrue(s_Swerve.runOnce(() -> s_Swerve.seedFieldRelative()));

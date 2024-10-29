@@ -54,7 +54,7 @@ public final class Constants {
         public static final Vector<N3> facingForwardVector = VecBuilder.fill(1, 0, 0);
 
         // Rotation2d of 90 degrees, for amp shooting
-        public static final Rotation2d facingAmpRotation = new Rotation2d(Math.PI/2);
+        public static final Rotation2d facingAmpRotation = Rotation2d.fromDegrees(90);
 
         // 2D position of each speaker in meters
         public static final Translation2d kBlueSpeaker2DPosition = new Translation2d(0.25, 5.55);
