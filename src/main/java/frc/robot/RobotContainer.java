@@ -248,7 +248,7 @@ public class RobotContainer {
 
         /* IMPORTANT Please see the following URL to get a graphical annotation of which xbox buttons 
             trigger what commands on the operator controller:
-            https://www.padcrafter.com/?dpadRight=&dpadUp=&leftStick=Aim+Intake+%28Calibration+Only%29&leftStickClick=Set+angle+to+amp&leftBumper=Prepare+intake+for+amp+spit&leftTrigger=&dpadLeft=&dpadDown=&backButton=%28Hold%29+Eject+Intake&startButton=%28Hold%29+Get+note+off+the+shooter%27s+top&rightStickClick=Lock+Speaker+%28point+blank%29&rightStick=Aim+Shooter+%28Calibration+Only%29&aButton=Fire&bButton=Lock+Speaker+%28limelight+only%29&xButton=Lock+Speaker&yButton=Lock+Amp+%28for+passing%29&rightBumper=Intake+Amp+Spit&rightTrigger=%28Hold%29+Deploy+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&plat=0#?rightStickClick=Lock+Speaker+%28using+pose%29&xButton=Lock+Speaker&aButton=Fire&bButton=Set+Angle%3A+Amp&rightStick=Aim+Shooter+%28Calibration+Only%29&rightBumper=Set+Angle%3A+Point+Blank&rightTrigger=Deploy+Intake&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&leftBumper=Set+Angle%3A+Podium&leftStick=Aim+Intake+%28Calibration+Only%29&dpadUp=Reset+Shooter+Encoder&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&startButton=Free+a+Stuck+Note+%28on+shooter%29&backButton=Eject+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&yButton=Manual+Angle+Fire&leftStickClick=Toggle+Auto+Shoot
+            https://www.padcrafter.com/?dpadRight=&dpadUp=&leftStick=Aim+Intake+%28Calibration+Only%29&leftStickClick=Set+angle+to+amp&leftBumper=Prepare+intake+for+amp+spit&leftTrigger=%28Hold%29+Deploy+Intake+lower&dpadLeft=&dpadDown=&backButton=%28Hold%29+Eject+Intake&startButton=%28Hold%29+Get+note+off+the+shooter%27s+top&rightStickClick=Lock+Speaker+%28point+blank%29&rightStick=Aim+Shooter+%28Calibration+Only%29&aButton=Fire&bButton=Lock+Speaker+%28limelight+only%29&xButton=Lock+Speaker&yButton=Lock+Amp+%28for+passing%29&rightBumper=Intake+Amp+Spit&rightTrigger=%28Hold%29+Deploy+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&plat=0#?rightStickClick=Lock+Speaker+%28using+pose%29&xButton=Lock+Speaker&aButton=Fire&bButton=Set+Angle%3A+Amp&rightStick=Aim+Shooter+%28Calibration+Only%29&rightBumper=Set+Angle%3A+Point+Blank&rightTrigger=Deploy+Intake&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&leftBumper=Set+Angle%3A+Podium&leftStick=Aim+Intake+%28Calibration+Only%29&dpadUp=Reset+Shooter+Encoder&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&startButton=Free+a+Stuck+Note+%28on+shooter%29&backButton=Eject+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&yButton=Manual+Angle+Fire&leftStickClick=Toggle+Auto+Shoot
             Please update this link whenever you change a button.
         */
         
@@ -257,7 +257,18 @@ public class RobotContainer {
             Commands.race(
                 Commands.sequence(
                     s_Intake.runOnce(() -> s_Intake.runIntake(1, 1)),
-                    s_Intake.run(() -> s_Intake.midPosition())
+                    s_Intake.startEnd(s_Intake::midPosition, () -> {})
+                ),
+                s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, -0.6), () -> {})
+            )
+        );
+        
+        // Run intake at bottom position in case mid isn't low enough
+        operatorController.leftTrigger().whileTrue(
+            Commands.race(
+                Commands.sequence(
+                    s_Intake.runOnce(() -> s_Intake.runIntake(1, 1)),
+                    s_Intake.startEnd(s_Intake::bottomPosition, () -> {})
                 ),
                 s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, -0.6), () -> {})
             )
@@ -569,6 +580,25 @@ public class RobotContainer {
                     s_Intake.startEnd(s_Intake::topPosition, () -> {})
                         .withTimeout(0.5)
                 )
+            )
+        );
+
+        NamedCommands.registerCommand("Run intake only", 
+            Commands.parallel(
+                // Turn on the feeder
+                s_Shooter.runOnce(() -> s_Shooter.runShooter(0, 0, -1)),
+                // Run the intake
+                s_Intake.runOnce(() -> s_Intake.runIntake(1, 1))
+            )
+        );
+
+        NamedCommands.registerCommand("Stop intake only", 
+            Commands.parallel(
+                // Turn off the feeder
+                s_Shooter.runOnce(() -> s_Shooter.runShooter(0, 0, 0)),
+                // Turn off the intake
+                s_Intake.startEnd(() -> s_Intake.runIntake(0, 0), () -> {})
+                    .withTimeout(0.5)
             )
         );
 

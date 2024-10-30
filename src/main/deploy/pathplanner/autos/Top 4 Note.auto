@@ -38,7 +38,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Stop intake"
+            "name": "Stop intake only"
           }
         },
         {
@@ -62,7 +62,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Run intake"
+            "name": "Run intake only"
           }
         },
         {
@@ -74,7 +74,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Stop intake"
+            "name": "Stop intake only"
           }
         },
         {
@@ -92,13 +92,19 @@
         {
           "type": "named",
           "data": {
-            "name": "Run intake"
+            "name": "Run intake only"
           }
         },
         {
           "type": "path",
           "data": {
             "pathName": "Top Pickup 7"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop intake"
           }
         },
         {
