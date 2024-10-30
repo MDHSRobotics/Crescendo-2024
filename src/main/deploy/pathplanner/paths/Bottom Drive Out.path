@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.3956564216023761,
-        "y": 4.15
+        "x": 1.586336145645264,
+        "y": 4.150871725166874
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.3956564216023761,
-        "y": 2.989030066185182
+        "x": 1.586336145645264,
+        "y": 2.989901791352055
       },
       "isLocked": false,
       "linkedName": "Bottom Pickup End"
@@ -33,7 +33,7 @@
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 5.0,
-    "maxAcceleration": 2.5,
+    "maxAcceleration": 3.5,
     "maxAngularVelocity": 1080.0,
     "maxAngularAcceleration": 1440.0
   },

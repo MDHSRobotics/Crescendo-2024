@@ -535,10 +535,10 @@ public class RobotContainer {
                 ).withTimeout(0.05),
                 // Angle the shooter
                 s_Shooter.run(() -> s_Shooter.setAngleFromPose(s_Swerve.getPose(), kAlliance))
-                 .withTimeout(1),
+                 .withTimeout(0.75),
                 // Run the shooter
                 s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.7), () -> {})
-                 .withTimeout(0.5),
+                 .withTimeout(0.25),
                 // Lower the shooter
                 s_Shooter.runOnce(() -> s_Shooter.setAngle(ShooterConstants.kBottomMeasureAngle, false)),
                 // Turn off the shooter
@@ -553,7 +553,7 @@ public class RobotContainer {
                 // Run the intake and lower it
                 Commands.sequence(
                     s_Intake.runOnce(() -> s_Intake.runIntake(1, 1)),
-                    s_Intake.startEnd(s_Intake::midPosition, () -> {})
+                    s_Intake.startEnd(s_Intake::bottomPosition, () -> {})
                         .withTimeout(0.5)
                 )
             )

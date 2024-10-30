@@ -56,7 +56,6 @@ public class Aiming {
         double targetPitch = -Math.toDegrees(robotRotation.getY());
         // If the robot is too far away from the speaker, the note will miss due to gravity (even though the angle looks right), so increase the angle a bit
         double distanceToSpeaker = robotTranslation.getNorm();
-        System.out.println(distanceToSpeaker);
         if (distanceToSpeaker > 3.8) {
             targetPitch += distanceToSpeaker * 0.8;
         }
