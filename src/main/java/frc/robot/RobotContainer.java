@@ -177,7 +177,7 @@ public class RobotContainer {
         );
 
         // When there is 20 seconds left in the match, permanently set the LED color to blue to remove shooting indicators from the operator, and add an alert to the dashboard.
-        matchIsEnding.onTrue(
+        matchIsEnding.and(RobotModeTriggers.teleop()).onTrue(
             Commands.parallel(
                 new InstantCommand(() -> Elastic.sendAlert(ElasticAlerts.matchEnd), new Subsystem[0]),
                 s_Led.startEnd(() -> s_Led.setColor(0, 0, 255), () -> {}).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
@@ -367,7 +367,12 @@ public class RobotContainer {
         // Shoot in amp or speaker, depending on the amp angle mode
         operatorController.a().onTrue(
             Commands.race(
-                Commands.idle(s_Swerve), // Prevent swerve movement to eliminate momentum.
+                // Prevent swerve movement to eliminate momentum.
+                s_Swerve.applyRequest(() -> drive
+                    .withVelocityX(0)
+                    .withVelocityY(0)
+                    .withRotationalRate(0)
+                ),
                 Commands.either(
                     // Amp:
                     Commands.sequence(
@@ -449,7 +454,11 @@ public class RobotContainer {
         operatorController.rightBumper().toggleOnTrue(
             Commands.race(
                 // Prevent swerve movement
-                Commands.idle(s_Swerve),
+                s_Swerve.applyRequest(() -> drive
+                    .withVelocityX(0)
+                    .withVelocityY(0)
+                    .withRotationalRate(0)
+                ),
                 // Spit out the note while lowering the intake slightly
                 Commands.sequence(
                 s_Intake.startEnd(s_Intake::ampFastSpit, () -> {})

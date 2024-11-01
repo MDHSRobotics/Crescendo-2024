@@ -153,7 +153,6 @@ public final class Constants {
      */
     public class ElasticAlerts {
         public static final ElasticNotification aimingInterrupted = new ElasticNotification(NotificationLevel.INFO, "Aiming interrupted/finished", "");
-        public static final ElasticNotification cameraFailure = new ElasticNotification(NotificationLevel.ERROR, "Unable to add camera pose.", "Switch to limelight or point blank aiming.");
         public static final ElasticNotification matchEnd = new ElasticNotification(NotificationLevel.INFO, "Match is about to end!", "");
     }
 }
