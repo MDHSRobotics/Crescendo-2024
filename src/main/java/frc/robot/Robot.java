@@ -55,7 +55,7 @@ public class Robot extends TimedRobot {
         // Set the log path for SysId
         SignalLogger.setPath("/logs");
         // Start logging data from Swerve and Telemetry.java
-        SignalLogger.start();
+        //SignalLogger.start();
         // Start logging NetworkTables (including Shuffleboard)
         DataLogManager.start();
         // Record joystick data
@@ -153,6 +153,12 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopPeriodic() {
         m_robotContainer.logSubsystemData();
+    }
+
+    @Override
+    public void teleopExit() {
+        SignalLogger.stop();
+        DataLogManager.stop();
     }
 
     @Override

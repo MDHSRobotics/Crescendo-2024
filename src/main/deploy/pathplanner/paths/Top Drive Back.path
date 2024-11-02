@@ -3,38 +3,32 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.49976438482943836,
-        "y": 2.148312537159596
+        "x": 1.604825551993446,
+        "y": 6.683920394867817
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.5497643848294383,
-        "y": 2.148312537159596
+        "x": 1.654825551993446,
+        "y": 6.683920394867817
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Top Pickup End"
     },
     {
       "anchor": {
-        "x": 2.977180119170929,
-        "y": 1.2158534784775594
+        "x": 0.6803552345843429,
+        "y": 7.183134366268733
       },
       "prevControl": {
-        "x": 2.927180119170929,
-        "y": 1.2158534784775594
+        "x": 0.6303552345843428,
+        "y": 7.183134366268733
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Bottom Drive Out End"
+      "linkedName": null
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.4,
-      "rotationDegrees": -132.2865271210294,
-      "rotateFast": false
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "eventMarkers": [],
   "globalConstraints": {
@@ -51,7 +45,7 @@
   "reversed": false,
   "folder": "New Drive Outs",
   "previewStartingState": {
-    "rotation": 180.0,
+    "rotation": -136.31,
     "velocity": 0
   },
   "useDefaultConstraints": true
