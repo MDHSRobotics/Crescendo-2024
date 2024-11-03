@@ -65,8 +65,8 @@ public final class Constants {
         public static final Translation3d kRedSpeaker3DPosition = new Translation3d(16.3, 5.55, 2.2);
 
         // 2D position of each amp area in meters
-        public static final Translation2d kBlueAmp2DPosition = new Translation2d(1.90, 7.30);
-        public static final Translation2d kRedAmp2DPosition = new Translation2d(14.65, 7.30);
+        public static final Translation2d kBlueAmp2DPosition = new Translation2d(1.90, 6.5);
+        public static final Translation2d kRedAmp2DPosition = new Translation2d(14.65, 6.5);
     }
 
     public class ShooterConstants {
@@ -104,7 +104,7 @@ public final class Constants {
         public static final double ampTopSpeed = 0.175;
         public static final double ampBottomSpeed = 0.525;
         public static final double speakerSpeed = 0.7;
-        public static final double passingSpeed = 0.5;
+        public static final double passingSpeed = 0.4;
     }
 
     public class IntakeConstants {

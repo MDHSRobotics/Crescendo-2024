@@ -166,7 +166,7 @@ public class Robot extends TimedRobot {
         CommandScheduler.getInstance().cancelAll();
 
         // Set the starting position to right below the red speaker.
-        m_robotContainer.setStartingPosition(new Pose2d(15.17, 5.55, Rotation2d.fromDegrees(180)));
+        m_robotContainer.setStartingPosition(new Pose2d(1.35, 5.55, Rotation2d.fromDegrees(180)));
 
         // Set the starting perspective for driving.
         m_robotContainer.setOperatorPerspective(Rotation2d.fromDegrees(m_robotContainer.kAlliance == Alliance.Blue ? 0 : 180));

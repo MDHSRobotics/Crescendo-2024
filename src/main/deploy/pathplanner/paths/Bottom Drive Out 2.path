@@ -3,32 +3,38 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.47537171997421085,
-        "y": 4.05
+        "x": 2.236697925511664,
+        "y": 4.159498742160069
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.6628436333795764,
-        "y": 4.138802485297277
+        "x": 2.236697925511664,
+        "y": 2.99852880834525
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Bottom Pickup 3 End"
     },
     {
       "anchor": {
-        "x": 1.3552185662929883,
-        "y": 5.546821904454621
+        "x": 2.890235494756704,
+        "y": 0.9968431365434164
       },
       "prevControl": {
-        "x": 0.9506739110498315,
-        "y": 5.408684705103299
+        "x": 2.8402354947567043,
+        "y": 0.9968431365434164
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Shoot Back Bot"
+      "linkedName": "Bottom Drive Out End"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.3,
+      "rotationDegrees": -138.36365315115634,
+      "rotateFast": false
+    }
+  ],
   "constraintZones": [],
   "eventMarkers": [],
   "globalConstraints": {
@@ -39,13 +45,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 121.73351915341628,
+    "rotation": 180.0,
     "rotateFast": false
   },
   "reversed": false,
-  "folder": null,
+  "folder": "New Drive Outs",
   "previewStartingState": {
-    "rotation": 180.0,
+    "rotation": 130.89,
     "velocity": 0
   },
   "useDefaultConstraints": true

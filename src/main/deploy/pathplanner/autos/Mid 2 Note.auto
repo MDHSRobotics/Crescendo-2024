@@ -40,42 +40,6 @@
           "data": {
             "name": "Shoot note"
           }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Middle 3N"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Run intake"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Middle 3N-2"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Stop intake"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Middle 3N-3"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot note"
-          }
         }
       ]
     }
