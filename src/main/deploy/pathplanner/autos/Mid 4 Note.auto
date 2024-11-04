@@ -2,8 +2,8 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.5,
-      "y": 4.05
+      "x": 1.34,
+      "y": 5.55
     },
     "rotation": 180.0
   },
@@ -11,12 +11,6 @@
     "type": "sequential",
     "data": {
       "commands": [
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Bottom Pickup"
-          }
-        },
         {
           "type": "named",
           "data": {
@@ -32,43 +26,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Bottom Pickup 2"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Stop intake only"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Bottom Pickup 3"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot note"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Bottom Pickup 4"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Run intake only"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Top Pickup 5"
+            "pathName": "Mid Pickup"
           }
         },
         {
@@ -84,9 +42,39 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "Run intake only"
+          }
+        },
+        {
           "type": "path",
           "data": {
-            "pathName": "Bottom Pickup 6"
+            "pathName": "Mid Pickup 2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop intake only"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Mid Pickup 3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot note"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Mid Pickup 4"
           }
         },
         {
@@ -98,7 +86,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Bottom Pickup 7"
+            "pathName": "Mid Pickup 5"
           }
         },
         {
@@ -110,13 +98,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Top Pickup 3"
+            "pathName": "Mid Pickup 6"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "Shoot note"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Mid Pickup 7"
           }
         }
       ]

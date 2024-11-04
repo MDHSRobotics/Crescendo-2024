@@ -3,32 +3,38 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.47537171997421085,
-        "y": 4.05
+        "x": 2.83,
+        "y": 6.74
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.6628436333795764,
-        "y": 4.138802485297277
+        "x": 1.83,
+        "y": 6.74
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Mid Pickup 3 End"
     },
     {
       "anchor": {
-        "x": 1.3552185662929883,
-        "y": 5.546821904454621
+        "x": 1.5,
+        "y": 4.1
       },
       "prevControl": {
-        "x": 0.9506739110498315,
-        "y": 5.408684705103299
+        "x": 1.5,
+        "y": 4.1499999999999995
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Shoot Back Bot"
+      "linkedName": "Mid Pickup 4 End"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.0,
+      "rotationDegrees": 180.0,
+      "rotateFast": false
+    }
+  ],
   "constraintZones": [],
   "eventMarkers": [],
   "globalConstraints": {
@@ -39,13 +45,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 121.73351915341628,
+    "rotation": 180.0,
     "rotateFast": false
   },
   "reversed": false,
-  "folder": null,
+  "folder": "New Note Backups",
   "previewStartingState": {
-    "rotation": 180.0,
+    "rotation": -152.59,
     "velocity": 0
   },
   "useDefaultConstraints": true

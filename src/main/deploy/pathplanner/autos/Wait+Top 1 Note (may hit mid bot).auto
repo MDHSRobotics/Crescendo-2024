@@ -2,54 +2,42 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.69,
-      "y": 6.67517683109546
+      "x": 0.5,
+      "y": 7.05
     },
-    "rotation": -120.0
+    "rotation": 180.0
   },
   "command": {
     "type": "sequential",
     "data": {
       "commands": [
         {
-          "type": "named",
-          "data": {
-            "name": "Angle 51"
-          }
-        },
-        {
           "type": "wait",
           "data": {
-            "waitTime": 1.0
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot Start"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot Stop"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 7.0
+            "waitTime": 8.0
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Amp Backup"
+            "pathName": "Top Backup"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot note"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Top Drive Back"
           }
         }
       ]
     }
   },
-  "folder": "Old Autos",
+  "folder": "New Autos",
   "choreoAuto": false
 }

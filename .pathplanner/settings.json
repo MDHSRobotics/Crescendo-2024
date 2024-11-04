@@ -5,13 +5,10 @@
   "pathFolders": [
     "Middle Note Pickup",
     "New Drive Outs",
-    "New Note Backups",
-    "Note Backups",
-    "Starting Positions to Shoot"
+    "New Note Backups"
   ],
   "autoFolders": [
-    "New Autos",
-    "Old Autos"
+    "New Autos"
   ],
   "defaultMaxVel": 5.0,
   "defaultMaxAccel": 3.5,
