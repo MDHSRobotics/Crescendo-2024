@@ -56,37 +56,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Bottom 5N"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Run intake"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Bottom 5N-2"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Stop intake"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Bottom 5N-3"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot note"
+            "pathName": "Bottom Drive Out 2"
           }
         }
       ]

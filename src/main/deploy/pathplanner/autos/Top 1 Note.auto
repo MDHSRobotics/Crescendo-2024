@@ -12,12 +12,6 @@
     "data": {
       "commands": [
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 8.5
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "Top Pickup"
@@ -32,7 +26,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Top Pickup 2"
+            "pathName": "Top Drive Back"
           }
         }
       ]

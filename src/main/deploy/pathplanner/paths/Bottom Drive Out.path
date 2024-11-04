@@ -16,19 +16,25 @@
     },
     {
       "anchor": {
-        "x": 2.977180119170929,
-        "y": 1.2158534784775594
+        "x": 2.890235494756704,
+        "y": 0.9968431365434164
       },
       "prevControl": {
-        "x": 2.927180119170929,
-        "y": 1.2158534784775594
+        "x": 2.8402354947567043,
+        "y": 0.9968431365434164
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": "Bottom Drive Out End"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.35,
+      "rotationDegrees": -132.93997922559242,
+      "rotateFast": false
+    }
+  ],
   "constraintZones": [],
   "eventMarkers": [],
   "globalConstraints": {

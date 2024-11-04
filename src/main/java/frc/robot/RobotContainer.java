@@ -179,7 +179,6 @@ public class RobotContainer {
         // When there is 20 seconds left in the match, permanently set the LED color to blue to remove shooting indicators from the operator, and add an alert to the dashboard.
         matchIsEnding.and(RobotModeTriggers.teleop()).onTrue(
             Commands.parallel(
-                new InstantCommand(() -> Elastic.sendAlert(ElasticAlerts.matchEnd), new Subsystem[0]),
                 s_Led.startEnd(() -> s_Led.setColor(0, 0, 255), () -> {}).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
             )
         );
@@ -323,7 +322,6 @@ public class RobotContainer {
                     s_Shooter.run(() -> s_Shooter.setAngleFromPose(s_Swerve.getPose(), kAlliance))
                 )
             ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
-            .andThen(() -> Elastic.sendAlert(ElasticAlerts.aimingInterrupted), new Subsystem[0])
         );
 
         // Lock on to amp area (for note passing).
@@ -351,7 +349,6 @@ public class RobotContainer {
                     s_Shooter.startEnd(() -> s_Shooter.setAngle(ShooterConstants.passingAngle, false), () -> {})
                 )
             ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
-            .andThen(() -> Elastic.sendAlert(ElasticAlerts.aimingInterrupted), new Subsystem[0])
         );
 
         // Set angle to amp
@@ -424,9 +421,9 @@ public class RobotContainer {
                 .withTimeout(0.5),
                 // Spit into the ground
                 Commands.parallel(
-                    s_Intake.runOnce(() -> s_Intake.runIntake(-0.2, -0.2)),
+                    s_Intake.runOnce(() -> s_Intake.runIntake(-1, -1)),
                     s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, 1), () -> {})
-                    .withTimeout(0.5)
+                    .withTimeout(1)
                 ),
                 // Turn off intake and feeder, and wait for them to fully stop
                 Commands.parallel(
@@ -447,7 +444,6 @@ public class RobotContainer {
                     )
                 )
             ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
-            .andThen(() -> Elastic.sendAlert(ElasticAlerts.aimingInterrupted), new Subsystem[0])
         );
         
         // Intake Amp Spit
@@ -552,7 +548,7 @@ public class RobotContainer {
                 s_Shooter.startEnd(() -> 
                     s_Shooter.runShooter(-0.2, -0.2, 0.5), () ->
                     s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, 0)
-                ).withTimeout(0.05),
+                ).withTimeout(0.1),
                 // Angle the shooter
                 s_Shooter.run(() -> s_Shooter.setAngleFromPose(s_Swerve.getPose(), kAlliance))
                  .withTimeout(0.75),
