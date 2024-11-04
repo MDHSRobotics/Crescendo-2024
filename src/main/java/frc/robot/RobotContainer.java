@@ -1,6 +1,5 @@
 package frc.robot;
 
-import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -8,7 +7,6 @@ import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -18,13 +16,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.*;
@@ -32,7 +26,6 @@ import frc.robot.commands.LockOnNoteCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.Swerve.HeadingTargets;
-import frc.utils.Elastic;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -61,6 +54,12 @@ public class RobotContainer {
         .withDeadband(SwerveSpeedConstants.MaxSpeed * Constants.stickDeadband)
         .withRotationalDeadband(SwerveSpeedConstants.MaxAngularRate * 0.06) // Add a 6% deadband to prevent joystick drift
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // I want field-centric driving in open loop
+    
+    // Slow drive has half the deadband to allow for lower minimum speed.
+    private final SwerveRequest.FieldCentric driveSlow = new SwerveRequest.FieldCentric()
+        .withDeadband(SwerveSpeedConstants.MaxSpeed * Constants.stickDeadband * 0.5)
+        .withRotationalDeadband(SwerveSpeedConstants.MaxAngularRate * 0.06 * 0.5)
+        .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
     private final SwerveRequest.FieldCentricFacingAngle driveFacingAngle = new SwerveRequest.FieldCentricFacingAngle()
         .withDeadband(SwerveSpeedConstants.MaxSpeed * Constants.stickDeadband)
@@ -77,19 +76,17 @@ public class RobotContainer {
     private final SendableChooser<Command> autoChooser;
 
     /* Robot States */
-    private double m_speedMultiplier = 1;
     private boolean m_isAmp = false;
 
     /* Robot State Triggers */
     private final Trigger shooterLimitSwitchPressed = new Trigger(s_Shooter::getLimitSwitch);
     private final Trigger climbLimitSwitchesPressed = new Trigger(s_Climb::getLimitSwitches);
     private final Trigger tagIsInSight = new Trigger(() -> s_Shooter.tagInSight(kAlliance));
-    private final Trigger noteIsInSight = new Trigger(s_Intake::noteInSight);
+    //private final Trigger noteIsInSight = new Trigger(s_Intake::noteInSight);
     private final Trigger shooterIsReady = new Trigger(() -> s_Shooter.isReady(kAlliance));
-    private final Trigger matchIsEnding = new Trigger(() -> DriverStation.getMatchTime() <= 20);
 
     /* Commands */
-    private final LockOnNoteCommand lockOnNoteCommmand = new LockOnNoteCommand(this, s_Swerve, driveFacingAngle);
+    // private final LockOnNoteCommand lockOnNoteCommmand = new LockOnNoteCommand(this, s_Swerve, driveFacingAngle);
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
@@ -118,10 +115,6 @@ public class RobotContainer {
         Shuffleboard.getTab("Swerve").add("Target Direction PID", driveFacingAngle.HeadingController);
 
         s_Swerve.registerTelemetry(logger::telemeterize);
-
-        if (Utils.isSimulation()) {
-            s_Swerve.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
-        }
 
         s_Shooter.setDefaultCommand(
             // Stop any shooter rotation, turn off the shooter, and return to bottom position.
@@ -164,23 +157,17 @@ public class RobotContainer {
 
         // When a note is in sight, the speaker tag isn't in sight, and driver is not rotating the robot, automatically lock on the note and blink the LEDs orange.
         // According to https://www.chiefdelphi.com/t/what-are-your-programming-horror-stories/473439/15, we also need to make sure this does not run in autonomous.
-        noteIsInSight.and(tagIsInSight.negate()).and(RobotModeTriggers.autonomous().negate()).whileTrue(
+        // This is disabled until we get the back camera back on.
+        /*noteIsInSight.and(tagIsInSight.negate()).and(RobotModeTriggers.autonomous().negate()).whileTrue(
             Commands.parallel(
                 lockOnNoteCommmand,
                 s_Led.run(() -> s_Led.blink(255, 20, 0, 300))
             ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
-        );
+        );*/
 
         // When the shooter is ready, turn the LEDs green
         shooterIsReady.whileTrue(
             s_Led.startEnd(() -> s_Led.setColor(0, 255, 0), () -> {})
-        );
-
-        // When there is 20 seconds left in the match, permanently set the LED color to blue to remove shooting indicators from the operator, and add an alert to the dashboard.
-        matchIsEnding.and(RobotModeTriggers.teleop()).onTrue(
-            Commands.parallel(
-                s_Led.startEnd(() -> s_Led.setColor(0, 0, 255), () -> {}).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
-            )
         );
 
         // Configure the button bindings
@@ -215,30 +202,83 @@ public class RobotContainer {
 
         /* IMPORTANT Please see the following URL to get a graphical annotation of which xbox buttons 
             trigger what commands on the driver controller:
-        https://www.padcrafter.com/index.php?templates=Driver+Controller&leftBumper=Climb+Down&dpadRight=&dpadLeft=&aButton=Hold+to+brake&yButton=Right+Climb+Up&dpadDown=&dpadUp=&xButton=Left+Climb+Up&bButton=&leftStick=Field+Oriented+Drive&rightStick=Rotate+Robot&col=%23242424%2C%23606A6E%2C%23FFFFFF&rightTrigger=Fast+Mode&leftTrigger=Slow+Mode&rightBumper=Climb+Up&startButton=Reset+Field+Oriented+Drive&plat=1&backButton=&rightStickClick=
+        https://www.padcrafter.com/index.php?templates=Driver+Controller&leftBumper=Climb+Down&dpadRight=Lock+onto+Stage+%28left+side%29&dpadLeft=Lock+onto+Stage+%28right+side%29&aButton=&yButton=Right+Climb+Up&dpadDown=Lock+onto+Stage+%28middle%29&dpadUp=&xButton=Left+Climb+Up&bButton=&leftStick=Field+Oriented+Drive&rightStick=Rotate+Robot&col=%23242424%2C%23606A6E%2C%23FFFFFF&rightTrigger=&leftTrigger=%28Hold%29+Drive+slow&rightBumper=Climb+Up&startButton=Reset+Field+Oriented+Drive&plat=1&backButton=&rightStickClick=
         Whenever you edit a button binding, please update this URL
         */
 
-        // Reset the field-centric heading
-        driverController.options().onTrue(s_Swerve.runOnce(() -> s_Swerve.seedFieldRelative()));
+        driverController.options().onTrue(
+            s_Swerve.runOnce(() -> s_Swerve.seedFieldRelative())
+        );
+
+        // Slow mode
+        driverController.R2().whileTrue(
+            s_Swerve.applyRequest(() -> driveSlow
+                .withVelocityX(getVelocityX() * 0.5)
+                .withVelocityY(getVelocityY() * 0.5)
+                .withRotationalRate(getRotationalRate() * 0.5)
+            )
+        );
+
+        // Stage aiming
+        driverController.povRight().onTrue(
+            Commands.sequence(
+                // Reset the PID controller
+                s_Swerve.runOnce(() -> driveFacingAngle.HeadingController.reset()),
+                s_Swerve.applyRequest(() -> driveFacingAngle
+                    .withVelocityX(getVelocityX() * 0.5)
+                    .withVelocityY(getVelocityY() * 0.5)
+                    .withTargetDirection(s_Swerve.getTargetDirection(HeadingTargets.STAGE_LEFT, kAlliance))
+                )
+            ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
+        );
+
+        driverController.povLeft().onTrue(
+            Commands.sequence(
+                // Reset the PID controller
+                s_Swerve.runOnce(() -> driveFacingAngle.HeadingController.reset()),
+                s_Swerve.applyRequest(() -> driveFacingAngle
+                    .withVelocityX(getVelocityX() * 0.5)
+                    .withVelocityY(getVelocityY() * 0.5)
+                    .withTargetDirection(s_Swerve.getTargetDirection(HeadingTargets.STAGE_RIGHT, kAlliance))
+                )
+            ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
+        );
+
+        driverController.povDown().onTrue(
+            Commands.sequence(
+                // Reset the PID controller
+                s_Swerve.runOnce(() -> driveFacingAngle.HeadingController.reset()),
+                s_Swerve.applyRequest(() -> driveFacingAngle
+                    .withVelocityX(getVelocityX() * 0.5)
+                    .withVelocityY(getVelocityY() * 0.5)
+                    .withTargetDirection(s_Swerve.getTargetDirection(HeadingTargets.STAGE_MIDDLE, kAlliance))
+                )
+            ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
+        );
         
         // Climb
-        driverController.L1().and(climbLimitSwitchesPressed.negate()).whileTrue(s_Climb.startEnd(() -> s_Climb.runClimb(-1, -1), () -> {}));
-        driverController.R1().whileTrue(s_Climb.startEnd(() -> s_Climb.runClimb(1, 1), () -> {}));
-        driverController.square().whileTrue(s_Climb.startEnd(() -> s_Climb.runClimb(1, 0), () -> {}));
-        driverController.triangle().whileTrue(s_Climb.startEnd(() -> s_Climb.runClimb(0, 1), () -> {}));
+        driverController.L1().and(climbLimitSwitchesPressed.negate()).whileTrue(
+            s_Climb.startEnd(() -> s_Climb.runClimb(-1, -1), () -> {})
+        );
 
-        driverController.R2().onTrue(new InstantCommand(() -> m_speedMultiplier = 1, new Subsystem[0])); // no subsystems required
-        driverController.L2().onTrue(new InstantCommand(() -> m_speedMultiplier = 0.2, new Subsystem[0])); // no subsystems required
+        driverController.R1().whileTrue(
+            s_Climb.startEnd(() -> s_Climb.runClimb(1, 1), () -> {})
+        );
 
-        // Temporary control for finding kSlipCurrentA.
-        // driverController.cross().whileTrue(s_Swerve.runEnd(s_Swerve::applyIncreasingVoltage, s_Swerve::resetVoltage));
+        driverController.square().whileTrue(
+            s_Climb.startEnd(() -> s_Climb.runClimb(1, 0), () -> {})
+        );
 
-        // SysId Controls. Comment out after finished.
-        // driverController.touchpad().and(driverController.povLeft()).whileTrue(s_Swerve.sysIdDynamic(Direction.kForward));
-        // driverController.touchpad().and(driverController.povRight()).whileTrue(s_Swerve.sysIdDynamic(Direction.kReverse));
-        // driverController.options().and(driverController.povLeft()).whileTrue(s_Swerve.sysIdQuasistatic(Direction.kForward));
-        // driverController.options().and(driverController.povRight()).whileTrue(s_Swerve.sysIdQuasistatic(Direction.kReverse));
+        driverController.triangle().whileTrue(
+            s_Climb.startEnd(() -> s_Climb.runClimb(0, 1), () -> {})
+        );
+        
+
+        // SysId Controls. Comment out stage aiming controls before you use this.
+        // driverController.povUp().whileTrue(s_Swerve.sysIdDynamic(Direction.kForward));
+        // driverController.povDown().whileTrue(s_Swerve.sysIdDynamic(Direction.kReverse));
+        // driverController.povUp().whileTrue(s_Swerve.sysIdQuasistatic(Direction.kForward));
+        // driverController.povDown().whileTrue(s_Swerve.sysIdQuasistatic(Direction.kReverse));
     }
 
     private void configureOperatorButtonBindings() {
@@ -247,7 +287,7 @@ public class RobotContainer {
 
         /* IMPORTANT Please see the following URL to get a graphical annotation of which xbox buttons 
             trigger what commands on the operator controller:
-            https://www.padcrafter.com/?dpadRight=&dpadUp=&leftStick=Aim+Intake+%28Calibration+Only%29&leftStickClick=Set+angle+to+amp&leftBumper=Prepare+intake+for+amp+spit&leftTrigger=%28Hold%29+Deploy+Intake+lower&dpadLeft=&dpadDown=&backButton=%28Hold%29+Eject+Intake&startButton=%28Hold%29+Get+note+off+the+shooter%27s+top&rightStickClick=Lock+Speaker+%28point+blank%29&rightStick=Aim+Shooter+%28Calibration+Only%29&aButton=Fire&bButton=Lock+Speaker+%28limelight+only%29&xButton=Lock+Speaker&yButton=Lock+Amp+%28for+passing%29&rightBumper=Intake+Amp+Spit&rightTrigger=%28Hold%29+Deploy+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&plat=0#?rightStickClick=Lock+Speaker+%28using+pose%29&xButton=Lock+Speaker&aButton=Fire&bButton=Set+Angle%3A+Amp&rightStick=Aim+Shooter+%28Calibration+Only%29&rightBumper=Set+Angle%3A+Point+Blank&rightTrigger=Deploy+Intake&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&leftBumper=Set+Angle%3A+Podium&leftStick=Aim+Intake+%28Calibration+Only%29&dpadUp=Reset+Shooter+Encoder&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&startButton=Free+a+Stuck+Note+%28on+shooter%29&backButton=Eject+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&yButton=Manual+Angle+Fire&leftStickClick=Toggle+Auto+Shoot
+            https://www.padcrafter.com/?dpadRight=&dpadUp=&leftStick=Aim+Intake+%28Calibration+Only%29&leftStickClick=Set+angle+to+amp&leftBumper=&leftTrigger=%28Hold%29+Deploy+Intake+lower&dpadLeft=&dpadDown=&backButton=%28Hold%29+Eject+Intake&startButton=%28Hold%29+Get+note+off+the+shooter%27s+top&rightStickClick=Lock+Speaker+%28point+blank%29&rightStick=Aim+Shooter+%28Calibration+Only%29&aButton=Fire&bButton=Lock+Speaker+%28limelight+only%29&xButton=Lock+Speaker&yButton=Lock+Amp+%28for+passing%29&rightBumper=&rightTrigger=%28Hold%29+Deploy+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&plat=0#?rightStickClick=Lock+Speaker+%28using+pose%29&xButton=Lock+Speaker&aButton=Fire&bButton=Set+Angle%3A+Amp&rightStick=Aim+Shooter+%28Calibration+Only%29&rightBumper=Set+Angle%3A+Point+Blank&rightTrigger=Deploy+Intake&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&leftBumper=Set+Angle%3A+Podium&leftStick=Aim+Intake+%28Calibration+Only%29&dpadUp=Reset+Shooter+Encoder&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&startButton=Free+a+Stuck+Note+%28on+shooter%29&backButton=Eject+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&yButton=Manual+Angle+Fire&leftStickClick=Toggle+Auto+Shoot
             Please update this link whenever you change a button.
         */
         
@@ -304,8 +344,8 @@ public class RobotContainer {
                     // Reset the PID controller
                     s_Swerve.runOnce(() -> driveFacingAngle.HeadingController.reset()),
                     s_Swerve.applyRequest(() -> driveFacingAngle
-                        .withVelocityX(getVelocityX()) // Drive forward with negative Y (forward)
-                        .withVelocityY(getVelocityY()) // Drive left with negative X (left)
+                        .withVelocityX(getVelocityX())
+                        .withVelocityY(getVelocityY())
                         .withTargetDirection(s_Swerve.getTargetDirection(HeadingTargets.SPEAKER, kAlliance)))
                 ),
 
@@ -321,7 +361,7 @@ public class RobotContainer {
                     // Angle the shooter
                     s_Shooter.run(() -> s_Shooter.setAngleFromPose(s_Swerve.getPose(), kAlliance))
                 )
-            ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
+            ).until(() -> Math.abs(driverController.getRightX()) > 0.75)
         );
 
         // Lock on to amp area (for note passing).
@@ -348,7 +388,7 @@ public class RobotContainer {
                     // Angle the shooter
                     s_Shooter.startEnd(() -> s_Shooter.setAngle(ShooterConstants.passingAngle, false), () -> {})
                 )
-            ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
+            ).until(() -> Math.abs(driverController.getRightX()) > 0.75)
         );
 
         // Set angle to amp
@@ -392,8 +432,8 @@ public class RobotContainer {
             )
         );
 
-        // Experimental Amp Shooting Sequence. Only use this if intake amp spitting doesn't work.
-        /*operatorController.povRight().toggleOnTrue(
+        // Experimental Amp Shooting Sequence.
+        operatorController.leftBumper().toggleOnTrue(
             Commands.sequence(
                 // Tuck note into shooter
                 s_Shooter.startEnd(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), () -> {})
@@ -408,62 +448,8 @@ public class RobotContainer {
                 s_Shooter.startEnd(() -> s_Shooter.runShooter(0.2, 0.2, -0.5), () -> {})
                 .until(() -> s_Shooter.getAngleDegrees() >= 80.0)
             )
-        );*/
-
-        // Prepare intake for amp spit
-        operatorController.leftBumper().toggleOnTrue(
-            Commands.sequence(
-                // Turn off intake and feeder
-                s_Intake.runOnce(() -> s_Intake.runIntake(0, 0)),
-                s_Shooter.runOnce(() -> s_Shooter.runShooter(0, 0, 0)),
-                // Make sure it's at the bottom
-                s_Intake.startEnd(s_Intake::bottomPosition, () -> {})
-                .withTimeout(0.5),
-                // Spit into the ground
-                Commands.parallel(
-                    s_Intake.runOnce(() -> s_Intake.runIntake(-1, -1)),
-                    s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, 1), () -> {})
-                    .withTimeout(1)
-                ),
-                // Turn off intake and feeder, and wait for them to fully stop
-                Commands.parallel(
-                    s_Intake.runOnce(() -> s_Intake.runIntake(0, 0)),
-                    s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, 0), () -> {})
-                    .withTimeout(0.5)
-                ),
-                // Raise the intake to the top position and aim at the speaker
-                Commands.parallel(
-                    s_Intake.runOnce(s_Intake::topPosition),
-                    Commands.sequence(
-                        // Reset the PID controller
-                        s_Swerve.runOnce(() -> driveFacingAngle.HeadingController.reset()),
-                        s_Swerve.applyRequest(() -> driveFacingAngle
-                            .withVelocityX(getVelocityX()) // Drive forward with negative Y (forward)
-                            .withVelocityY(getVelocityY()) // Drive left with negative X (left)
-                            .withTargetDirection(s_Swerve.getTargetDirection(HeadingTargets.AMP_SHOOTING, kAlliance)))
-                    )
-                )
-            ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
         );
         
-        // Intake Amp Spit
-        operatorController.rightBumper().toggleOnTrue(
-            Commands.race(
-                // Prevent swerve movement
-                s_Swerve.applyRequest(() -> drive
-                    .withVelocityX(0)
-                    .withVelocityY(0)
-                    .withRotationalRate(0)
-                ),
-                // Spit out the note while lowering the intake slightly
-                Commands.sequence(
-                s_Intake.startEnd(s_Intake::ampFastSpit, () -> {})
-                    .withTimeout(0.05),
-                s_Intake.startEnd(s_Intake::ampPosition, () -> {})
-                    .withTimeout(1)
-                )
-            )
-        );
 
         /* Manual Controls */
         // Calibration Mode
@@ -618,17 +604,17 @@ public class RobotContainer {
     }
 
     public double getVelocityX() {
-        double velocityX = -driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed * m_speedMultiplier;
+        double velocityX = -driverController.getLeftY() * SwerveSpeedConstants.MaxSpeed;
         return velocityX;
     }
 
     public double getVelocityY() {
-        double velocityY = -driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed * m_speedMultiplier;
+        double velocityY = -driverController.getLeftX() * SwerveSpeedConstants.MaxSpeed;
         return velocityY;
     }
 
     public double getRotationalRate() {
-        double rotationalRate = -driverController.getRightX() * SwerveSpeedConstants.MaxAngularRate * m_speedMultiplier;
+        double rotationalRate = -driverController.getRightX() * SwerveSpeedConstants.MaxAngularRate;
         return rotationalRate;
     }
 

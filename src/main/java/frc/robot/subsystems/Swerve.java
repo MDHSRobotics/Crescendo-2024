@@ -4,8 +4,6 @@ import java.util.function.Supplier;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
-import com.ctre.phoenix6.controls.VoltageOut;
-import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
@@ -48,7 +46,10 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     public enum HeadingTargets {
         SPEAKER,
         AMP_AREA,
-        AMP_SHOOTING
+        AMP_SHOOTING,
+        STAGE_LEFT,
+        STAGE_RIGHT,
+        STAGE_MIDDLE
     }
 
     private static final double kSimLoopPeriod = 0.005; // 5 ms
@@ -58,15 +59,10 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     // Old PID Controller for deciding the rotational rate of the robot during speaker aiming.
     private PIDController m_rotationalRateController = new PIDController(0.15, 0, 0);
     
-    // Temporary variables for finding kSlipCurrentA.
-    private final TalonFX m_frontRightDriveMotor = new TalonFX(TunerConstants.kFrontRightDriveMotorId);
-    private double m_voltage = 0;
-    private final VoltageOut m_request = new VoltageOut(0).withEnableFOC(false);
-    
     private final SwerveRequest.ApplyChassisSpeeds AutoRequest = new SwerveRequest.ApplyChassisSpeeds();
 
-    private final SwerveRequest.SysIdSwerveTranslation TranslationCharacterization = new SwerveRequest.SysIdSwerveTranslation(); // Driving forward
-    // private final SwerveRequest.SysIdSwerveRotation RotationCharacterization = new SwerveRequest.SysIdSwerveRotation(); // Rotating robot
+    private final SwerveRequest.SysIdSwerveTranslation TranslationCharacterization = new SwerveRequest.SysIdSwerveTranslation(); // Driving forward 
+    // private final SwerveRequest.SysIdSwerveRotation RotationCharacterization = new SwerveRequest.SysIdSwerveRotation(); // Rotating robot (for HeadingController)
     // private final SwerveRequest.SysIdSwerveSteerGains SteerCharacterization = new SwerveRequest.SysIdSwerveSteerGains(); // Rotating wheels only
 
     /* Routines for swerve characterization. Use one of these sysidroutines for your particular test */
@@ -237,8 +233,17 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
             case AMP_AREA:
                 targetYaw = Aiming.getYaw(PoseConstants.kBlueAmp2DPosition, currentPose);
                 break;
-            default: // AMP_SHOOTING
-                targetYaw = PoseConstants.facingAmpRotation;
+            case AMP_SHOOTING:
+                targetYaw = PoseConstants.facingAmp;
+                break;
+            case STAGE_LEFT:
+                targetYaw = PoseConstants.facingBlueStageLeft;
+                break;
+            case STAGE_RIGHT:
+                targetYaw = PoseConstants.facingBlueStageRight;
+                break;
+            default: // STAGE_MIDDLE
+                targetYaw = PoseConstants.facingBlueStageMiddle;
             }
         } else { // Red alliance:
             switch (target) {
@@ -248,8 +253,16 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
             case AMP_AREA:
                 targetYaw = Aiming.getYaw(PoseConstants.kRedAmp2DPosition, currentPose);
                 break;
-            default: // AMP_SHOOTING
-                targetYaw = PoseConstants.facingAmpRotation;
+            case AMP_SHOOTING:
+                targetYaw = PoseConstants.facingAmp;
+            case STAGE_LEFT:
+                targetYaw = PoseConstants.facingRedStageLeft;
+                break;
+            case STAGE_RIGHT:
+                targetYaw = PoseConstants.facingRedStageRight;
+                break;
+            default: // STAGE_MIDDLE
+                targetYaw = PoseConstants.facingRedStageMiddle;
             }
         }
     
@@ -276,15 +289,6 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         return rotationalRate;
     }
 
-    // Temporary methods for applying voltage to find kSlipCurrentA.
-    public void applyIncreasingVoltage() {
-        m_voltage += 0.01;
-        System.out.println(m_voltage);
-        m_frontRightDriveMotor.setControl(m_request.withOutput(m_voltage));
-    }
-    public void resetVoltage() {
-        m_voltage = 0;
-    }
 
     /** Shuffleboard logging. We avoid overriding periodic() because it runs even when the robot is disabled. */
     public void logData() {

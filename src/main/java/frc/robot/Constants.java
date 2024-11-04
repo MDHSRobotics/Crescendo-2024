@@ -9,8 +9,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N3;
 import frc.robot.generated.TunerConstants;
-import frc.utils.Elastic.ElasticNotification;
-import frc.utils.Elastic.ElasticNotification.NotificationLevel;
 
 public final class Constants {
     public static final double stickDeadband = 0.1;
@@ -53,8 +51,16 @@ public final class Constants {
         // Initial vector of the robot orientation, representing a robot with no rotation.
         public static final Vector<N3> facingForwardVector = VecBuilder.fill(1, 0, 0);
 
-        // Rotation2d of 90 degrees, for amp shooting
-        public static final Rotation2d facingAmpRotation = Rotation2d.fromDegrees(90);
+        // Robot rotations for constant HeadingTargets
+        public static final Rotation2d facingAmp = Rotation2d.fromDegrees(90);
+
+        public static final Rotation2d facingBlueStageLeft = Rotation2d.fromDegrees(-60);
+        public static final Rotation2d facingBlueStageRight = Rotation2d.fromDegrees(60);
+        public static final Rotation2d facingBlueStageMiddle = Rotation2d.fromDegrees(180);
+
+        public static final Rotation2d facingRedStageLeft = Rotation2d.fromDegrees(120);
+        public static final Rotation2d facingRedStageRight = Rotation2d.fromDegrees(-120);
+        public static final Rotation2d facingRedStageMiddle = Rotation2d.fromDegrees(0);
 
         // 2D position of each speaker in meters
         public static final Translation2d kBlueSpeaker2DPosition = new Translation2d(0.25, 5.55);
@@ -147,14 +153,6 @@ public final class Constants {
         ClimbConstants.kLeftClimbMotorID, "Left Climb",
         ClimbConstants.kRightClimbMotorID, "Right Climb"
     );
-
-    /**
-     * Class used for creating our dashboard alerts
-     */
-    public class ElasticAlerts {
-        public static final ElasticNotification aimingInterrupted = new ElasticNotification(NotificationLevel.INFO, "Aiming interrupted/finished", "");
-        public static final ElasticNotification matchEnd = new ElasticNotification(NotificationLevel.INFO, "Match is about to end!", "");
-    }
 }
 
 /*
