@@ -62,6 +62,9 @@ public final class Constants {
         public static final Rotation2d facingRedStageRight = Rotation2d.fromDegrees(-120);
         public static final Rotation2d facingRedStageMiddle = Rotation2d.fromDegrees(0);
 
+        public static final Rotation2d behindBlueSource = Rotation2d.fromDegrees(120);
+        public static final Rotation2d behindRedSource = Rotation2d.fromDegrees(60);
+
         // 2D position of each speaker in meters
         public static final Translation2d kBlueSpeaker2DPosition = new Translation2d(0.25, 5.55);
         public static final Translation2d kRedSpeaker2DPosition = new Translation2d(16.3, 5.55);

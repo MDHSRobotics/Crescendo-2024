@@ -49,7 +49,8 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         AMP_SHOOTING,
         STAGE_LEFT,
         STAGE_RIGHT,
-        STAGE_MIDDLE
+        STAGE_MIDDLE,
+        SOURCE
     }
 
     private static final double kSimLoopPeriod = 0.005; // 5 ms
@@ -242,8 +243,11 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
             case STAGE_RIGHT:
                 targetYaw = PoseConstants.facingBlueStageRight;
                 break;
-            default: // STAGE_MIDDLE
+            case STAGE_MIDDLE:
                 targetYaw = PoseConstants.facingBlueStageMiddle;
+                break;
+            default: // SOURCE:
+                targetYaw = PoseConstants.behindBlueSource;
             }
         } else { // Red alliance:
             switch (target) {
@@ -261,8 +265,11 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
             case STAGE_RIGHT:
                 targetYaw = PoseConstants.facingRedStageRight;
                 break;
-            default: // STAGE_MIDDLE
+            case STAGE_MIDDLE:
                 targetYaw = PoseConstants.facingRedStageMiddle;
+                break;
+            default: // SOURCE:
+                targetYaw = PoseConstants.behindRedSource;
             }
         }
     

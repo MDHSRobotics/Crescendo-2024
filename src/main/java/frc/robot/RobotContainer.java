@@ -202,7 +202,7 @@ public class RobotContainer {
 
         /* IMPORTANT Please see the following URL to get a graphical annotation of which xbox buttons 
             trigger what commands on the driver controller:
-        https://www.padcrafter.com/index.php?templates=Driver+Controller&leftBumper=Climb+Down&dpadRight=Lock+onto+Stage+%28left+side%29&dpadLeft=Lock+onto+Stage+%28right+side%29&aButton=&yButton=Right+Climb+Up&dpadDown=Lock+onto+Stage+%28middle%29&dpadUp=&xButton=Left+Climb+Up&bButton=&leftStick=Field+Oriented+Drive&rightStick=Rotate+Robot&col=%23242424%2C%23606A6E%2C%23FFFFFF&rightTrigger=&leftTrigger=%28Hold%29+Drive+slow&rightBumper=Climb+Up&startButton=Reset+Field+Oriented+Drive&plat=1&backButton=&rightStickClick=
+        https://www.padcrafter.com/index.php?templates=Driver+Controller&leftBumper=Climb+Down&dpadRight=Right+Climb+Up&dpadLeft=Left+Climb+Up&aButton=Lock+onto+Stage+%28middle%29&yButton=Lock+onto+Source&dpadDown=&dpadUp=&xButton=Lock+onto+Stage+%28right+side%29&bButton=Lock+onto+Stage+%28left+side%29&leftStick=Field+Oriented+Drive&rightStick=Rotate+Robot&col=%23242424%2C%23606A6E%2C%23FFFFFF&rightTrigger=&leftTrigger=%28Hold%29+Drive+slow&rightBumper=Climb+Up&startButton=Reset+Field+Oriented+Drive&plat=1&backButton=&rightStickClick=
         Whenever you edit a button binding, please update this URL
         */
 
@@ -218,9 +218,22 @@ public class RobotContainer {
                 .withRotationalRate(getRotationalRate() * 0.5)
             )
         );
+        
+        // Source aiming
+        driverController.triangle().onTrue(
+            Commands.sequence(
+                // Reset the PID controller
+                s_Swerve.runOnce(() -> driveFacingAngle.HeadingController.reset()),
+                s_Swerve.applyRequest(() -> driveFacingAngle
+                    .withVelocityX(getVelocityX() * 0.5)
+                    .withVelocityY(getVelocityY() * 0.5)
+                    .withTargetDirection(s_Swerve.getTargetDirection(HeadingTargets.SOURCE, kAlliance))
+                )
+            ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
+        );
 
         // Stage aiming
-        driverController.povRight().onTrue(
+        driverController.circle().onTrue(
             Commands.sequence(
                 // Reset the PID controller
                 s_Swerve.runOnce(() -> driveFacingAngle.HeadingController.reset()),
@@ -232,7 +245,7 @@ public class RobotContainer {
             ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
         );
 
-        driverController.povLeft().onTrue(
+        driverController.square().onTrue(
             Commands.sequence(
                 // Reset the PID controller
                 s_Swerve.runOnce(() -> driveFacingAngle.HeadingController.reset()),
@@ -244,7 +257,7 @@ public class RobotContainer {
             ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
         );
 
-        driverController.povDown().onTrue(
+        driverController.cross().onTrue(
             Commands.sequence(
                 // Reset the PID controller
                 s_Swerve.runOnce(() -> driveFacingAngle.HeadingController.reset()),
@@ -265,11 +278,11 @@ public class RobotContainer {
             s_Climb.startEnd(() -> s_Climb.runClimb(1, 1), () -> {})
         );
 
-        driverController.square().whileTrue(
+        driverController.povLeft().whileTrue(
             s_Climb.startEnd(() -> s_Climb.runClimb(1, 0), () -> {})
         );
 
-        driverController.triangle().whileTrue(
+        driverController.povRight().whileTrue(
             s_Climb.startEnd(() -> s_Climb.runClimb(0, 1), () -> {})
         );
         
