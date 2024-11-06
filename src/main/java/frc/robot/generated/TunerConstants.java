@@ -65,9 +65,9 @@ public class TunerConstants {
      * 3. Apply a VoltageOut request to the front right steer motor to rotate the wheel heading once (you might have to do this in a separate program)
      * 4. Write down the number of wheel spins and multiply it by kDriveGearRatio
     */
-    private static final double kCoupleRatio = 3.06122449;
+    public static final double kCoupleRatio = 3.06122449;
 
-    private static final double kDriveGearRatio = 6.122448979591837;
+    public static final double kDriveGearRatio = 6.122448979591837;
     private static final double kSteerGearRatio = 21.428571428571427;
     private static final double kWheelRadiusInches = 2;
 
@@ -145,7 +145,9 @@ public class TunerConstants {
 
     private static final double kBackRightXPosInches = -10.875;
     private static final double kBackRightYPosInches = -13.375;
-
+    
+    // Extra calculated field for the drive base radius in meters
+    public static final double kDriveBaseRadius = 0.4378508;
 
     private static final SwerveModuleConstants FrontLeft = ConstantCreator.createModuleConstants(
             kFrontLeftSteerMotorId, kFrontLeftDriveMotorId, kFrontLeftEncoderId, kFrontLeftEncoderOffset, Units.inchesToMeters(kFrontLeftXPosInches), Units.inchesToMeters(kFrontLeftYPosInches), kInvertLeftSide);

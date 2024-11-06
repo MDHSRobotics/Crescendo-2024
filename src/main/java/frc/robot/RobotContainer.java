@@ -22,7 +22,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.*;
-import frc.robot.commands.LockOnNoteCommand;
+import frc.robot.commands.WheelRadiusCharacterization;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.Swerve.HeadingTargets;
@@ -82,11 +82,10 @@ public class RobotContainer {
     private final Trigger shooterLimitSwitchPressed = new Trigger(s_Shooter::getLimitSwitch);
     private final Trigger climbLimitSwitchesPressed = new Trigger(s_Climb::getLimitSwitches);
     private final Trigger tagIsInSight = new Trigger(() -> s_Shooter.tagInSight(kAlliance));
-    //private final Trigger noteIsInSight = new Trigger(s_Intake::noteInSight);
     private final Trigger shooterIsReady = new Trigger(() -> s_Shooter.isReady(kAlliance));
 
     /* Commands */
-    // private final LockOnNoteCommand lockOnNoteCommmand = new LockOnNoteCommand(this, s_Swerve, driveFacingAngle);
+    private final WheelRadiusCharacterization wheelRadiusCharacterization = new WheelRadiusCharacterization(s_Swerve);
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
@@ -154,16 +153,6 @@ public class RobotContainer {
         tagIsInSight.and(shooterIsReady.negate()).whileTrue(
             s_Led.run(() -> s_Led.blink(255, 0, 0, 300))
         );
-
-        // When a note is in sight, the speaker tag isn't in sight, and driver is not rotating the robot, automatically lock on the note and blink the LEDs orange.
-        // According to https://www.chiefdelphi.com/t/what-are-your-programming-horror-stories/473439/15, we also need to make sure this does not run in autonomous.
-        // This is disabled until we get the back camera back on.
-        /*noteIsInSight.and(tagIsInSight.negate()).and(RobotModeTriggers.autonomous().negate()).whileTrue(
-            Commands.parallel(
-                lockOnNoteCommmand,
-                s_Led.run(() -> s_Led.blink(255, 20, 0, 300))
-            ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
-        );*/
 
         // When the shooter is ready, turn the LEDs green
         shooterIsReady.whileTrue(
@@ -285,7 +274,9 @@ public class RobotContainer {
         driverController.povRight().whileTrue(
             s_Climb.startEnd(() -> s_Climb.runClimb(0, 1), () -> {})
         );
-        
+
+        // Run wheel radius calculation
+        driverController.share().whileTrue(wheelRadiusCharacterization);        
 
         // SysId Controls. Comment out stage aiming controls before you use this.
         // driverController.povUp().whileTrue(s_Swerve.sysIdDynamic(Direction.kForward));

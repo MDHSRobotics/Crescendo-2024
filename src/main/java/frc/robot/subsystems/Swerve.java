@@ -2,7 +2,9 @@ package frc.robot.subsystems;
 
 import java.util.function.Supplier;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
@@ -214,6 +216,10 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         return getPose().getRotation().getDegrees();
     }
 
+    public double getRobotYawRadians() {
+        return getPose().getRotation().getRadians();
+    }
+
     /**
      * Finds the robot heading that points the robot at the target.
      * @param target the target you want to face
@@ -294,6 +300,37 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         double output = m_rotationalRateController.calculate(tx, 0);
         double rotationalRate = MathUtil.clamp(output, -SwerveSpeedConstants.MaxAngularRate, SwerveSpeedConstants.MaxAngularRate);
         return rotationalRate;
+    }
+
+    /**
+     * Returns an array of the current wheel positions in radians.
+     * @see frc.robot.commands.WheelRadiusCharacterization
+     */
+    public double[] getWheelPositions() {
+        double[] wheelPositions = new double[4];
+
+        for (int i = 0; i < 4; ++i) {
+            StatusSignal<Double> drivePosition = Modules[i].getDriveMotor().getPosition();
+            StatusSignal<Double> driveVelocity = Modules[i].getDriveMotor().getVelocity();
+            StatusSignal<Double> steerPosition = Modules[i].getSteerMotor().getPosition();
+            StatusSignal<Double> steerVelocity = Modules[i].getSteerMotor().getVelocity();
+
+            // Latency compensate our signals
+            double driveRotations = BaseStatusSignal.getLatencyCompensatedValue(drivePosition, driveVelocity);
+            double steerRotations = BaseStatusSignal.getLatencyCompensatedValue(steerPosition, steerVelocity);
+
+            // Back out the drive rotations based on angle rotations due to coupling between azimuth and steer
+            driveRotations -= steerRotations * TunerConstants.kCoupleRatio;
+
+            // Convert from drive motor to wheel rotations with the gear ratio
+            double wheelRotations = driveRotations / TunerConstants.kDriveGearRatio;
+
+            // Convert from rotations to radians.
+            // Ignore the edu.wpi, Java refuses to import a second Units library.
+            wheelPositions[i] = edu.wpi.first.math.util.Units.rotationsToRadians(wheelRotations);
+        }
+
+        return wheelPositions;
     }
 
 
