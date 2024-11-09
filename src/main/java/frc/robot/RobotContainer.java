@@ -66,8 +66,8 @@ public class RobotContainer {
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
     // Point wheels in one direction in preparation for SysId testing.
-    /*private final SwerveRequest.PointWheelsAt pointWheelsAt = new SwerveRequest.PointWheelsAt()
-        .withModuleDirection(Rotation2d.fromDegrees(0));*/
+    private final SwerveRequest.PointWheelsAt pointWheelsForward = new SwerveRequest.PointWheelsAt()
+        .withModuleDirection(Rotation2d.fromDegrees(0));
 
     // Set up telemetry.
     private final Telemetry logger = new Telemetry();
@@ -83,9 +83,6 @@ public class RobotContainer {
     private final Trigger climbLimitSwitchesPressed = new Trigger(s_Climb::getLimitSwitches);
     private final Trigger tagIsInSight = new Trigger(() -> s_Shooter.tagInSight(kAlliance));
     private final Trigger shooterIsReady = new Trigger(() -> s_Shooter.isReady(kAlliance));
-
-    /* Commands */
-    private final WheelRadiusCharacterization wheelRadiusCharacterization = new WheelRadiusCharacterization(s_Swerve);
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
@@ -200,7 +197,7 @@ public class RobotContainer {
         );
 
         // Slow mode
-        driverController.R2().whileTrue(
+        driverController.L2().whileTrue(
             s_Swerve.applyRequest(() -> driveSlow
                 .withVelocityX(getVelocityX() * 0.5)
                 .withVelocityY(getVelocityY() * 0.5)
@@ -276,13 +273,18 @@ public class RobotContainer {
         );
 
         // Run wheel radius calculation
-        driverController.share().whileTrue(wheelRadiusCharacterization);        
+        driverController.share().whileTrue(new WheelRadiusCharacterization(s_Swerve));        
 
-        // SysId Controls. Comment out stage aiming controls before you use this.
-        // driverController.povUp().whileTrue(s_Swerve.sysIdDynamic(Direction.kForward));
-        // driverController.povDown().whileTrue(s_Swerve.sysIdDynamic(Direction.kReverse));
-        // driverController.povUp().whileTrue(s_Swerve.sysIdQuasistatic(Direction.kForward));
-        // driverController.povDown().whileTrue(s_Swerve.sysIdQuasistatic(Direction.kReverse));
+        // Point wheels forward in preparation for SysId
+        driverController.touchpad().whileTrue(
+            s_Swerve.applyRequest(() -> pointWheelsForward)
+        );
+
+        // SysId Controls
+        driverController.povUp().whileTrue(s_Swerve.sysIdDynamic(Direction.kForward));
+        driverController.povDown().whileTrue(s_Swerve.sysIdDynamic(Direction.kReverse));
+        driverController.povUp().whileTrue(s_Swerve.sysIdQuasistatic(Direction.kForward));
+        driverController.povDown().whileTrue(s_Swerve.sysIdQuasistatic(Direction.kReverse));
     }
 
     private void configureOperatorButtonBindings() {
@@ -484,27 +486,6 @@ public class RobotContainer {
                 s_Shooter.startEnd(() -> s_Shooter.setAngle(51, false), () -> {})
             )
         );
-
-        // Podium Shooting Angle
-        /*operatorController.leftBumper()
-        .onTrue(
-            new InstantCommand(() -> m_isAmp = false, new Subsystem[0]) // no subsystems required
-            .andThen(s_Shooter.startEnd(() -> s_Shooter.setAngle(36, false), () -> {}))
-        );*/
-
-        // Manual shoot
-        /*operatorController.y().onTrue(
-            Commands.sequence(
-                // Tuck note into shooter
-                s_Shooter.startEnd(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), () -> {}).withTimeout(0.05),
-                // Ramp up
-                s_Shooter.startEnd(() -> s_Shooter.runShooter(0.5, 0.5, 0), () -> {}).withTimeout(1.0),
-                // Shoot
-                s_Shooter.startEnd(() -> s_Shooter.runShooter(0.5, 0.5, -0.5), () -> {})
-                .withTimeout(0.5)
-            )
-        );*/
-
 
         // Fully eject note from intake
         operatorController.back().whileTrue(
