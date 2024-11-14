@@ -3,6 +3,7 @@ package frc.robot.commands;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoublePublisher;
@@ -21,16 +22,23 @@ import frc.robot.subsystems.Swerve;
  */
 public class WheelRadiusCharacterization extends Command {
     private final Swerve swerve;
-    private final SwerveRequest.ApplyChassisSpeeds rotationRequest = new SwerveRequest.ApplyChassisSpeeds()
-        .withSpeeds(new ChassisSpeeds(0, 0, 0.5));
+    private final SwerveRequest.ApplyChassisSpeeds rotationRequest = new SwerveRequest.ApplyChassisSpeeds();
     private final SwerveRequest.ApplyChassisSpeeds stopRequest = new SwerveRequest.ApplyChassisSpeeds()
         .withSpeeds(new ChassisSpeeds());
     
+    // Max rotation speed in radians per second.
+    private final double maxRotationalRate = 0.5;
+    // This limits the rotational acceleration to 0.5 radians per second^2 to prevent any wheel slip when the robot starts rotating.
+    // If the acceleration is the same as the rotational rate, that means it will take 1 second to get to the max rotational rate.
+    private final SlewRateLimiter rotationalAccelerationLimiter = new SlewRateLimiter(0.5);
+
     private double lastGyroYawRadians = 0.0;
     private double totalGyroYawRadians = 0.0;
 
+    // Wheel positions in radians.
     private double[] startingWheelPositions;
 
+    // Calculated wheel radius in inches.
     private double currentEffectiveWheelRadius = 0.0;
 
     /* NetworkTables logging */
@@ -52,11 +60,15 @@ public class WheelRadiusCharacterization extends Command {
         totalGyroYawRadians = 0.0;
 
         startingWheelPositions = swerve.getWheelPositions();
+
+        rotationalAccelerationLimiter.reset(0);
     }
 
     @Override
     public void execute() {
         // Rotate the swerve drive
+        double rotationalRate = rotationalAccelerationLimiter.calculate(maxRotationalRate);
+        rotationRequest.Speeds.omegaRadiansPerSecond = rotationalRate;
         swerve.setControl(rotationRequest);
 
         // Get yaw and wheel positions
