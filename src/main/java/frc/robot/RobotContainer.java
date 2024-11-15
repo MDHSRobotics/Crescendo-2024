@@ -264,13 +264,13 @@ public class RobotContainer {
             s_Climb.startEnd(() -> s_Climb.runClimb(1, 1), () -> {})
         );
 
-        driverController.povLeft().whileTrue(
+        /*driverController.povLeft().whileTrue(
             s_Climb.startEnd(() -> s_Climb.runClimb(1, 0), () -> {})
-        );
+        );*/
 
-        driverController.povRight().whileTrue(
+        /*driverController.povRight().whileTrue(
             s_Climb.startEnd(() -> s_Climb.runClimb(0, 1), () -> {})
-        );
+        );*/
 
         // Run wheel radius calculation
         driverController.share().whileTrue(new WheelRadiusCharacterization(s_Swerve));        
@@ -281,8 +281,8 @@ public class RobotContainer {
         );
 
         // SysId Controls
-        driverController.povUp().whileTrue(s_Swerve.sysIdDynamic(Direction.kForward));
-        driverController.povDown().whileTrue(s_Swerve.sysIdDynamic(Direction.kReverse));
+        driverController.povLeft().whileTrue(s_Swerve.sysIdDynamic(Direction.kForward));
+        driverController.povRight().whileTrue(s_Swerve.sysIdDynamic(Direction.kReverse));
         driverController.povUp().whileTrue(s_Swerve.sysIdQuasistatic(Direction.kForward));
         driverController.povDown().whileTrue(s_Swerve.sysIdQuasistatic(Direction.kReverse));
     }
@@ -293,12 +293,12 @@ public class RobotContainer {
 
         /* IMPORTANT Please see the following URL to get a graphical annotation of which xbox buttons 
             trigger what commands on the operator controller:
-            https://www.padcrafter.com/?dpadRight=&dpadUp=&leftStick=Aim+Intake+%28Calibration+Only%29&leftStickClick=Set+angle+to+amp&leftBumper=&leftTrigger=%28Hold%29+Deploy+Intake+lower&dpadLeft=&dpadDown=&backButton=%28Hold%29+Eject+Intake&startButton=%28Hold%29+Get+note+off+the+shooter%27s+top&rightStickClick=Lock+Speaker+%28point+blank%29&rightStick=Aim+Shooter+%28Calibration+Only%29&aButton=Fire&bButton=Lock+Speaker+%28limelight+only%29&xButton=Lock+Speaker&yButton=Lock+Amp+%28for+passing%29&rightBumper=&rightTrigger=%28Hold%29+Deploy+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&plat=0#?rightStickClick=Lock+Speaker+%28using+pose%29&xButton=Lock+Speaker&aButton=Fire&bButton=Set+Angle%3A+Amp&rightStick=Aim+Shooter+%28Calibration+Only%29&rightBumper=Set+Angle%3A+Point+Blank&rightTrigger=Deploy+Intake&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&leftBumper=Set+Angle%3A+Podium&leftStick=Aim+Intake+%28Calibration+Only%29&dpadUp=Reset+Shooter+Encoder&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&startButton=Free+a+Stuck+Note+%28on+shooter%29&backButton=Eject+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&yButton=Manual+Angle+Fire&leftStickClick=Toggle+Auto+Shoot
+            https://www.padcrafter.com/?dpadRight=&dpadUp=&leftStick=Aim+Intake+%28Calibration+Only%29&leftStickClick=Set+angle+to+amp&leftBumper=&leftTrigger=%28Toggle%29+Deploy+Intake+lower&dpadLeft=&dpadDown=&backButton=%28Toggle%29+Eject+Intake&startButton=%28Toggle%29+Get+note+off+the+shooter%27s+top&rightStickClick=Lock+Speaker+%28point+blank%29&rightStick=Aim+Shooter+%28Calibration+Only%29&aButton=Fire&bButton=Lock+Speaker+%28limelight+only%29&xButton=Lock+Speaker&yButton=Lock+Amp+%28for+passing%29&rightBumper=&rightTrigger=%28Toggle%29+Deploy+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&plat=0#?rightStickClick=Lock+Speaker+%28using+pose%29&xButton=Lock+Speaker&aButton=Fire&bButton=Set+Angle%3A+Amp&rightStick=Aim+Shooter+%28Calibration+Only%29&rightBumper=Set+Angle%3A+Point+Blank&rightTrigger=Deploy+Intake&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&leftBumper=Set+Angle%3A+Podium&leftStick=Aim+Intake+%28Calibration+Only%29&dpadUp=Reset+Shooter+Encoder&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&startButton=Free+a+Stuck+Note+%28on+shooter%29&backButton=Eject+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&yButton=Manual+Angle+Fire&leftStickClick=Toggle+Auto+Shoot
             Please update this link whenever you change a button.
         */
         
         // Run intake at mid position
-        operatorController.rightTrigger().whileTrue(
+        operatorController.rightTrigger().toggleOnTrue(
             Commands.race(
                 Commands.sequence(
                     s_Intake.runOnce(() -> s_Intake.runIntake(1, 1)),
@@ -309,7 +309,7 @@ public class RobotContainer {
         );
         
         // Run intake at bottom position in case mid isn't low enough
-        operatorController.leftTrigger().whileTrue(
+        operatorController.leftTrigger().toggleOnTrue(
             Commands.race(
                 Commands.sequence(
                     s_Intake.runOnce(() -> s_Intake.runIntake(1, 1)),
@@ -488,7 +488,7 @@ public class RobotContainer {
         );
 
         // Fully eject note from intake
-        operatorController.back().whileTrue(
+        operatorController.back().toggleOnTrue(
             Commands.race(
                 Commands.sequence(
                     s_Intake.runOnce(() -> s_Intake.runIntake(-1, -1)),
@@ -499,7 +499,7 @@ public class RobotContainer {
         );
 
         // Free a stuck note on the top of the robot
-        operatorController.start().whileTrue(
+        operatorController.start().toggleOnTrue(
             s_Shooter.startEnd(() -> s_Shooter.runShooter(-1,-1,0), () -> {})
         );
     }

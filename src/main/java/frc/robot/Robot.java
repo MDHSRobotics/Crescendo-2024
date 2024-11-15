@@ -61,6 +61,7 @@ public class Robot extends TimedRobot {
         // Record joystick data
         DriverStation.startDataLog(DataLogManager.getLog());
         // Start logging REV Spark Max and Spark Flex data
+        // Not working with NetworkTables?
         URCL.start(Constants.sparkDeviceNames);
 
         // Set the limelight pipeline.
@@ -145,6 +146,8 @@ public class Robot extends TimedRobot {
 
         // Set the starting perspective for driving.
         m_robotContainer.setOperatorPerspective(Rotation2d.fromDegrees(m_robotContainer.kAlliance == Alliance.Blue ? 0 : 180));
+        
+        SignalLogger.start();
     }
 
     /**
@@ -166,7 +169,7 @@ public class Robot extends TimedRobot {
         CommandScheduler.getInstance().cancelAll();
 
         // Set the starting position to right below the red speaker.
-        m_robotContainer.setStartingPosition(new Pose2d(1.35, 5.55, Rotation2d.fromDegrees(180)));
+        m_robotContainer.setStartingPosition(new Pose2d(15.15, 5.55, Rotation2d.fromDegrees(180)));
 
         // Set the starting perspective for driving.
         m_robotContainer.setOperatorPerspective(Rotation2d.fromDegrees(m_robotContainer.kAlliance == Alliance.Blue ? 0 : 180));
@@ -178,6 +181,12 @@ public class Robot extends TimedRobot {
     @Override
     public void testPeriodic() {
         m_robotContainer.logSubsystemData();
+    }
+
+    @Override
+    public void testExit() {
+        SignalLogger.stop();
+        DataLogManager.stop();
     }
 
 }

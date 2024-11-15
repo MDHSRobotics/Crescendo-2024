@@ -27,10 +27,10 @@ public class WheelRadiusCharacterization extends Command {
         .withSpeeds(new ChassisSpeeds());
     
     // Max rotation speed in radians per second.
-    private final double maxRotationalRate = 0.5;
-    // This limits the rotational acceleration to 0.5 radians per second^2 to prevent any wheel slip when the robot starts rotating.
+    private final double maxRotationalRate = 1;
+    // This limits the rotational acceleration to 1 radians per second^2 to prevent any wheel slip when the robot starts rotating.
     // If the acceleration is the same as the rotational rate, that means it will take 1 second to get to the max rotational rate.
-    private final SlewRateLimiter rotationalAccelerationLimiter = new SlewRateLimiter(0.5);
+    private final SlewRateLimiter rotationalAccelerationLimiter = new SlewRateLimiter(1);
 
     private double lastGyroYawRadians = 0.0;
     private double totalGyroYawRadians = 0.0;
