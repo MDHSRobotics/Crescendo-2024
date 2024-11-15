@@ -304,7 +304,8 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
 
     /**
      * Returns an array of the current wheel positions in radians.
-     * @see frc.robot.commands.WheelRadiusCharacterization
+     * <p>Inspired by {@link com.ctre.phoenix6.mechanisms.swerve.SwerveModule#getPosition(boolean) CTRE's getPosition method}
+     * <p>Used in {@link frc.robot.commands.WheelRadiusCharacterization WheelRadiusCharacterization}
      */
     public double[] getWheelPositions() {
         double[] wheelPositions = new double[4];
