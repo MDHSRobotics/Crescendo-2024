@@ -16,6 +16,7 @@ import frc.robot.subsystems.Swerve;
 /**
  * This command rotates the robot, and uses the gyro to calculate the average radius of the wheels.
  * This can be used in TunerConstants.kWheelRadiusInches to make our odometry more accurate.
+ * To be sure that the steer motor position does not cause any inaccuracies, run this as soon as you turn on the robot.
  * All credit goes to Team 6328 Mechanical Advantage for this command.
  * @see <a href="https://www.chiefdelphi.com/t/frc-6328-mechanical-advantage-2024-build-thread/442736/264#wheel-radius-characterization-7">Mechanical Advantage's explanation</a>
  * @see <a href="https://github.com/Mechanical-Advantage/RobotCode2024/blob/main/src/main/java/org/littletonrobotics/frc2024/commands/WheelRadiusCharacterization.java">Mechanical Advantage's code</a>
