@@ -40,7 +40,7 @@
   "goalEndState": {
     "velocity": 0,
     "rotation": -101.48000000000002,
-    "rotateFast": false
+    "rotateFast": true
   },
   "reversed": false,
   "folder": "New Note Backups",
