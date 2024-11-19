@@ -264,19 +264,19 @@ public class RobotContainer {
             s_Climb.startEnd(() -> s_Climb.runClimb(1, 1), () -> {})
         );
 
-        /*driverController.povLeft().whileTrue(
+        driverController.povLeft().whileTrue(
             s_Climb.startEnd(() -> s_Climb.runClimb(1, 0), () -> {})
-        );*/
+        );
 
-        /*driverController.povRight().whileTrue(
+        driverController.povRight().whileTrue(
             s_Climb.startEnd(() -> s_Climb.runClimb(0, 1), () -> {})
-        );*/
+        );
 
         // Run wheel radius calculation
         driverController.share().whileTrue(new WheelRadiusCharacterization(s_Swerve));        
 
         // Point wheels forward in preparation for SysId
-        driverController.touchpad().whileTrue(
+        /*driverController.touchpad().whileTrue(
             s_Swerve.applyRequest(() -> pointWheelsForward)
         );
 
@@ -284,7 +284,7 @@ public class RobotContainer {
         driverController.povLeft().whileTrue(s_Swerve.sysIdDynamic(Direction.kForward));
         driverController.povRight().whileTrue(s_Swerve.sysIdDynamic(Direction.kReverse));
         driverController.povUp().whileTrue(s_Swerve.sysIdQuasistatic(Direction.kForward));
-        driverController.povDown().whileTrue(s_Swerve.sysIdQuasistatic(Direction.kReverse));
+        driverController.povDown().whileTrue(s_Swerve.sysIdQuasistatic(Direction.kReverse));*/
     }
 
     private void configureOperatorButtonBindings() {
@@ -335,7 +335,7 @@ public class RobotContainer {
                     s_Shooter.startEnd(() -> 
                         s_Shooter.runShooter(-0.2, -0.2, 0.5), () ->
                         s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, 0))
-                    .withTimeout(0.05),
+                    .withTimeout(0.1),
 
                     // Angle the shooter
                     s_Shooter.run(() -> s_Shooter.setAngleFromLimelight(kAlliance))
@@ -362,7 +362,7 @@ public class RobotContainer {
                     s_Shooter.startEnd(() -> 
                         s_Shooter.runShooter(-0.2, -0.2, 0.5), () ->
                         s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, 0))
-                    .withTimeout(0.05),
+                    .withTimeout(0.1),
 
                     // Angle the shooter
                     s_Shooter.run(() -> s_Shooter.setAngleFromPose(s_Swerve.getPose(), kAlliance))
@@ -389,7 +389,7 @@ public class RobotContainer {
                     s_Shooter.startEnd(() -> 
                         s_Shooter.runShooter(-0.2, -0.2, 0.5), () ->
                         s_Shooter.runShooter(ShooterConstants.passingSpeed, ShooterConstants.passingSpeed, 0))
-                    .withTimeout(0.05),
+                    .withTimeout(0.1),
 
                     // Angle the shooter
                     s_Shooter.startEnd(() -> s_Shooter.setAngle(ShooterConstants.passingAngle, false), () -> {})

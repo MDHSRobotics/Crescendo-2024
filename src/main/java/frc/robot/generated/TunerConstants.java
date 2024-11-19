@@ -55,7 +55,7 @@ public class TunerConstants {
     // Theoretical free speed (m/s) at 12v applied output.
     // This was found on our swerve module website.
     // Our current free speed is MK4i, L3, Falcon 500, FOC: https://www.swervedrivespecialties.com/products/mk4i-swerve-module
-    public static final double kSpeedAt12VoltsMps = 5.27304;
+    public static final double kSpeedAt12VoltsMps = 3.0;
 
     // Every 1 rotation of the azimuth (swerve module) results in kCoupleRatio drive motor rotations
     // This is the inverse of the 1st stage of the drive motor, according to this link: https://v6.docs.ctr-electronics.com/en/stable/docs/api-reference/mechanisms/swerve/swerve-builder-api.html#additional-constants
