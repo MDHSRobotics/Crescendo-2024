@@ -72,7 +72,7 @@ public class Intake extends SubsystemBase{
         leftAngle.setIdleMode(IdleMode.kBrake);
         
         m_pidController = rightAngle.getPIDController();
-        m_pidController.setP(0.1);
+        m_pidController.setP(0.08);
 
         // CAN optimization: https://docs.revrobotics.com/brushless/spark-max/control-interfaces#periodic-status-frames
         intake.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 500);
