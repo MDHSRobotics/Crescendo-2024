@@ -8,13 +8,12 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N3;
-import frc.robot.generated.TunerConstants;
 
 public final class Constants {
     public static final double stickDeadband = 0.1;
 
     public class SwerveSpeedConstants {
-        public static final double MaxSpeed = TunerConstants.kSpeedAt12VoltsMps;
+        public static final double MaxSpeed = 3.0;
         // Max angular rate in radians per second.
         // https://www.chiefdelphi.com/t/how-to-calculate-the-max-free-speed-of-a-swerve/400741/3
         // https://study.com/skill/learn/converting-angular-speed-from-revolutions-per-second-to-radians-per-second-explanation.html#:~:text=Steps%20for%20Converting%20Angular%20Speed,r%20a%20d%201%20revolution%20.
