@@ -16,24 +16,24 @@
     },
     {
       "anchor": {
-        "x": 2.830912031534531,
-        "y": 6.737473786751582
+        "x": 2.597046336949817,
+        "y": 5.55
       },
       "prevControl": {
-        "x": 2.7809120315345313,
-        "y": 6.737473786751582
+        "x": 2.5470463369498173,
+        "y": 5.55
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Mid Pickup 2 End"
+      "linkedName": "Mid Pickup End"
     }
   ],
   "rotationTargets": [],
   "constraintZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 2.0,
-    "maxAcceleration": 2.0,
+    "maxVelocity": 5.0,
+    "maxAcceleration": 3.5,
     "maxAngularVelocity": 1080.0,
     "maxAngularAcceleration": 1440.0
   },
@@ -45,8 +45,8 @@
   "reversed": false,
   "folder": "New Note Backups",
   "previewStartingState": {
-    "rotation": -101.48000000000002,
+    "rotation": 180.0,
     "velocity": 0
   },
-  "useDefaultConstraints": false
+  "useDefaultConstraints": true
 }
