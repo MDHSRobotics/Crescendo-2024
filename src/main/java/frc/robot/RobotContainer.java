@@ -273,7 +273,7 @@ public class RobotContainer {
         );
 
         // Run wheel radius calculation
-        driverController.share().whileTrue(new WheelRadiusCharacterization(s_Swerve));        
+        //driverController.share().whileTrue(new WheelRadiusCharacterization(s_Swerve));        
 
         // Point wheels forward in preparation for SysId
         /*driverController.touchpad().whileTrue(
@@ -421,7 +421,7 @@ public class RobotContainer {
                     Commands.sequence(
                         // Tuck note into shooter
                         s_Shooter.startEnd(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), () -> {})
-                            .withTimeout(0.05),
+                            .withTimeout(0.1),
                         // Ramp up
                         s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.ampTopSpeed, ShooterConstants.ampBottomSpeed, 0), () -> {})
                             .withTimeout(1.0),

@@ -28,7 +28,13 @@
       "linkedName": "Mid Pickup 3 End"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.0,
+      "rotationDegrees": -152.59,
+      "rotateFast": true
+    }
+  ],
   "constraintZones": [],
   "eventMarkers": [],
   "globalConstraints": {
@@ -40,7 +46,7 @@
   "goalEndState": {
     "velocity": 0,
     "rotation": -152.59,
-    "rotateFast": false
+    "rotateFast": true
   },
   "reversed": false,
   "folder": "New Note Backups",
