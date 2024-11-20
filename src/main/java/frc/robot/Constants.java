@@ -105,12 +105,12 @@ public final class Constants {
         public static final double kBottomMeasureAngle = 23.0;
         public static final double kDegreesToRotationsConversion = -0.5839;
 
-        public static final double ampAngle = 52.0;
+        public static final double ampAngle = 55.0;
 
         public static final double passingAngle = 55.0;
 
-        public static final double ampTopSpeed = 0.175;
-        public static final double ampBottomSpeed = 0.525;
+        public static final double ampTopSpeed = 0.15;
+        public static final double ampBottomSpeed = 0.6;
         public static final double speakerSpeed = 0.7;
         public static final double passingSpeed = 0.4;
     }

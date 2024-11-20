@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.597046336949817,
-        "y": 5.55
+        "x": 2.6410247106208504,
+        "y": 5.394680503646721
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.647046336949817,
-        "y": 5.55
+        "x": 2.6910247106208502,
+        "y": 5.394680503646721
       },
       "isLocked": false,
       "linkedName": "Mid Pickup End"
@@ -34,18 +34,18 @@
   "globalConstraints": {
     "maxVelocity": 2.0,
     "maxAcceleration": 2.0,
-    "maxAngularVelocity": 1080.0,
-    "maxAngularAcceleration": 1440.0
+    "maxAngularVelocity": 2160.0,
+    "maxAngularAcceleration": 2880.0
   },
   "goalEndState": {
     "velocity": 0,
     "rotation": -101.48000000000002,
-    "rotateFast": false
+    "rotateFast": true
   },
   "reversed": false,
   "folder": "New Note Backups",
   "previewStartingState": {
-    "rotation": -101.48000000000002,
+    "rotation": 180.0,
     "velocity": 0
   },
   "useDefaultConstraints": false

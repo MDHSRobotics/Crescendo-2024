@@ -426,8 +426,8 @@ public class RobotContainer {
                         s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.ampTopSpeed, ShooterConstants.ampBottomSpeed, 0), () -> {})
                             .withTimeout(1.0),
                         // Shoot into amp
-                        s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.ampTopSpeed, ShooterConstants.ampBottomSpeed, -0.5), () -> {})
-                            .withTimeout(0.2)
+                        s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.ampTopSpeed, ShooterConstants.ampBottomSpeed, -0.4), () -> {})
+                            .withTimeout(0.5)
                     ),
                     // OR
                     // Speaker:

@@ -50,12 +50,6 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Mid Pickup 1.5"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
             "pathName": "Mid Pickup 2"
           }
         },

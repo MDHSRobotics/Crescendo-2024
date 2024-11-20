@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.83,
-        "y": 6.74
+        "x": 2.3351571027466376,
+        "y": 6.240174642511447
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.83,
-        "y": 6.74
+        "x": 1.3351571027466376,
+        "y": 6.240174642511447
       },
       "isLocked": false,
       "linkedName": "Mid Pickup 3 End"

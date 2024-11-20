@@ -16,36 +16,30 @@
     },
     {
       "anchor": {
-        "x": 2.83,
-        "y": 6.74
+        "x": 2.3351571027466376,
+        "y": 6.240174642511447
       },
       "prevControl": {
-        "x": 2.88,
-        "y": 6.74
+        "x": 2.3851571027466374,
+        "y": 6.240174642511447
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": "Mid Pickup 3 End"
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.0,
-      "rotationDegrees": -152.59,
-      "rotateFast": true
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 5.0,
     "maxAcceleration": 3.5,
-    "maxAngularVelocity": 1080.0,
-    "maxAngularAcceleration": 1440.0
+    "maxAngularVelocity": 2160.0,
+    "maxAngularAcceleration": 2880.0
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -152.59,
+    "rotation": -161.56505117707798,
     "rotateFast": true
   },
   "reversed": false,
@@ -54,5 +48,5 @@
     "rotation": -101.48000000000002,
     "velocity": 0
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }
