@@ -42,12 +42,6 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "Run intake only"
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "Mid Pickup 2"
@@ -56,7 +50,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Stop intake only"
+            "name": "Run intake only"
           }
         },
         {
@@ -68,7 +62,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Shoot note"
+            "name": "Stop intake only"
           }
         },
         {
@@ -80,7 +74,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Run intake only"
+            "name": "Shoot note"
           }
         },
         {
@@ -92,7 +86,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Stop intake"
+            "name": "Run intake only"
           }
         },
         {
@@ -104,13 +98,19 @@
         {
           "type": "named",
           "data": {
-            "name": "Shoot note"
+            "name": "Stop intake"
           }
         },
         {
           "type": "path",
           "data": {
             "pathName": "Mid Pickup 7"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot note"
           }
         }
       ]

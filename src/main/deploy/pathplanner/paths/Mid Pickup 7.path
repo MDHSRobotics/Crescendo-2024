@@ -3,12 +3,12 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.1452803707389156,
+        "x": 2.56,
         "y": 4.1
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.1952803707389155,
+        "x": 2.61,
         "y": 4.1
       },
       "isLocked": false,
@@ -16,11 +16,11 @@
     },
     {
       "anchor": {
-        "x": 2.54751761173901,
+        "x": 2.145,
         "y": 4.1
       },
       "prevControl": {
-        "x": 2.4975176117390103,
+        "x": 2.095,
         "y": 4.1
       },
       "nextControl": null,
@@ -28,30 +28,24 @@
       "linkedName": null
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.0,
-      "rotationDegrees": 180.0,
-      "rotateFast": false
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 5.0,
     "maxAcceleration": 3.5,
-    "maxAngularVelocity": 1080.0,
-    "maxAngularAcceleration": 1440.0
+    "maxAngularVelocity": 681.0,
+    "maxAngularAcceleration": 720.0
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0,
+    "rotation": 139.05,
     "rotateFast": false
   },
   "reversed": false,
   "folder": "New Note Backups",
   "previewStartingState": {
-    "rotation": 139.05,
+    "rotation": 180.0,
     "velocity": 0
   },
   "useDefaultConstraints": true
