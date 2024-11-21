@@ -80,7 +80,7 @@ public class Shooter extends SubsystemBase{
       
   private ShuffleboardTab mainTab = Shuffleboard.getTab("Main");
   private GenericEntry adjustment = 
-    mainTab.addPersistent("Adjustment Angle", 4)
+    mainTab.addPersistent("Adjustment Angle", 3)
     .withSize(2, 1)
     .getEntry();
   private GenericEntry atSpeed =

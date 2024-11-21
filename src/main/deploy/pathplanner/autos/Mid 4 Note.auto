@@ -36,6 +36,12 @@
           }
         },
         {
+          "type": "path",
+          "data": {
+            "pathName": "Mid Pickup 1.5"
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "Shoot note"
