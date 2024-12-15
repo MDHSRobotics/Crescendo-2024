@@ -227,8 +227,9 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
      * @see HeadingTargets
      * @see Alliance
      */
-    public Rotation2d getTargetDirection(HeadingTargets target, Alliance alliance) {
+    public Rotation2d getTargetDirection(HeadingTargets target) {
         Pose2d currentPose = getPose();
+        Alliance alliance = DriverStation.getAlliance().orElseThrow();
         Rotation2d targetYaw;
 
         // Calculate the yaw based on alliance and target

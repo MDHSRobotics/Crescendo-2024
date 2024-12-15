@@ -7,10 +7,8 @@ import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -33,9 +31,6 @@ import frc.robot.subsystems.Swerve.HeadingTargets;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-
-    // Robot Alliance
-    public Alliance kAlliance = DriverStation.getAlliance().orElse(Alliance.Blue);
     
     /* Controllers */
     private final CommandPS4Controller driverController = new CommandPS4Controller(0); 
@@ -189,7 +184,7 @@ public class RobotContainer {
                 s_Swerve.applyRequest(() -> driveFacingAngle
                     .withVelocityX(getVelocityX() * 0.5)
                     .withVelocityY(getVelocityY() * 0.5)
-                    .withTargetDirection(s_Swerve.getTargetDirection(HeadingTargets.SOURCE, kAlliance))
+                    .withTargetDirection(s_Swerve.getTargetDirection(HeadingTargets.SOURCE))
                 )
             )
             .until(this::driverAttempedToRotate)
@@ -204,7 +199,7 @@ public class RobotContainer {
                 s_Swerve.applyRequest(() -> driveFacingAngle
                     .withVelocityX(getVelocityX() * 0.5)
                     .withVelocityY(getVelocityY() * 0.5)
-                    .withTargetDirection(s_Swerve.getTargetDirection(HeadingTargets.STAGE_LEFT, kAlliance))
+                    .withTargetDirection(s_Swerve.getTargetDirection(HeadingTargets.STAGE_LEFT))
                 )
             )
             .until(this::driverAttempedToRotate)
@@ -218,7 +213,7 @@ public class RobotContainer {
                 s_Swerve.applyRequest(() -> driveFacingAngle
                     .withVelocityX(getVelocityX() * 0.5)
                     .withVelocityY(getVelocityY() * 0.5)
-                    .withTargetDirection(s_Swerve.getTargetDirection(HeadingTargets.STAGE_RIGHT, kAlliance))
+                    .withTargetDirection(s_Swerve.getTargetDirection(HeadingTargets.STAGE_RIGHT))
                 )
             )
             .until(this::driverAttempedToRotate)
@@ -232,7 +227,7 @@ public class RobotContainer {
                 s_Swerve.applyRequest(() -> driveFacingAngle
                     .withVelocityX(getVelocityX() * 0.5)
                     .withVelocityY(getVelocityY() * 0.5)
-                    .withTargetDirection(s_Swerve.getTargetDirection(HeadingTargets.STAGE_MIDDLE, kAlliance))
+                    .withTargetDirection(s_Swerve.getTargetDirection(HeadingTargets.STAGE_MIDDLE))
                 )
             )
             .until(this::driverAttempedToRotate)
@@ -322,7 +317,7 @@ public class RobotContainer {
                     s_Swerve.applyRequest(() -> driveFacingAngle
                         .withVelocityX(getVelocityX())
                         .withVelocityY(getVelocityY())
-                        .withTargetDirection(s_Swerve.getTargetDirection(HeadingTargets.SPEAKER, kAlliance)))
+                        .withTargetDirection(s_Swerve.getTargetDirection(HeadingTargets.SPEAKER)))
                 ),
                 s_Shooter.aimShooterWithPoseCommand(s_Swerve::getPose)
             ).until(this::driverAttempedToRotate)
@@ -338,7 +333,7 @@ public class RobotContainer {
                     s_Swerve.applyRequest(() -> driveFacingAngle
                     .withVelocityX(getVelocityX()) // Drive forward with negative Y (forward)
                     .withVelocityY(getVelocityY()) // Drive left with negative X (left)
-                    .withTargetDirection(s_Swerve.getTargetDirection(HeadingTargets.AMP_AREA, kAlliance)))
+                    .withTargetDirection(s_Swerve.getTargetDirection(HeadingTargets.AMP_AREA)))
                 ),
                 s_Shooter.aimShooterWithAngleCommand(ShooterConstants.passingAngle)
             ).until(this::driverAttempedToRotate)

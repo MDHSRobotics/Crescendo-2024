@@ -66,7 +66,7 @@ public class Robot extends TimedRobot {
 
         // Set the limelight pipeline.
         // In Orange County Regionals, the lights make Apriltags hard to see, so we may change the front to use a separate pipeline.
-        // LimelightHelpers.setPipelineIndex("limelight-front", m_robotContainer.kAlliance == Alliance.Blue ? 1 : 0);
+        // LimelightHelpers.setPipelineIndex("limelight-front", DriverStation.getAlliance().orElseThrow() == Alliance.Blue ? 1 : 0);
         LimelightHelpers.setPipelineIndex("limelight-front", 0);
         LimelightHelpers.setPipelineIndex("limelight-back", 0);
 
@@ -104,12 +104,9 @@ public class Robot extends TimedRobot {
 
     @Override
     public void disabledExit() {
-        // Update the alliance
-        m_robotContainer.kAlliance = DriverStation.getAlliance().get();
-
         // Set the priority tag depending on alliance. This means we will get tx and ty from this tag, but limelight pose measurements from all tags.
         // https://docs.limelightvision.io/docs/docs-limelight/software-change-log#new-feature-priority-id-nt-key-priorityid
-        if (m_robotContainer.kAlliance == Alliance.Blue) {
+        if (DriverStation.getAlliance().orElseThrow() == Alliance.Blue) {
             LimelightHelpers.setPriorityTagID("limelight-front", 7);
         } else {
             LimelightHelpers.setPriorityTagID("limelight-front", 4);
@@ -145,7 +142,7 @@ public class Robot extends TimedRobot {
         CommandScheduler.getInstance().cancelAll();
 
         // Set the starting perspective for driving.
-        m_robotContainer.setOperatorPerspective(Rotation2d.fromDegrees(m_robotContainer.kAlliance == Alliance.Blue ? 0 : 180));
+        m_robotContainer.setOperatorPerspective(Rotation2d.fromDegrees(DriverStation.getAlliance().orElseThrow() == Alliance.Blue ? 0 : 180));
         
         SignalLogger.start();
     }
@@ -172,7 +169,7 @@ public class Robot extends TimedRobot {
         m_robotContainer.setStartingPosition(new Pose2d(15.15, 5.55, Rotation2d.fromDegrees(180)));
 
         // Set the starting perspective for driving.
-        m_robotContainer.setOperatorPerspective(Rotation2d.fromDegrees(m_robotContainer.kAlliance == Alliance.Blue ? 0 : 180));
+        m_robotContainer.setOperatorPerspective(Rotation2d.fromDegrees(DriverStation.getAlliance().orElseThrow() == Alliance.Blue ? 0 : 180));
     }
 
     /**
