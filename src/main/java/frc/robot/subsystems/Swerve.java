@@ -234,48 +234,48 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         // Calculate the yaw based on alliance and target
         if (alliance == Alliance.Blue) {
             switch (target) {
-            case SPEAKER:
-                targetYaw = Aiming.getYaw(PoseConstants.kBlueSpeaker2DPosition, currentPose);
-                break;
-            case AMP_AREA:
-                targetYaw = Aiming.getYaw(PoseConstants.kBlueAmp2DPosition, currentPose);
-                break;
-            case AMP_SHOOTING:
-                targetYaw = PoseConstants.facingAmp;
-                break;
-            case STAGE_LEFT:
-                targetYaw = PoseConstants.facingBlueStageLeft;
-                break;
-            case STAGE_RIGHT:
-                targetYaw = PoseConstants.facingBlueStageRight;
-                break;
-            case STAGE_MIDDLE:
-                targetYaw = PoseConstants.facingBlueStageMiddle;
-                break;
-            default: // SOURCE:
-                targetYaw = PoseConstants.behindBlueSource;
+                case SPEAKER:
+                    targetYaw = Aiming.getYaw(PoseConstants.kBlueSpeaker2DPosition, currentPose);
+                    break;
+                case AMP_AREA:
+                    targetYaw = Aiming.getYaw(PoseConstants.kBlueAmp2DPosition, currentPose);
+                    break;
+                case AMP_SHOOTING:
+                    targetYaw = PoseConstants.facingAmp;
+                    break;
+                case STAGE_LEFT:
+                    targetYaw = PoseConstants.facingBlueStageLeft;
+                    break;
+                case STAGE_RIGHT:
+                    targetYaw = PoseConstants.facingBlueStageRight;
+                    break;
+                case STAGE_MIDDLE:
+                    targetYaw = PoseConstants.facingBlueStageMiddle;
+                    break;
+                default: // SOURCE:
+                    targetYaw = PoseConstants.behindBlueSource;
             }
         } else { // Red alliance:
             switch (target) {
-            case SPEAKER:
-                targetYaw = Aiming.getYaw(PoseConstants.kRedSpeaker2DPosition, currentPose);
-                break;
-            case AMP_AREA:
-                targetYaw = Aiming.getYaw(PoseConstants.kRedAmp2DPosition, currentPose);
-                break;
-            case AMP_SHOOTING:
-                targetYaw = PoseConstants.facingAmp;
-            case STAGE_LEFT:
-                targetYaw = PoseConstants.facingRedStageLeft;
-                break;
-            case STAGE_RIGHT:
-                targetYaw = PoseConstants.facingRedStageRight;
-                break;
-            case STAGE_MIDDLE:
-                targetYaw = PoseConstants.facingRedStageMiddle;
-                break;
-            default: // SOURCE:
-                targetYaw = PoseConstants.behindRedSource;
+                case SPEAKER:
+                    targetYaw = Aiming.getYaw(PoseConstants.kRedSpeaker2DPosition, currentPose);
+                    break;
+                case AMP_AREA:
+                    targetYaw = Aiming.getYaw(PoseConstants.kRedAmp2DPosition, currentPose);
+                    break;
+                case AMP_SHOOTING:
+                    targetYaw = PoseConstants.facingAmp;
+                case STAGE_LEFT:
+                    targetYaw = PoseConstants.facingRedStageLeft;
+                    break;
+                case STAGE_RIGHT:
+                    targetYaw = PoseConstants.facingRedStageRight;
+                    break;
+                case STAGE_MIDDLE:
+                    targetYaw = PoseConstants.facingRedStageMiddle;
+                    break;
+                default: // SOURCE:
+                    targetYaw = PoseConstants.behindRedSource;
             }
         }
     

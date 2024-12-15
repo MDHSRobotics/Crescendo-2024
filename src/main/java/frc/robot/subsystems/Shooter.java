@@ -3,7 +3,8 @@ package frc.robot.subsystems;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 
-import java.util.Map;
+import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.SparkPIDController;
@@ -11,13 +12,14 @@ import com.revrobotics.CANSparkBase.IdleMode;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
@@ -39,8 +41,6 @@ public class Shooter extends SubsystemBase{
 
   private RelativeEncoder m_angleEncoder;
 
-  private final DigitalInput m_limitSwitch = new DigitalInput(ShooterConstants.kLimitSwitchID);
-
   private double m_lastAngle = 23;
 
   /* Shuffleboard Logging */
@@ -53,17 +53,6 @@ public class Shooter extends SubsystemBase{
   private GenericEntry angleDegrees = list.add("Angle Degrees", 0.0).getEntry();
   private GenericEntry tx = list.add("Limelight TX", 0.0).getEntry();
   private GenericEntry ty = list.add("Limelight TY", 0.0).getEntry();
-
-  private GenericEntry shootSpeedTopAdjustment =
-    tab.addPersistent("Top Shooter Speed Multiplier", 1)
-      .withWidget(BuiltInWidgets.kNumberSlider)
-      .withProperties(Map.of("min", 0, "max", 1))
-      .getEntry();
-  private GenericEntry shootSpeedBotAdjustment =
-    tab.addPersistent("Bottom Shooter Speed Multiplier", 1)
-      .withWidget(BuiltInWidgets.kNumberSlider)
-      .withProperties(Map.of("min", 0, "max", 1))
-      .getEntry();
 
   private GenericEntry calculatedDistance =
     tab.add("Calculated distance", 0.0)
@@ -111,6 +100,8 @@ public class Shooter extends SubsystemBase{
     angle = new CANSparkFlex(ShooterConstants.kAngleID, MotorType.kBrushless);
     feeder = new CANSparkMax(ShooterConstants.kFeederID, MotorType.kBrushless);
 
+    topShooter.setInverted(true);
+
     m_angleEncoder = angle.getEncoder();
 
     m_pidController = angle.getPIDController();
@@ -138,28 +129,9 @@ public class Shooter extends SubsystemBase{
     feeder.setOpenLoopRampRate(0.1);
   }
 
-  public void runShooter(double topPower, double bottomPower, double feed){
-    topShooter.set(-topPower * shootSpeedTopAdjustment.getDouble(1.0));
-    bottomShooter.set(bottomPower * shootSpeedBotAdjustment.getDouble(1.0));
-    feeder.set(-feed);
-  }
-
-  /** Old method, kept only for old auto */
-  public void runFeed(double power) {
-    feeder.set(-power);
-  }
-
-  public void rotateShooter(double angleSpeed){
-    angle.set(angleSpeed);
-
-    // Update the calculated angle so it doesn't appear to be aiming
-    calculatedAngle.setDouble(0);
-    calculatedRotations.setDouble(0);
-  }
-
   //adjust the angle of the shooter
-  public void setAngleFromLimelight(Alliance alliance) {
-    if(tagInSight(alliance)){
+  public void setAngleFromLimelight() {
+    if(tagInSight()){
       // calculate the distance
       double horizontalDistance = Aiming.calculateDistance(
           LimelightConstants.kLimelightLensHeightInches, 
@@ -187,8 +159,9 @@ public class Shooter extends SubsystemBase{
     * Angles the shooter to a target based on the given position.
     * @param robotPose The current robot pose given by the swerve subsystem
     */
-  public void setAngleFromPose(Pose2d robotPose, Alliance alliance) {
+  public void setAngleFromPose(Pose2d robotPose) {
     double targetPitch;
+    Alliance alliance = DriverStation.getAlliance().orElseThrow();
 
     // Calculate the angle based on alliance
     if (alliance == Alliance.Blue) { // If blue alliance:
@@ -222,19 +195,12 @@ public class Shooter extends SubsystemBase{
     }
   }
 
-  public void resetEncoders(){
-    angle.getEncoder().setPosition(0);
-  }
-
-  public double getAngleDegrees() {
-    return angleDegrees.getDouble(0.0);
-  }
-
   public boolean isAtAngle(){
     return Aiming.approximatelyEqual(calculatedRotations.getDouble(0), angle.getEncoder().getPosition(), 1.0);
   }
 
-  public boolean tagInSight(Alliance alliance) {
+  public boolean tagInSight() {
+    Alliance alliance = DriverStation.getAlliance().orElseThrow();
     double tagID = LimelightHelpers.getFiducialID("limelight-front");
     if (alliance == Alliance.Blue && tagID == 7) {
       return true;
@@ -245,16 +211,167 @@ public class Shooter extends SubsystemBase{
     }
   }
 
-  public boolean isReady(Alliance alliance) {
-    return tagInSight(alliance) && atSpeed.getBoolean(false) && isAtAngle.getBoolean(false) && txCorrect.getBoolean(false);
+  public boolean isReady() {
+    return tagInSight() && atSpeed.getBoolean(false) && isAtAngle.getBoolean(false) && txCorrect.getBoolean(false);
   }
 
-  public boolean getLimitSwitch() {
-    return m_limitSwitch.get();
+  /* Instance Command Factory Methods
+   * These methods allow us to create single-subsystem commands directly in the subsystems, instead of placing them in RobotContainer.
+   * https://docs.wpilib.org/en/latest/docs/software/commandbased/organizing-command-based.html#instance-command-factory-methods
+  */
+
+  /**
+   * This command turns off the flywheels and rollers, and lowers the shooter to its bottom position.
+   */
+  public Command disableShooterCommand() {
+    return this.runOnce(() -> {
+      topShooter.set(0);
+      bottomShooter.set(0);
+      feeder.set(0);
+      setAngle(ShooterConstants.kBottomMeasureAngle, false);
+    })
+    .andThen(Commands.idle(this))
+    .withName("Disable Shooter");
+  }
+
+  /**
+   * This command lowers the shooter to its bottom position and runs the feeder.
+   * <p>The shooter must lower and run the feeder, or else the note will get stuck in the robot.
+   */
+  public Command intakeNoteCommand() {
+    return this.runOnce(() -> {
+      topShooter.set(0);
+      bottomShooter.set(0);
+      feeder.set(0.6);
+      setAngle(ShooterConstants.kBottomMeasureAngle, false);
+    })
+    .andThen(Commands.idle(this));
+  }
+
+  /**
+   * This command runs the shooter in reverse so the note is away from the flywheel, and then spins up the flywheels.
+   * The shooter must run in reverse first, or else the note will fly out when the flywheels spin up.
+   * <p> This is meant to be used in other commands.
+   */
+  public Command spinUpFlywheelsCommand() {
+    return this.startEnd(() -> {
+        topShooter.set(-0.2);
+        bottomShooter.set(-0.2);
+        feeder.set(-0.5);
+      }, () -> {
+        topShooter.set(ShooterConstants.speakerSpeed);
+        bottomShooter.set(ShooterConstants.speakerSpeed);
+        feeder.set(0);
+      })
+      .withTimeout(0.1);
+  }
+
+  /**
+   * This command spins up the flywheels, and then it constantly calculates the angle to the speaker using the limelight.
+   */
+  public Command aimShooterCommand() {
+    return Commands.sequence(
+      spinUpFlywheelsCommand(),
+      this.run(() -> {
+        setAngleFromLimelight();
+      })
+    )
+    .withName("Aim Shooter using Limelight");
+  }
+
+  /**
+   * This command spins up the flywheels, and then it constantly calculates the angle to the speaker using the supplied robot position.
+   * <p>You must pass a pose supplier method into this command instead of a single pose, because the command needs to get the pose every update.
+   * @param poseSupplier A method that returns the robot position, ideally s_Swerve.getPose().
+   */
+  public Command aimShooterWithPoseCommand(Supplier<Pose2d> poseSupplier) {
+    return Commands.sequence(
+      spinUpFlywheelsCommand(),
+      this.run(() -> {
+        setAngleFromPose(poseSupplier.get());
+      })
+    )
+    .withName("Aim Shooter using Pose");
+  }
+
+  /**
+   * This command spins up the flywheels, and then it sets the shooter to the specified angle.
+   * @param angle The angle from the horizontal (the floor) to the shooter.
+   */
+  public Command aimShooterWithAngleCommand(double angle) {
+    return Commands.sequence(
+      spinUpFlywheelsCommand(),
+      this.runOnce(() -> {
+        setAngle(angle, false);
+      }),
+      Commands.idle(this)
+    )
+    .withName("Aim Shooter at " + angle + "degrees");
+  }
+
+  /**
+   * This command runs the shooter to shoot the note for 0.25 seconds.
+   */
+  public Command shootNoteCommand() {
+    return this.runOnce(() -> {
+      topShooter.set(ShooterConstants.speakerSpeed);
+      bottomShooter.set(ShooterConstants.speakerSpeed);
+      feeder.set(0.7);
+    })
+    .andThen(Commands.idle(this))
+    .withTimeout(0.25)
+    .withName("Run the shooter");
+  }
+
+  /**
+   * This command allows the operator to manually angle the shooter.
+   * <p>You must pass a power supplier method into this command instead of a single power, because the command needs to get the power every update.
+   * @param rotationPowerSupplier A method that returns the rotation power, ideally a controller's joystick Y axis.
+   */
+  public Command manualAimCommand(DoubleSupplier rotationPowerSupplier) {
+    return this.run(() -> {
+      angle.set(rotationPowerSupplier.getAsDouble());
+
+      // Update the calculated angle so it doesn't appear to be aiming
+      calculatedAngle.setDouble(0);
+      calculatedRotations.setDouble(0);
+    })
+    .withName("Manual Shooter Aim");
+  }
+
+  /**
+   * This command allows the operator to manually shoot a note.
+   * For the sake of easier demos, this command does not return the shooter to the bottom position.
+   */
+  public Command manualShootCommand() {
+    return Commands.sequence(
+      spinUpFlywheelsCommand(),
+      shootNoteCommand(),
+      this.runOnce(() -> {
+        topShooter.set(0);
+        bottomShooter.set(0);
+        feeder.set(0);
+      }),
+      Commands.idle(this)
+    );
+  }
+
+  /**
+   * This command lowers the shooter to its bottom position and runs the feeder in reverse to eject a note.
+   * <p>The shooter must lower and run the feeder, or else the note will remain stuck in the robot.
+   */
+  public Command ejectNoteCommand() {
+    return this.runOnce(() -> {
+      topShooter.set(0);
+      bottomShooter.set(0);
+      feeder.set(-1);
+      setAngle(ShooterConstants.kBottomMeasureAngle, false);
+    })
+    .andThen(Commands.idle(this));
   }
 
   /** Shuffleboard logging. We avoid overriding periodic() because it runs even when the robot is disabled. */
-  public void logData(Alliance alliance) {
+  public void logData() {
     // Listed data
     bottomShooterSpeed.setDouble(bottomShooter.get());
     topShooterSpeed.setDouble(topShooter.get());
@@ -267,8 +384,8 @@ public class Shooter extends SubsystemBase{
     // Widget data
     atSpeed.setBoolean(topShooter.getEncoder().getVelocity() < -3800);
     isAtAngle.setBoolean(isAtAngle());
-    seeTag.setBoolean(tagInSight(alliance));
+    seeTag.setBoolean(tagInSight());
     txCorrect.setBoolean(Aiming.approximatelyEqual(LimelightHelpers.getTX("limelight-front"), 0, 3));
-    ready.setBoolean(isReady(alliance));
+    ready.setBoolean(isReady());
   }
 }

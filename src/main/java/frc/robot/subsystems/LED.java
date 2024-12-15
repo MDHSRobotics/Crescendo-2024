@@ -65,52 +65,14 @@ public class LED extends SubsystemBase{
      * @param b The blue value (0-255)
      */
     public void setColor(int r, int g, int b){
-        //System.out.println("Target Color: (r: "+r+" g: "+g+" b: "+b+")");
         for (int i = 0; i < m_ledBuffer.getLength(); i++) {
             // Sets the specified LED to the RGB values for red
             m_ledBuffer.setRGB(i, r, g, b);
-         }
+        }
         m_led.setData(m_ledBuffer);
         m_led.start();
 
         color.setBoolean(true);
-    }
-
-    /**
-     * Blinks the lights with the set color
-     * @param r The red value (0-255)
-     * @param g The green value (0-255)
-     * @param b The blue value (0-255)
-     * @param time The total cycle time -start of on to end of off- in ms
-     */
-    public void blink(int r, int g, int b, double time){
-        int br = r * (System.currentTimeMillis() % time > time/2 ? 1 : 0);
-        int bg = g * (System.currentTimeMillis() % time > time/2 ? 1 : 0);
-        int bb = b * (System.currentTimeMillis() % time > time/2 ? 1 : 0);
-        setColor(br,bg,bb);
-    }
-
-    /**
-     * Sets the lights to a shifting rainbow.
-     * Good to use for a default command
-     */
-    public void rainbow() {
-        
-        // For every pixel
-        for (int i = 0; i < m_ledBuffer.getLength(); i++) {
-          // Calculate the hue - hue is easier for rainbows because the color
-          // shape is a circle so only one value needs to precess
-          final int hue = (m_rainbowFirstPixelHue + (i * 180 / m_ledBuffer.getLength())) % 180;
-          // Set the value
-          m_ledBuffer.setHSV(i, hue, 255, 128);
-        }
-        // Increase by to make the rainbow "move"
-        m_rainbowFirstPixelHue += 3;
-        // Check bounds
-        m_rainbowFirstPixelHue %= 180;
-
-        m_led.setData(m_ledBuffer);
-        m_led.start();
     }
     
     public void redShift() {
@@ -133,4 +95,67 @@ public class LED extends SubsystemBase{
         toggleManualColorControl.setName("Toggle Manual Control: Enabled");
     }
 
+    /* Instance Command Factory Methods
+    * These methods allow us to create single-subsystem commands directly in the subsystems, instead of placing them in RobotContainer.
+    * https://docs.wpilib.org/en/latest/docs/software/commandbased/organizing-command-based.html#instance-command-factory-methods
+    */
+
+    /**
+     * This command makes the LEDs light up in a moving rainbow.
+     */
+    public Command rainbowCommand() {
+      return this.run(() -> {
+        // For every pixel
+        for (int i = 0; i < m_ledBuffer.getLength(); i++) {
+          // Calculate the hue - hue is easier for rainbows because the color
+          // shape is a circle so only one value needs to precess
+          final int hue = (m_rainbowFirstPixelHue + (i * 180 / m_ledBuffer.getLength())) % 180;
+          // Set the value
+          m_ledBuffer.setHSV(i, hue, 255, 128);
+        }
+        // Increase by to make the rainbow "move"
+        m_rainbowFirstPixelHue += 3;
+        // Check bounds
+        m_rainbowFirstPixelHue %= 180;
+
+        m_led.setData(m_ledBuffer);
+        m_led.start();
+      })
+      .andThen(Commands.idle(this))
+      .withName("Rainbow");
+    }
+
+    /**
+     * This command sets the color of the lights until the command is interrupted.
+     * <p>Since the command is easily reusable, it's better to name the command in RobotContainer wherever it is used.
+     * @param r The red value (0-255)
+     * @param g The green value (0-255)
+     * @param b The blue value (0-255)
+     */
+    public Command setColorCommand(int r, int g, int b) {
+      return this.runOnce(() -> setColor(r, g, b))
+      .andThen(Commands.idle(this));
+    }
+
+    /**
+     * This command blinks the LEDs a certain color at a certain interval until interrupted.
+     * @param r The red value (0-255)
+     * @param g The green value (0-255)
+     * @param b The blue value (0-255)
+     * @param time The total cycle time -start of on to end of off- in ms
+     */
+    public Command blinkCommand(int r, int g, int b, double time) {
+      return this.run(() -> {
+        long currentTime = System.currentTimeMillis();
+        int br = r;
+        int bg = g;
+        int bb = b;
+        if (currentTime % time > time/2) {
+          br = 0;
+          bg = 0;
+          bb = 0;
+        }
+        setColor(br,bg,bb);
+      });
+    }
 }

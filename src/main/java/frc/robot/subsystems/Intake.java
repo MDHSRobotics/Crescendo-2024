@@ -13,11 +13,16 @@ import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.IntakeConstants;
-import frc.utils.LimelightHelpers;
 
 public class Intake extends SubsystemBase{
+    public enum IntakePositions {
+        BOTTOM,
+        MID
+    }
 
     private CANSparkFlex intake;
     private CANSparkMax conveyor;
@@ -32,10 +37,9 @@ public class Intake extends SubsystemBase{
     /* Shuffleboard Logging */
     private ShuffleboardTab tab = Shuffleboard.getTab("Intake");
 
-    private GenericEntry noteInSight = tab.add("Note In Sight", false).getEntry();
-
     private ShuffleboardLayout list = tab.getLayout("Intake Info", BuiltInLayouts.kList).withSize(3, 4);
-    private GenericEntry angleRotations = list.add("Angle Rotations", 0.0).getEntry();
+    private GenericEntry leftAngleRotations = list.add("Left Angle Rotations", 0.0).getEntry();
+    private GenericEntry rightAngleRotations = list.add("Right Angle Rotations", 0.0).getEntry();
     private GenericEntry intakeSpeed = list.add("Intake Speed", 0.0).getEntry();
     private GenericEntry conveyorSpeed = list.add("Conveyer Speed", 0.0).getEntry();
 
@@ -45,19 +49,9 @@ public class Intake extends SubsystemBase{
     private GenericEntry intakeBottomRotations = tab.addPersistent("Bottom Rotations", 34.0)
         .withSize(2, 1)
         .getEntry();
-    private GenericEntry intakeMidRotations = tab.addPersistent("Mid Rotations", 33.0)
-        .withSize(2, 1)
-        .getEntry();
     private GenericEntry intakeEjectRotations = tab.addPersistent("Eject Rotations", 30.0)
         .withSize(2, 1)
         .getEntry();
-    public GenericEntry intakeAmpRotations = tab.addPersistent("Amp Rotations", 1.0)
-        .withSize(2, 1)
-        .getEntry();
-    public GenericEntry ampFastSpitPower = tab.addPersistent("Amp Fast Spit Power", -0.2)
-        .withSize(3, 1)
-        .getEntry();    
-    
 
     public Intake(){
         intake = new CANSparkFlex(IntakeConstants.kIntakeID, MotorType.kBrushless);
@@ -100,57 +94,80 @@ public class Intake extends SubsystemBase{
         conveyor.setInverted(true);
     }
 
-    public void runIntake(double intakeSpeed, double conveyerSpeed) {
-        intake.set(intakeSpeed);
-        conveyor.set(conveyerSpeed);
+    /* Instance Command Factory Methods
+    * These methods allow us to create single-subsystem commands directly in the subsystems, instead of placing them in RobotContainer.
+    * https://docs.wpilib.org/en/latest/docs/software/commandbased/organizing-command-based.html#instance-command-factory-methods
+    */
+
+    /**
+    * This command turns off the rollers and raises the intake to its top position.
+    */
+    public Command disableIntakeCommand(boolean returnToTopPosition) {
+        Command disableIntakeCommand;
+        if (returnToTopPosition) {
+            disableIntakeCommand = this.runOnce(() -> {
+                intake.set(0);
+                conveyor.set(0);
+                m_pidController.setReference(intakeTopRotations.getDouble(0), CANSparkMax.ControlType.kPosition);
+            });
+        } else {
+            disableIntakeCommand = this.runOnce(() -> {
+                intake.set(0);
+                conveyor.set(0);
+            });
+        }
+
+        disableIntakeCommand.andThen(Commands.idle(this))
+        .withName("Disable Intake");
+
+        return disableIntakeCommand;
     }
 
-    public void ampFastSpit() {
-        intake.set(ampFastSpitPower.getDouble(0));
-        conveyor.set(ampFastSpitPower.getDouble(0));
+    /**
+    * This command enables the rollers and raises the intake to the desired position.
+    */
+    public Command intakeNoteCommand(IntakePositions position) {
+        Command intakeNoteCommand;
+        switch (position) {
+            case BOTTOM:
+                intakeNoteCommand = this.runOnce(() -> {
+                    intake.set(1);
+                    conveyor.set(1);
+                    m_pidController.setReference(intakeBottomRotations.getDouble(0), CANSparkMax.ControlType.kPosition);
+                });
+                break;
+            default: // MID:
+                intakeNoteCommand = this.runOnce(() -> {
+                    intake.set(1);
+                    conveyor.set(1);
+                    m_pidController.setReference(intakeBottomRotations.getDouble(0), CANSparkMax.ControlType.kPosition);
+                });
+        }
+
+        intakeNoteCommand.andThen(Commands.idle(this));
+        
+        return intakeNoteCommand;
     }
 
-    public void rotateIntake(double angleSpeed) {
-        rightAngle.set(angleSpeed);
-    }
-
-    public void topPosition(){
-        m_pidController.setReference(intakeTopRotations.getDouble(0), CANSparkMax.ControlType.kPosition);
-    }
-
-    public void bottomPosition(){
-        m_pidController.setReference(intakeBottomRotations.getDouble(0), CANSparkMax.ControlType.kPosition);
-    }
-
-    public void midPosition(){
-        m_pidController.setReference(intakeMidRotations.getDouble(0), CANSparkMax.ControlType.kPosition);
-    }
-
-    public void ejectPosition() {
-        m_pidController.setReference(intakeEjectRotations.getDouble(0), CANSparkMax.ControlType.kPosition);
-    }
-
-    public void ampPosition() {
-        m_pidController.setReference(intakeAmpRotations.getDouble(0), CANSparkMax.ControlType.kPosition);
-    }
-    
-    
-    public void resetEncoders(){
-        m_leftAngleEncoder.setPosition(0);
-        m_rightAngleEncoder.setPosition(0);
-    }
-
-    public boolean noteInSight() {
-        boolean noteIsInSight = LimelightHelpers.getDetectorClass("limelight-back").equals("note");
-        return noteIsInSight;
+    /**
+     * This command runs the rollers in reverse and raises the intake to the eject position (about halfway).
+     * This is occasionally needed when the note gets stuck.
+     */
+    public Command ejectNoteCommand() {
+        return this.runOnce(() -> {
+            intake.set(-1);
+            conveyor.set(-1);
+            m_pidController.setReference(intakeEjectRotations.getDouble(0), CANSparkMax.ControlType.kPosition);
+        })
+        .andThen(Commands.idle(this));
     }
 
     /** Shuffleboard logging. We avoid overriding periodic() because it runs even when the robot is disabled. */
     public void logData() {
         // Subsystem data
-        angleRotations.setDouble(rightAngle.getEncoder().getPosition());
+        leftAngleRotations.setDouble(m_leftAngleEncoder.getPosition());
+        rightAngleRotations.setDouble(m_rightAngleEncoder.getPosition());
         intakeSpeed.setDouble(intake.get());
         conveyorSpeed.setDouble(conveyor.get());
-        noteInSight.setBoolean(noteInSight());
     }
 }

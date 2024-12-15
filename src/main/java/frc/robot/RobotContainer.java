@@ -15,8 +15,6 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -25,6 +23,7 @@ import frc.robot.Constants.*;
 import frc.robot.commands.WheelRadiusCharacterization;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
+import frc.robot.subsystems.Intake.IntakePositions;
 import frc.robot.subsystems.Swerve.HeadingTargets;
 
 /**
@@ -75,14 +74,10 @@ public class RobotContainer {
     /* Auto Chooser */
     private final SendableChooser<Command> autoChooser;
 
-    /* Robot States */
-    private boolean m_isAmp = false;
-
     /* Robot State Triggers */
-    private final Trigger shooterLimitSwitchPressed = new Trigger(s_Shooter::getLimitSwitch);
     private final Trigger climbLimitSwitchesPressed = new Trigger(s_Climb::getLimitSwitches);
-    private final Trigger tagIsInSight = new Trigger(() -> s_Shooter.tagInSight(kAlliance));
-    private final Trigger shooterIsReady = new Trigger(() -> s_Shooter.isReady(kAlliance));
+    private final Trigger tagIsInSight = new Trigger(() -> s_Shooter.tagInSight());
+    private final Trigger shooterIsReady = new Trigger(() -> s_Shooter.isReady());
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
@@ -98,6 +93,7 @@ public class RobotContainer {
                         .withVelocityY(getVelocityY()) // Left and right speed
                         .withRotationalRate(getRotationalRate()) // Rotation speed
                     )
+                    .withName("Default Drive")
             );
         }
 
@@ -112,48 +108,26 @@ public class RobotContainer {
 
         s_Swerve.registerTelemetry(logger::telemeterize);
 
-        s_Shooter.setDefaultCommand(
-            // Stop any shooter rotation, turn off the shooter, and return to bottom position.
-            Commands.sequence(
-                s_Shooter.runOnce(() -> s_Shooter.rotateShooter(0)),
-                s_Shooter.runOnce(() -> s_Shooter.runShooter(0, 0, 0)),
-                s_Shooter.startEnd(() -> s_Shooter.setAngle(ShooterConstants.kBottomMeasureAngle, false), () -> {})
-            )
-        );
+        s_Shooter.setDefaultCommand(s_Shooter.disableShooterCommand());
 
-        s_Intake.setDefaultCommand(
-            // Stop any intake rotation, turn off intake, and return to top position.
-            Commands.sequence(
-                s_Intake.runOnce(() -> s_Intake.rotateIntake(0)),
-                s_Intake.runOnce(() -> s_Intake.runIntake(0, 0)),
-                s_Intake.startEnd(() -> s_Intake.topPosition(), () -> {})
-            )
-        );
+        s_Intake.setDefaultCommand(s_Intake.disableIntakeCommand(true));
 
-        s_Led.setDefaultCommand(
-            s_Led.run(()-> s_Led.rainbow())
-        );
+        s_Led.setDefaultCommand(s_Led.rainbowCommand());
 
-        s_Climb.setDefaultCommand(
-            s_Climb.startEnd(() -> s_Climb.runClimb(0,0), () -> {})
-        );
+        s_Climb.setDefaultCommand(s_Climb.runClimbCommand(0, 0).withName("Disable Climb"));
 
 
         /* Trigger-Activated Commands */
-        // LEDs glow orange for 3 secs whenever a note is picked up.
-        shooterLimitSwitchPressed.onTrue(
-            s_Led.startEnd(() -> s_Led.setColor(255, 20, 0), () -> {})
-                .withTimeout(3)
-        );
-
         // While a tag is in sight but the shooter is not ready, blink the LEDs red
         tagIsInSight.and(shooterIsReady.negate()).whileTrue(
-            s_Led.run(() -> s_Led.blink(255, 0, 0, 300))
+            s_Led.blinkCommand(255, 0, 0, 300)
+            .withName("Blink LEDs Red")
         );
 
         // When the shooter is ready, turn the LEDs green
         shooterIsReady.whileTrue(
-            s_Led.startEnd(() -> s_Led.setColor(0, 255, 0), () -> {})
+            s_Led.setColorCommand(0, 255, 0)
+            .withName("Green LEDs")
         );
 
         // Configure the button bindings
@@ -194,6 +168,7 @@ public class RobotContainer {
 
         driverController.options().onTrue(
             s_Swerve.runOnce(() -> s_Swerve.seedFieldRelative())
+            .withName("Reset Robot Perspective")
         );
 
         // Slow mode
@@ -203,19 +178,22 @@ public class RobotContainer {
                 .withVelocityY(getVelocityY() * 0.5)
                 .withRotationalRate(getRotationalRate() * 0.5)
             )
+            .withName("Drive Slow")
         );
         
         // Source aiming
         driverController.triangle().onTrue(
             Commands.sequence(
                 // Reset the PID controller
-                s_Swerve.runOnce(() -> driveFacingAngle.HeadingController.reset()),
+                s_Swerve.runOnce(driveFacingAngle.HeadingController::reset),
                 s_Swerve.applyRequest(() -> driveFacingAngle
                     .withVelocityX(getVelocityX() * 0.5)
                     .withVelocityY(getVelocityY() * 0.5)
                     .withTargetDirection(s_Swerve.getTargetDirection(HeadingTargets.SOURCE, kAlliance))
                 )
-            ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
+            )
+            .until(this::driverAttempedToRotate)
+            .withName("Drive Slow Facing Source")
         );
 
         // Stage aiming
@@ -228,7 +206,9 @@ public class RobotContainer {
                     .withVelocityY(getVelocityY() * 0.5)
                     .withTargetDirection(s_Swerve.getTargetDirection(HeadingTargets.STAGE_LEFT, kAlliance))
                 )
-            ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
+            )
+            .until(this::driverAttempedToRotate)
+            .withName("Drive Slow Facing the Stage's Left Side")
         );
 
         driverController.square().onTrue(
@@ -240,7 +220,9 @@ public class RobotContainer {
                     .withVelocityY(getVelocityY() * 0.5)
                     .withTargetDirection(s_Swerve.getTargetDirection(HeadingTargets.STAGE_RIGHT, kAlliance))
                 )
-            ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
+            )
+            .until(this::driverAttempedToRotate)
+            .withName("Drive Slow Facing the Stage's Right Side")
         );
 
         driverController.cross().onTrue(
@@ -252,24 +234,26 @@ public class RobotContainer {
                     .withVelocityY(getVelocityY() * 0.5)
                     .withTargetDirection(s_Swerve.getTargetDirection(HeadingTargets.STAGE_MIDDLE, kAlliance))
                 )
-            ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
+            )
+            .until(this::driverAttempedToRotate)
+            .withName("Drive Slow Facing the Stage's Middle/Back Side")
         );
         
         // Climb
         driverController.L1().and(climbLimitSwitchesPressed.negate()).whileTrue(
-            s_Climb.startEnd(() -> s_Climb.runClimb(-1, -1), () -> {})
+            s_Climb.runClimbCommand(-1, -1).withName("Lower Both Climbs")
         );
 
         driverController.R1().whileTrue(
-            s_Climb.startEnd(() -> s_Climb.runClimb(1, 1), () -> {})
+            s_Climb.runClimbCommand(1, 1).withName("Raise Both Climbs")
         );
 
         driverController.povLeft().whileTrue(
-            s_Climb.startEnd(() -> s_Climb.runClimb(1, 0), () -> {})
+            s_Climb.runClimbCommand(1, 0).withName("Raise the Left Climb")
         );
 
         driverController.povRight().whileTrue(
-            s_Climb.startEnd(() -> s_Climb.runClimb(0, 1), () -> {})
+            s_Climb.runClimbCommand(0, 1).withName("Raise the Right Climb")
         );
 
         // Run wheel radius calculation
@@ -293,30 +277,26 @@ public class RobotContainer {
 
         /* IMPORTANT Please see the following URL to get a graphical annotation of which xbox buttons 
             trigger what commands on the operator controller:
-            https://www.padcrafter.com/?dpadRight=&dpadUp=&leftStick=Aim+Intake+%28Calibration+Only%29&leftStickClick=Set+angle+to+amp&leftBumper=&leftTrigger=%28Toggle%29+Deploy+Intake+lower&dpadLeft=&dpadDown=&backButton=%28Toggle%29+Eject+Intake&startButton=%28Toggle%29+Get+note+off+the+shooter%27s+top&rightStickClick=Lock+Speaker+%28point+blank%29&rightStick=Aim+Shooter+%28Calibration+Only%29&aButton=Fire&bButton=Lock+Speaker+%28limelight+only%29&xButton=Lock+Speaker&yButton=Lock+Amp+%28for+passing%29&rightBumper=&rightTrigger=%28Toggle%29+Deploy+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&plat=0#?rightStickClick=Lock+Speaker+%28using+pose%29&xButton=Lock+Speaker&aButton=Fire&bButton=Set+Angle%3A+Amp&rightStick=Aim+Shooter+%28Calibration+Only%29&rightBumper=Set+Angle%3A+Point+Blank&rightTrigger=Deploy+Intake&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&leftBumper=Set+Angle%3A+Podium&leftStick=Aim+Intake+%28Calibration+Only%29&dpadUp=Reset+Shooter+Encoder&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&startButton=Free+a+Stuck+Note+%28on+shooter%29&backButton=Eject+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&yButton=Manual+Angle+Fire&leftStickClick=Toggle+Auto+Shoot
+            https://www.padcrafter.com/?dpadRight=Manual+Note+Shot&dpadUp=&leftStick=Aim+Intake+%28Calibration+Only%29&leftStickClick=Set+angle+to+amp&leftBumper=&leftTrigger=%28Toggle%29+Deploy+Intake+lower&dpadLeft=Toggle+manual+shooter+aim&dpadDown=&backButton=%28Toggle%29+Eject+Intake&startButton=%28Toggle%29+Get+note+off+the+shooter%27s+top&rightStickClick=Lock+Speaker+%28point+blank%29&rightStick=Aim+Shooter+%28must+be+toggled%29&aButton=Fire&bButton=Lock+Speaker+%28limelight+only%29&xButton=Lock+Speaker&yButton=Lock+Amp+%28for+passing%29&rightBumper=&rightTrigger=%28Toggle%29+Deploy+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&plat=0#?rightStickClick=Lock+Speaker+%28using+pose%29&xButton=Lock+Speaker&aButton=Fire&bButton=Set+Angle%3A+Amp&rightStick=Aim+Shooter+%28Calibration+Only%29&rightBumper=Set+Angle%3A+Point+Blank&rightTrigger=Deploy+Intake&leftTrigger=Deploy+Intake+%28Slightly+Above+Ground%29&leftBumper=Set+Angle%3A+Podium&leftStick=Aim+Intake+%28Calibration+Only%29&dpadUp=Reset+Shooter+Encoder&dpadLeft=Calibration+Mode+Toggle&dpadDown=Reset+Intake+Encoder&startButton=Free+a+Stuck+Note+%28on+shooter%29&backButton=Eject+Intake&templates=Operator+Controller&col=%23D3D3D3%2C%233E4B50%2C%23FFFFFF&yButton=Manual+Angle+Fire&leftStickClick=Toggle+Auto+Shoot
             Please update this link whenever you change a button.
         */
         
         // Run intake at mid position
         operatorController.rightTrigger().toggleOnTrue(
             Commands.race(
-                Commands.sequence(
-                    s_Intake.runOnce(() -> s_Intake.runIntake(1, 1)),
-                    s_Intake.startEnd(s_Intake::midPosition, () -> {})
-                ),
-                s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, -0.6), () -> {})
+                s_Intake.intakeNoteCommand(IntakePositions.MID),
+                s_Shooter.intakeNoteCommand()
             )
+            .withName("Run Intake at Mid Position")
         );
         
         // Run intake at bottom position in case mid isn't low enough
         operatorController.leftTrigger().toggleOnTrue(
             Commands.race(
-                Commands.sequence(
-                    s_Intake.runOnce(() -> s_Intake.runIntake(1, 1)),
-                    s_Intake.startEnd(s_Intake::bottomPosition, () -> {})
-                ),
-                s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, -0.6), () -> {})
+                s_Intake.intakeNoteCommand(IntakePositions.BOTTOM),
+                s_Shooter.intakeNoteCommand()
             )
+            .withName("Run Intake at Bottom Position")
         );
 
 
@@ -326,21 +306,11 @@ public class RobotContainer {
                 s_Swerve.applyRequest(() -> drive
                     .withVelocityX(getVelocityX()) // Drive forward with negative Y (forward)
                     .withVelocityY(getVelocityY()) // Drive left with negative X (left)
-                    .withRotationalRate(s_Swerve.calculateTagRotationalRate())),
-
-                Commands.sequence(
-                    // Set firing mode to speaker
-                    new InstantCommand(() -> m_isAmp = false, new Subsystem[0]), // no subsystems required
-                    // Rev up the shooter
-                    s_Shooter.startEnd(() -> 
-                        s_Shooter.runShooter(-0.2, -0.2, 0.5), () ->
-                        s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, 0))
-                    .withTimeout(0.1),
-
-                    // Angle the shooter
-                    s_Shooter.run(() -> s_Shooter.setAngleFromLimelight(kAlliance))
-                )
-            ).until(() -> Math.abs(driverController.getRightX()) > Constants.stickDeadband)
+                    .withRotationalRate(s_Swerve.calculateTagRotationalRate())
+                ),
+                s_Shooter.aimShooterCommand()
+            ).until(this::driverAttempedToRotate)
+            .withName("Lock onto Speaker with Limelight")
         );
         
         // Lock on to speaker (new method using pose estimation).
@@ -354,20 +324,9 @@ public class RobotContainer {
                         .withVelocityY(getVelocityY())
                         .withTargetDirection(s_Swerve.getTargetDirection(HeadingTargets.SPEAKER, kAlliance)))
                 ),
-
-                Commands.sequence(
-                    // Set firing mode to speaker
-                    new InstantCommand(() -> m_isAmp = false, new Subsystem[0]), // no subsystems required
-                    // Rev up the shooter
-                    s_Shooter.startEnd(() -> 
-                        s_Shooter.runShooter(-0.2, -0.2, 0.5), () ->
-                        s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, 0))
-                    .withTimeout(0.1),
-
-                    // Angle the shooter
-                    s_Shooter.run(() -> s_Shooter.setAngleFromPose(s_Swerve.getPose(), kAlliance))
-                )
-            ).until(() -> Math.abs(driverController.getRightX()) > 0.75)
+                s_Shooter.aimShooterWithPoseCommand(s_Swerve::getPose)
+            ).until(this::driverAttempedToRotate)
+            .withName("Lock onto Speaker with Pose")
         );
 
         // Lock on to amp area (for note passing).
@@ -381,33 +340,13 @@ public class RobotContainer {
                     .withVelocityY(getVelocityY()) // Drive left with negative X (left)
                     .withTargetDirection(s_Swerve.getTargetDirection(HeadingTargets.AMP_AREA, kAlliance)))
                 ),
-
-                Commands.sequence(
-                    // Set firing mode to speaker
-                    new InstantCommand(() -> m_isAmp = false, new Subsystem[0]), // no subsystems required
-                    // Rev up the shooter
-                    s_Shooter.startEnd(() -> 
-                        s_Shooter.runShooter(-0.2, -0.2, 0.5), () ->
-                        s_Shooter.runShooter(ShooterConstants.passingSpeed, ShooterConstants.passingSpeed, 0))
-                    .withTimeout(0.1),
-
-                    // Angle the shooter
-                    s_Shooter.startEnd(() -> s_Shooter.setAngle(ShooterConstants.passingAngle, false), () -> {})
-                )
-            ).until(() -> Math.abs(driverController.getRightX()) > 0.75)
-        );
-
-        // Set angle to amp
-        operatorController.leftStick().toggleOnTrue(
-            Commands.parallel(
-                new InstantCommand(() -> m_isAmp = true, new Subsystem[0]), // no subsystems required
-                s_Shooter.startEnd(() -> s_Shooter.setAngle(ShooterConstants.ampAngle, false), () -> {}),
-                s_Led.startEnd(() -> s_Led.setColor(255, 0, 0), () -> {})
-            )
+                s_Shooter.aimShooterWithAngleCommand(ShooterConstants.passingAngle)
+            ).until(this::driverAttempedToRotate)
+            .withName("Lock onto passing area")
         );
 
 
-        // Shoot in amp or speaker, depending on the amp angle mode
+        // Shoot in speaker
         operatorController.a().onTrue(
             Commands.race(
                 // Prevent swerve movement to eliminate momentum.
@@ -416,91 +355,35 @@ public class RobotContainer {
                     .withVelocityY(0)
                     .withRotationalRate(0)
                 ),
-                Commands.either(
-                    // Amp:
-                    Commands.sequence(
-                        // Tuck note into shooter
-                        s_Shooter.startEnd(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), () -> {})
-                            .withTimeout(0.1),
-                        // Ramp up
-                        s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.ampTopSpeed, ShooterConstants.ampBottomSpeed, 0), () -> {})
-                            .withTimeout(1.0),
-                        // Shoot into amp
-                        s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.ampTopSpeed, ShooterConstants.ampBottomSpeed, -0.4), () -> {})
-                            .withTimeout(0.5)
-                    ),
-                    // OR
-                    // Speaker:
-                    s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.7), () -> {})
-                        .withTimeout(0.25),
-                    () -> m_isAmp
-                )
+                s_Shooter.shootNoteCommand()
             )
-        );
-
-        // Experimental Amp Shooting Sequence.
-        operatorController.leftBumper().toggleOnTrue(
-            Commands.sequence(
-                // Tuck note into shooter
-                s_Shooter.startEnd(() -> s_Shooter.runShooter(-0.2, -0.2, 0.5), () -> {})
-                .withTimeout(0.05),
-                // Ramp up
-                s_Shooter.startEnd(() -> s_Shooter.runShooter(0.2, 0.2, 0), () -> {})
-                .withTimeout(1.0),
-                // Slowly raise the pitch of the shooter until it reaches the correct angle
-                s_Shooter.startEnd(() -> s_Shooter.rotateShooter(0.2), () -> {})
-                .until(() -> s_Shooter.getAngleDegrees() >= 52.0),
-                // Shoot into amp, and stop before the shooter raises too high up
-                s_Shooter.startEnd(() -> s_Shooter.runShooter(0.2, 0.2, -0.5), () -> {})
-                .until(() -> s_Shooter.getAngleDegrees() >= 80.0)
-            )
+            .withName("Shoot Note")
         );
         
 
         /* Manual Controls */
-        // Calibration Mode
-        // Warning: We usually set the starting position by hand while the robot is off.
-        // Only use this if you ABSOLUTELY do not have time to do it by hand.
+        // Enable manual aim for the shooter
         operatorController.povLeft().toggleOnTrue(
-            Commands.parallel(
-                s_Shooter.run(() -> s_Shooter.rotateShooter(operatorController.getRightY())),
-                s_Intake.run(() -> s_Intake.rotateIntake(operatorController.getLeftY()))
-            )
+           s_Shooter.manualAimCommand(operatorController::getRightY)
         );
-        // Only use this in calibration mode
-        operatorController.povUp().onTrue(s_Shooter.runOnce(() -> s_Shooter.resetEncoders()));
-        operatorController.povDown().onTrue(s_Intake.runOnce(() -> s_Intake.resetEncoders()));
+
+        // Manually rev up and shoot a note
+        operatorController.povRight().onTrue(
+            s_Shooter.manualShootCommand()
+        );
 
         // Point Blank Shooting Angle
         operatorController.rightStick().toggleOnTrue(
-            Commands.sequence(
-                // Set firing mode to speaker
-                new InstantCommand(() -> m_isAmp = false, new Subsystem[0]), // no subsystems required
-                // Rev up the shooter
-                s_Shooter.startEnd(() -> 
-                    s_Shooter.runShooter(-0.2, -0.2, 0.5), () ->
-                    s_Shooter.runShooter(ShooterConstants.passingSpeed, ShooterConstants.passingSpeed, 0))
-                .withTimeout(0.05),
-
-                // Angle the shooter
-                s_Shooter.startEnd(() -> s_Shooter.setAngle(51, false), () -> {})
-            )
+            s_Shooter.aimShooterWithAngleCommand(51)
         );
 
         // Fully eject note from intake
         operatorController.back().toggleOnTrue(
             Commands.race(
-                Commands.sequence(
-                    s_Intake.runOnce(() -> s_Intake.runIntake(-1, -1)),
-                    s_Intake.run(s_Intake::ejectPosition)
-                ),
-                s_Shooter.startEnd(() -> s_Shooter.runShooter(0, 0, 1), () -> {})
+                s_Intake.ejectNoteCommand(),
+                s_Shooter.ejectNoteCommand()
             )
-        );
-
-        // Free a stuck note on the top of the robot
-        operatorController.start().toggleOnTrue(
-            s_Shooter.startEnd(() -> s_Shooter.runShooter(-1,-1,0), () -> {})
+            .withName("Eject Note")
         );
     }
 
@@ -515,66 +398,50 @@ public class RobotContainer {
         /* New Auto Commands */
         NamedCommands.registerCommand("Shoot note",  
             Commands.sequence(
-                // Tuck the note into the shooter, then rev up
-                s_Shooter.startEnd(() -> 
-                    s_Shooter.runShooter(-0.2, -0.2, 0.5), () ->
-                    s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, 0)
-                ).withTimeout(0.1),
                 // Angle the shooter
-                s_Shooter.run(() -> s_Shooter.setAngleFromPose(s_Swerve.getPose(), kAlliance))
-                 .withTimeout(0.75),
+                s_Shooter.aimShooterWithPoseCommand(s_Swerve::getPose)
+                    .withTimeout(0.75),
                 // Run the shooter
-                s_Shooter.startEnd(() -> s_Shooter.runShooter(ShooterConstants.speakerSpeed, ShooterConstants.speakerSpeed, -0.7), () -> {})
-                 .withTimeout(0.25),
-                // Lower the shooter
-                s_Shooter.runOnce(() -> s_Shooter.setAngle(ShooterConstants.kBottomMeasureAngle, false)),
-                // Turn off the shooter
-                s_Shooter.runOnce(() -> s_Shooter.runShooter(0, 0, 0))
+                s_Shooter.shootNoteCommand(),
+                // Disable the shooter
+                s_Shooter.disableShooterCommand()
             )
         );
 
         NamedCommands.registerCommand("Run intake", 
             Commands.parallel(
                 // Turn on the feeder
-                s_Shooter.runOnce(() -> s_Shooter.runShooter(0, 0, -1)),
+                s_Shooter.intakeNoteCommand(),
                 // Run the intake and lower it
-                Commands.sequence(
-                    s_Intake.runOnce(() -> s_Intake.runIntake(1, 1)),
-                    s_Intake.startEnd(s_Intake::bottomPosition, () -> {})
-                        .withTimeout(0.5)
-                )
-            )
+                s_Intake.intakeNoteCommand(IntakePositions.BOTTOM)
+            ).withTimeout(0.5)
         );
 
         NamedCommands.registerCommand("Stop intake", 
             Commands.parallel(
                 // Turn off the feeder
-                s_Shooter.runOnce(() -> s_Shooter.runShooter(0, 0, 0)),
+                s_Shooter.disableShooterCommand(),
                 // Turn off the intake and raise it
-                Commands.sequence(
-                    s_Intake.runOnce(() -> s_Intake.runIntake(0, 0)),
-                    s_Intake.startEnd(s_Intake::topPosition, () -> {})
-                        .withTimeout(0.5)
-                )
-            )
+                s_Intake.disableIntakeCommand(true)
+            ).withTimeout(0.5)
         );
 
+        // This command expects the intake to already be at the bottom position, so no time is wasted with waiting.
         NamedCommands.registerCommand("Run intake only", 
             Commands.parallel(
                 // Turn on the feeder
-                s_Shooter.runOnce(() -> s_Shooter.runShooter(0, 0, -1)),
+                s_Shooter.intakeNoteCommand(),
                 // Run the intake
-                s_Intake.runOnce(() -> s_Intake.runIntake(1, 1))
+                s_Intake.intakeNoteCommand(IntakePositions.BOTTOM)
             )
         );
 
         NamedCommands.registerCommand("Stop intake only", 
             Commands.parallel(
                 // Turn off the feeder
-                s_Shooter.runOnce(() -> s_Shooter.runShooter(0, 0, 0)),
-                // Turn off the intake
-                s_Intake.startEnd(() -> s_Intake.runIntake(0, 0), () -> {})
-                    .withTimeout(0.5)
+                s_Shooter.disableShooterCommand(),
+                // Turn off the intake without returning to top position
+                s_Intake.disableIntakeCommand(false)
             )
         );
     }
@@ -603,6 +470,11 @@ public class RobotContainer {
         return rotationalRate;
     }
 
+    public boolean driverAttempedToRotate() {
+        boolean deadbandPassed = Math.abs(driverController.getRightX()) > Constants.stickDeadband;
+        return deadbandPassed;
+    }
+
     public void setStartingPosition(Pose2d startingPosition) {
         s_Swerve.seedFieldRelative(startingPosition);
     }
@@ -613,7 +485,7 @@ public class RobotContainer {
 
     public void logSubsystemData() {
         s_Swerve.logData();
-        s_Shooter.logData(kAlliance);
+        s_Shooter.logData();
         s_Intake.logData();
         s_Climb.logData();
     }

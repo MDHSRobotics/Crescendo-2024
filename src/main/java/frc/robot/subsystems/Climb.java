@@ -7,6 +7,8 @@ import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.ClimbConstants;
@@ -37,6 +39,8 @@ public class Climb extends SubsystemBase{
         leftClimb = new CANSparkMax(ClimbConstants.kLeftClimbMotorID, MotorType.kBrushless);
         rightClimb = new CANSparkMax(ClimbConstants.kRightClimbMotorID, MotorType.kBrushless);
 
+        leftClimb.setInverted(true);
+
         leftEncoder = leftClimb.getEncoder();
         rightEncoder = rightClimb.getEncoder();
         
@@ -54,16 +58,28 @@ public class Climb extends SubsystemBase{
         }
     }
 
-    public void runClimb(double climb1Power, double climb2Power){  
-        leftClimb.set(-climb1Power);
-        rightClimb.set(climb2Power);
-    }
-
     /**
      * @return True if at least one of the switches is pressed, false if both switches are unpressed
      */
     public boolean getLimitSwitches() {
         return m_leftlimitSwitch.get() || m_rightlimitSwitch.get();
+    }
+
+    /* Instance Command Factory Methods
+    * These methods allow us to create single-subsystem commands directly in the subsystems, instead of placing them in RobotContainer.
+    * https://docs.wpilib.org/en/latest/docs/software/commandbased/organizing-command-based.html#instance-command-factory-methods
+    */
+
+    /**
+     * This command runs the climb at the specified power until the command is interrupted.
+     * <p>Since the command is easily reusable, it's better to name the command in RobotContainer wherever it is used.
+     */
+    public Command runClimbCommand(double leftPower, double rightPower) {
+        return this.runOnce(() -> {
+            leftClimb.set(leftPower);
+            rightClimb.set(rightPower);
+        })
+        .andThen(Commands.idle(this));
     }
 
     public void logData() {
