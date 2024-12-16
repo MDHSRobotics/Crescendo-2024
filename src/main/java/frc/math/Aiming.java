@@ -1,93 +1,97 @@
 package frc.math;
 
-import java.lang.Math;
-
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.numbers.N3;
 import frc.robot.Constants.PoseConstants;
 import frc.robot.Constants.ShooterConstants;
-import edu.wpi.first.math.numbers.N3;
 
 public class Aiming {
 
-    /* Pose Estimation Aiming Methods */
-    /**
-     * @param goalPose The 2D position of the target (found in PoseConstants)
-     * @param robotPose The current robot pose given by the swerve subsystem
-     * @return The new robot yaw as a Rotation2d that points the robot at the target.
-     */
-    public static Rotation2d getYaw(Translation2d goalPose, Pose2d robotPose) {
-        // Find the angle of the vector that the goal would make if the robot was the origin
-        double xDistance = goalPose.getX() - robotPose.getX();
-        double yDistance = goalPose.getY() - robotPose.getY();
+  /* Pose Estimation Aiming Methods */
+  /**
+   * @param goalPose The 2D position of the target (found in PoseConstants)
+   * @param robotPose The current robot pose given by the swerve subsystem
+   * @return The new robot yaw as a Rotation2d that points the robot at the target.
+   */
+  public static Rotation2d getYaw(Translation2d goalPose, Pose2d robotPose) {
+    // Find the angle of the vector that the goal would make if the robot was the origin
+    double xDistance = goalPose.getX() - robotPose.getX();
+    double yDistance = goalPose.getY() - robotPose.getY();
 
-        double yawRadians = Math.atan2(yDistance, xDistance);
-        Rotation2d targetYaw = Rotation2d.fromRadians(yawRadians);
+    double yawRadians = Math.atan2(yDistance, xDistance);
+    Rotation2d targetYaw = Rotation2d.fromRadians(yawRadians);
 
-        return targetYaw;
-    }
+    return targetYaw;
+  }
 
-    /**
-     * @param goalPose The 3D position of the target, given by the swerve subsystem
-     * @param robotPose The current robot pose given by the swerve subsystem
-     * @return The new shooter pitch in degrees that points the shooter at the target.
-     */
-    public static double getPitch(Translation3d goalPose, Pose2d robotPose) {
-        // Must find the (x,y) coordinate of the shooter's pivot point first.
-        // If you don't understand this, go to "src\main\java\frc\math\PivotCorrectionExplanation.png"
-        double robotHeading = robotPose.getRotation().getRadians();
-        double xCorrection = ShooterConstants.kPivotDistanceM * Math.cos(robotHeading);
-        double yCorrection = ShooterConstants.kPivotDistanceM * Math.sin(robotHeading);
+  /**
+   * @param goalPose The 3D position of the target, given by the swerve subsystem
+   * @param robotPose The current robot pose given by the swerve subsystem
+   * @return The new shooter pitch in degrees that points the shooter at the target.
+   */
+  public static double getPitch(Translation3d goalPose, Pose2d robotPose) {
+    // Must find the (x,y) coordinate of the shooter's pivot point first.
+    // If you don't understand this, go to "src\main\java\frc\math\PivotCorrectionExplanation.png"
+    double robotHeading = robotPose.getRotation().getRadians();
+    double xCorrection = ShooterConstants.kPivotDistanceM * Math.cos(robotHeading);
+    double yCorrection = ShooterConstants.kPivotDistanceM * Math.sin(robotHeading);
 
-        // Find the pitch of the vector
-        Translation3d robotTranslation = new Translation3d(
+    // Find the pitch of the vector
+    Translation3d robotTranslation =
+        new Translation3d(
             goalPose.getX() - (robotPose.getX() + xCorrection),
             goalPose.getY() - (robotPose.getY() + yCorrection),
-            goalPose.getZ() - ShooterConstants.kPivotHeightM); // The x, y, and z distance to the speaker
-        Vector<N3> facingSpeakerVector = robotTranslation.toVector();
-        Rotation3d robotRotation = new Rotation3d(PoseConstants.facingForwardVector, facingSpeakerVector); // Rotation from forward to facing the speaker.
-        
-        // We take the negative because we want the clockwise angle.
-        // https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html#wpilib-coordinate-system
-        double targetPitch = -Math.toDegrees(robotRotation.getY());
-        // If the robot is too far away from the speaker, the note will miss due to gravity (even though the angle looks right), so increase the angle a bit
-        double distanceToSpeaker = robotTranslation.getNorm();
-        if (distanceToSpeaker > 3.8) {
-            targetPitch += distanceToSpeaker * 0.8;
-        }
-        return targetPitch;
+            goalPose.getZ()
+                - ShooterConstants.kPivotHeightM); // The x, y, and z distance to the speaker
+    Vector<N3> facingSpeakerVector = robotTranslation.toVector();
+    Rotation3d robotRotation =
+        new Rotation3d(
+            PoseConstants.facingForwardVector,
+            facingSpeakerVector); // Rotation from forward to facing the speaker.
+
+    // We take the negative because we want the clockwise angle.
+    // https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html#wpilib-coordinate-system
+    double targetPitch = -Math.toDegrees(robotRotation.getY());
+    // If the robot is too far away from the speaker, the note will miss due to gravity (even though
+    // the angle looks right), so increase the angle a bit
+    double distanceToSpeaker = robotTranslation.getNorm();
+    if (distanceToSpeaker > 3.8) {
+      targetPitch += distanceToSpeaker * 0.8;
     }
+    return targetPitch;
+  }
 
-    /* Limelight Aiming Methods */
-    /**
-     * @param lensHeight The height of the limelight in inches
-     * @param goalHeight The height of the goal in inches
-     * @param initialAngle The mounting angle of the limelight in degrees
-     * @param offsetAngle The additional angle to the target in degrees
-     * @return Distance from the limelight to the apriltag in inches
-     */
-    public static double calculateDistance(double lensHeight, double goalHeight, double initialAngle, double offsetAngle){
-        double angleToGoalRadians = Math.toRadians(initialAngle + offsetAngle);
+  /* Limelight Aiming Methods */
+  /**
+   * @param lensHeight The height of the limelight in inches
+   * @param goalHeight The height of the goal in inches
+   * @param initialAngle The mounting angle of the limelight in degrees
+   * @param offsetAngle The additional angle to the target in degrees
+   * @return Distance from the limelight to the apriltag in inches
+   */
+  public static double calculateDistance(
+      double lensHeight, double goalHeight, double initialAngle, double offsetAngle) {
+    double angleToGoalRadians = Math.toRadians(initialAngle + offsetAngle);
 
-        //Calculate distance
-        return (goalHeight - lensHeight) / Math.tan(angleToGoalRadians);
-    }
+    // Calculate distance
+    return (goalHeight - lensHeight) / Math.tan(angleToGoalRadians);
+  }
 
-    /**
-     * @param distance Distance from the limelight to the apriltag in inches
-     * @param heightDifference Distance to the height of the apriltag in inches
-     * @return Target pitch angle in radians 
-     */
-    public static double getPitch(double distance, double heightDifference){
-        return Math.atan2(heightDifference, distance);
-    }
+  /**
+   * @param distance Distance from the limelight to the apriltag in inches
+   * @param heightDifference Distance to the height of the apriltag in inches
+   * @return Target pitch angle in radians
+   */
+  public static double getPitch(double distance, double heightDifference) {
+    return Math.atan2(heightDifference, distance);
+  }
 
-    public static boolean approximatelyEqual(double v1, double v2, double tolerance){
-        return Math.abs(v1 - v2) < tolerance;
-      }
-
+  public static boolean approximatelyEqual(double v1, double v2, double tolerance) {
+    return Math.abs(v1 - v2) < tolerance;
+  }
 }

@@ -26,13 +26,9 @@ public final class Main {
       // Among potentially other things, the SimRobot has a longer loop cycle
       // to minimize watchdog overruns
       RobotBase.startRobot(SimRobot::new);
+    } else {
+      // Normal execution connected to RoboRio
+      RobotBase.startRobot(Robot::new);
     }
-
-    else {
-        // Normal execution connected to RoboRio
-        RobotBase.startRobot(Robot::new);
-    }
-
   }
-
-}  
+}
