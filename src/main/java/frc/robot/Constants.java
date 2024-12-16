@@ -10,152 +10,151 @@ import frc.robot.generated.TunerConstants;
 import java.util.Map;
 
 public final class Constants {
-  public static final double stickDeadband = 0.1;
+    public static final double stickDeadband = 0.1;
 
-  public class SwerveSpeedConstants {
-    public static final double MaxSpeed = TunerConstants.kSpeedAt12VoltsMps;
-    // Max angular rate in radians per second.
-    // https://www.chiefdelphi.com/t/how-to-calculate-the-max-free-speed-of-a-swerve/400741/3
-    // https://study.com/skill/learn/converting-angular-speed-from-revolutions-per-second-to-radians-per-second-explanation.html#:~:text=Steps%20for%20Converting%20Angular%20Speed,r%20a%20d%201%20revolution%20.
-    public static final double MaxAngularRate = 11.89;
-  }
+    public class SwerveSpeedConstants {
+        public static final double MaxSpeed = TunerConstants.kSpeedAt12VoltsMps;
+        // Max angular rate in radians per second.
+        // https://www.chiefdelphi.com/t/how-to-calculate-the-max-free-speed-of-a-swerve/400741/3
+        // https://study.com/skill/learn/converting-angular-speed-from-revolutions-per-second-to-radians-per-second-explanation.html#:~:text=Steps%20for%20Converting%20Angular%20Speed,r%20a%20d%201%20revolution%20.
+        public static final double MaxAngularRate = 11.89;
+    }
 
-  public class LimelightConstants {
-    // How many degrees back is your limelight rotated from perfectly vertical?
-    public static final double kLimelightMountAngleDegrees = 30.0; // a1
-    // The distance from the center of the Limelight lens to the floor.
-    public static final double kLimelightLensHeightInches = 10.992; // w3
-    // The additional horizontal distance between the limelight and the pivot
-    public static final double kLimelightPivotHorizontalDistance = 19.446; // l1
+    public class LimelightConstants {
+        // How many degrees back is your limelight rotated from perfectly vertical?
+        public static final double kLimelightMountAngleDegrees = 30.0; // a1
+        // The distance from the center of the Limelight lens to the floor.
+        public static final double kLimelightLensHeightInches = 10.992; // w3
+        // The additional horizontal distance between the limelight and the pivot
+        public static final double kLimelightPivotHorizontalDistance = 19.446; // l1
 
-    // April tag Heights
-    // Additional height to account for where we measure to the top of the tag instead of the given
-    // bottom
-    private static final double kTagAdditionalHeight = 7.75;
-    // Height of source tags
-    public static final double kSourceTagHeight = kTagAdditionalHeight + 48.125;
-    // Height of speaker tags
-    public static final double kSpeakerTagHeight = kTagAdditionalHeight + 51.875; // h1
-    // Height of amp tags
-    public static final double kAmpTagHeight = kTagAdditionalHeight + 48.125;
-    // Height of stage tags
-    public static final double kStageTagHeight = kTagAdditionalHeight + 47.5;
+        // April tag Heights
+        // Additional height to account for where we measure to the top of the tag instead of the given
+        // bottom
+        private static final double kTagAdditionalHeight = 7.75;
+        // Height of source tags
+        public static final double kSourceTagHeight = kTagAdditionalHeight + 48.125;
+        // Height of speaker tags
+        public static final double kSpeakerTagHeight = kTagAdditionalHeight + 51.875; // h1
+        // Height of amp tags
+        public static final double kAmpTagHeight = kTagAdditionalHeight + 48.125;
+        // Height of stage tags
+        public static final double kStageTagHeight = kTagAdditionalHeight + 47.5;
 
-    // Height to the ideal speaker entrance in inches
-    public static final double kSpeakerHeight = 86.0; // h2
-    public static final double kSpeakerHorizontal = 9.0; // l2
-  }
+        // Height to the ideal speaker entrance in inches
+        public static final double kSpeakerHeight = 86.0; // h2
+        public static final double kSpeakerHorizontal = 9.0; // l2
+    }
 
-  public class PoseConstants {
-    // Initial vector of the robot orientation, representing a robot with no rotation.
-    public static final Vector<N3> facingForwardVector = VecBuilder.fill(1, 0, 0);
+    public class PoseConstants {
+        // Initial vector of the robot orientation, representing a robot with no rotation.
+        public static final Vector<N3> facingForwardVector = VecBuilder.fill(1, 0, 0);
 
-    // Robot rotations for constant HeadingTargets
-    public static final Rotation2d facingAmp = Rotation2d.fromDegrees(90);
+        // Robot rotations for constant HeadingTargets
+        public static final Rotation2d facingAmp = Rotation2d.fromDegrees(90);
 
-    public static final Rotation2d facingBlueStageLeft = Rotation2d.fromDegrees(-60);
-    public static final Rotation2d facingBlueStageRight = Rotation2d.fromDegrees(60);
-    public static final Rotation2d facingBlueStageMiddle = Rotation2d.fromDegrees(180);
+        public static final Rotation2d facingBlueStageLeft = Rotation2d.fromDegrees(-60);
+        public static final Rotation2d facingBlueStageRight = Rotation2d.fromDegrees(60);
+        public static final Rotation2d facingBlueStageMiddle = Rotation2d.fromDegrees(180);
 
-    public static final Rotation2d facingRedStageLeft = Rotation2d.fromDegrees(120);
-    public static final Rotation2d facingRedStageRight = Rotation2d.fromDegrees(-120);
-    public static final Rotation2d facingRedStageMiddle = Rotation2d.fromDegrees(0);
+        public static final Rotation2d facingRedStageLeft = Rotation2d.fromDegrees(120);
+        public static final Rotation2d facingRedStageRight = Rotation2d.fromDegrees(-120);
+        public static final Rotation2d facingRedStageMiddle = Rotation2d.fromDegrees(0);
 
-    public static final Rotation2d behindBlueSource = Rotation2d.fromDegrees(120);
-    public static final Rotation2d behindRedSource = Rotation2d.fromDegrees(60);
+        public static final Rotation2d behindBlueSource = Rotation2d.fromDegrees(120);
+        public static final Rotation2d behindRedSource = Rotation2d.fromDegrees(60);
 
-    // 2D position of each speaker in meters
-    public static final Translation2d kBlueSpeaker2DPosition = new Translation2d(0.25, 5.55);
-    public static final Translation2d kRedSpeaker2DPosition = new Translation2d(16.3, 5.55);
+        // 2D position of each speaker in meters
+        public static final Translation2d kBlueSpeaker2DPosition = new Translation2d(0.25, 5.55);
+        public static final Translation2d kRedSpeaker2DPosition = new Translation2d(16.3, 5.55);
 
-    // 3D position of each speaker opening in meters
-    public static final Translation3d kBlueSpeaker3DPosition = new Translation3d(0.25, 5.55, 2.2);
-    public static final Translation3d kRedSpeaker3DPosition = new Translation3d(16.3, 5.55, 2.2);
+        // 3D position of each speaker opening in meters
+        public static final Translation3d kBlueSpeaker3DPosition = new Translation3d(0.25, 5.55, 2.2);
+        public static final Translation3d kRedSpeaker3DPosition = new Translation3d(16.3, 5.55, 2.2);
 
-    // 2D position of each amp area in meters
-    public static final Translation2d kBlueAmp2DPosition = new Translation2d(1.90, 6.5);
-    public static final Translation2d kRedAmp2DPosition = new Translation2d(14.65, 6.5);
-  }
+        // 2D position of each amp area in meters
+        public static final Translation2d kBlueAmp2DPosition = new Translation2d(1.90, 6.5);
+        public static final Translation2d kRedAmp2DPosition = new Translation2d(14.65, 6.5);
+    }
 
-  public class ShooterConstants {
+    public class ShooterConstants {
 
-    /* Motor IDs */
-    public static final int kTopID = 3;
-    public static final int kBottomID = 4;
-    public static final int kAngleID = 6;
-    public static final int kFeederID = 7;
+        /* Motor IDs */
+        public static final int kTopID = 3;
+        public static final int kBottomID = 4;
+        public static final int kAngleID = 6;
+        public static final int kFeederID = 7;
 
-    // Limit Switch ID
-    public static final int kLimitSwitchID = 0;
+        // Limit Switch ID
+        public static final int kLimitSwitchID = 0;
 
-    // The max and min angles of the shooter in degrees
-    public static final double kShooterMaxAngle = 66;
+        // The max and min angles of the shooter in degrees
+        public static final double kShooterMaxAngle = 66;
 
-    // Height of the shooter from the ground in inches
-    public static final double kPivotHeight = 12.375; // w1
-    // Height of the shooter from the ground in meters
-    public static final double kPivotHeightM = 0.314325;
-    // Horizontal distance of the pivot from the center of the robot in meters
-    public static final double kPivotDistanceM = -0.18415;
+        // Height of the shooter from the ground in inches
+        public static final double kPivotHeight = 12.375; // w1
+        // Height of the shooter from the ground in meters
+        public static final double kPivotHeightM = 0.314325;
+        // Horizontal distance of the pivot from the center of the robot in meters
+        public static final double kPivotDistanceM = -0.18415;
 
-    // Gear ratio between the pivot and motors
-    public static final double kAngleGearRatio = 1920;
+        // Gear ratio between the pivot and motors
+        public static final double kAngleGearRatio = 1920;
 
-    // At some angle, measure the angle and rotations and the code will account for it when
-    // calculating the rotations
-    public static final double kBottomMeasureAngle = 23.0;
-    public static final double kDegreesToRotationsConversion = -0.5839;
+        // At some angle, measure the angle and rotations and the code will account for it when
+        // calculating the rotations
+        public static final double kBottomMeasureAngle = 23.0;
+        public static final double kDegreesToRotationsConversion = -0.5839;
 
-    public static final double ampAngle = 55.0;
+        public static final double ampAngle = 55.0;
 
-    public static final double passingAngle = 55.0;
+        public static final double passingAngle = 55.0;
 
-    public static final double ampTopSpeed = 0.15;
-    public static final double ampBottomSpeed = 0.6;
-    public static final double speakerSpeed = 0.7;
-    public static final double passingSpeed = 0.4;
-  }
+        public static final double ampTopSpeed = 0.15;
+        public static final double ampBottomSpeed = 0.6;
+        public static final double speakerSpeed = 0.7;
+        public static final double passingSpeed = 0.4;
+    }
 
-  public class IntakeConstants {
+    public class IntakeConstants {
 
-    /* Motor IDs */
-    public static final int kLeftAngleID = 8;
-    public static final int kRightAngleID = 9;
-    public static final int kConveyorID = 10;
-    public static final int kIntakeID = 11;
-  }
+        /* Motor IDs */
+        public static final int kLeftAngleID = 8;
+        public static final int kRightAngleID = 9;
+        public static final int kConveyorID = 10;
+        public static final int kIntakeID = 11;
+    }
 
-  public class ClimbConstants {
+    public class ClimbConstants {
 
-    /* Motor IDs */
-    public static final int kLeftClimbMotorID = 1;
-    public static final int kRightClimbMotorID = 2;
+        /* Motor IDs */
+        public static final int kLeftClimbMotorID = 1;
+        public static final int kRightClimbMotorID = 2;
 
-    // Limit Switch ID
-    public static final int kLeftLimitSwitchID = 2;
-    public static final int kRightLimitSwitchID = 3;
-  }
+        // Limit Switch ID
+        public static final int kLeftLimitSwitchID = 2;
+        public static final int kRightLimitSwitchID = 3;
+    }
 
-  public class LEDConstants {
+    public class LEDConstants {
 
-    public static final int kStripLength = 35;
+        public static final int kStripLength = 35;
 
-    public static final int kStrobeLength = 40;
-  }
+        public static final int kStrobeLength = 40;
+    }
 
-  // This map is used for labelling Spark Maxes and Spark Flexes with URCL.
-  public static final Map<Integer, String> sparkDeviceNames =
-      Map.of(
-          ShooterConstants.kTopID, "Shooter Top",
-          ShooterConstants.kBottomID, "Shooter Bottom",
-          ShooterConstants.kAngleID, "Shooter Angler",
-          ShooterConstants.kFeederID, "Feeder",
-          IntakeConstants.kLeftAngleID, "Intake Left Angler",
-          IntakeConstants.kRightAngleID, "Intake Right Angler",
-          IntakeConstants.kIntakeID, "Intake",
-          IntakeConstants.kConveyorID, "Conveyer",
-          ClimbConstants.kLeftClimbMotorID, "Left Climb",
-          ClimbConstants.kRightClimbMotorID, "Right Climb");
+    // This map is used for labelling Spark Maxes and Spark Flexes with URCL.
+    public static final Map<Integer, String> sparkDeviceNames = Map.of(
+            ShooterConstants.kTopID, "Shooter Top",
+            ShooterConstants.kBottomID, "Shooter Bottom",
+            ShooterConstants.kAngleID, "Shooter Angler",
+            ShooterConstants.kFeederID, "Feeder",
+            IntakeConstants.kLeftAngleID, "Intake Left Angler",
+            IntakeConstants.kRightAngleID, "Intake Right Angler",
+            IntakeConstants.kIntakeID, "Intake",
+            IntakeConstants.kConveyorID, "Conveyer",
+            ClimbConstants.kLeftClimbMotorID, "Left Climb",
+            ClimbConstants.kRightClimbMotorID, "Right Climb");
 }
 
 /*

@@ -12,23 +12,23 @@ import edu.wpi.first.wpilibj.RobotBase;
  * call.
  */
 public final class Main {
-  private Main() {}
+    private Main() {}
 
-  /**
-   * Main initialization function. Do not perform any initialization here.
-   *
-   * <p>If you change your main robot class, change the parameter type.
-   */
-  public static void main(String... args) {
+    /**
+     * Main initialization function. Do not perform any initialization here.
+     *
+     * <p>If you change your main robot class, change the parameter type.
+     */
+    public static void main(String... args) {
 
-    if (RobotBase.isSimulation()) {
-      // Simulation mode - not connected to RoboRio.
-      // Among potentially other things, the SimRobot has a longer loop cycle
-      // to minimize watchdog overruns
-      RobotBase.startRobot(SimRobot::new);
-    } else {
-      // Normal execution connected to RoboRio
-      RobotBase.startRobot(Robot::new);
+        if (RobotBase.isSimulation()) {
+            // Simulation mode - not connected to RoboRio.
+            // Among potentially other things, the SimRobot has a longer loop cycle
+            // to minimize watchdog overruns
+            RobotBase.startRobot(SimRobot::new);
+        } else {
+            // Normal execution connected to RoboRio
+            RobotBase.startRobot(Robot::new);
+        }
     }
-  }
 }
