@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.Constants.LimelightConstants;
 import frc.utils.LimelightHelpers;
 import org.littletonrobotics.urcl.URCL;
 
@@ -65,10 +66,9 @@ public class Robot extends TimedRobot {
         // Set the limelight pipeline.
         // In Orange County Regionals, the lights make Apriltags hard to see, so we may change the front
         // to use a separate pipeline.
-        // LimelightHelpers.setPipelineIndex("limelight-front",
+        // LimelightHelpers.setPipelineIndex(LimelightConstants.kFrontName,
         // DriverStation.getAlliance().orElseThrow() == Alliance.Blue ? 1 : 0);
-        LimelightHelpers.setPipelineIndex("limelight-front", 0);
-        LimelightHelpers.setPipelineIndex("limelight-back", 0);
+        LimelightHelpers.setPipelineIndex(LimelightConstants.kFrontName, 0);
 
         // Uncomment this if you want to hide "controller not connected" warnings.
         // DriverStation.silenceJoystickConnectionWarning(true);
@@ -105,9 +105,9 @@ public class Robot extends TimedRobot {
         // but limelight pose measurements from all tags.
         // https://docs.limelightvision.io/docs/docs-limelight/software-change-log#new-feature-priority-id-nt-key-priorityid
         if (DriverStation.getAlliance().orElseThrow() == Alliance.Blue) {
-            LimelightHelpers.setPriorityTagID("limelight-front", 7);
+            LimelightHelpers.setPriorityTagID(LimelightConstants.kFrontName, 7);
         } else {
-            LimelightHelpers.setPriorityTagID("limelight-front", 4);
+            LimelightHelpers.setPriorityTagID(LimelightConstants.kFrontName, 4);
         }
     }
 

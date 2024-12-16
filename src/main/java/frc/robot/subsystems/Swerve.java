@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.math.Aiming;
+import frc.robot.Constants.LimelightConstants;
 import frc.robot.Constants.PoseConstants;
 import frc.robot.Constants.SwerveSpeedConstants;
 import frc.robot.generated.TunerConstants;
@@ -229,7 +230,6 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
      * Finds the robot heading that points the robot at the target.
      *
      * @param target the target you want to face
-     * @param alliance your current alliance
      * @see HeadingTargets
      * @see Alliance
      */
@@ -305,7 +305,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
      * @return The rotational rate that rotates the robot to the speaker.
      */
     public double calculateTagRotationalRate() {
-        double tx = LimelightHelpers.getTX("limelight-front");
+        double tx = LimelightHelpers.getTX(LimelightConstants.kFrontName);
         double output = m_rotationalRateController.calculate(tx, 0);
         double rotationalRate =
                 MathUtil.clamp(output, -SwerveSpeedConstants.MaxAngularRate, SwerveSpeedConstants.MaxAngularRate);
@@ -358,11 +358,12 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         ChassisSpeeds speeds = getRobotRelativeSpeeds();
         double yawRateDegrees = Math.toDegrees(speeds.omegaRadiansPerSecond);
 
-        LimelightHelpers.SetRobotOrientation("limelight-front", yawDegrees, yawRateDegrees, 0.0, 0.0, 0.0, 0.0);
+        LimelightHelpers.SetRobotOrientation(
+                LimelightConstants.kFrontName, yawDegrees, yawRateDegrees, 0.0, 0.0, 0.0, 0.0);
 
         /* Add Limelight Bot Pose to Pose Estimation and logs */
         LimelightHelpers.PoseEstimate limelightMeasurement =
-                LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-front");
+                LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(LimelightConstants.kFrontName);
         if (limelightMeasurement != null) {
             if ((limelightMeasurement.tagCount >= 1)
                     && (Math.abs(yawRateDegrees)

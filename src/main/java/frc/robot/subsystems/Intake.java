@@ -114,7 +114,7 @@ public class Intake extends SubsystemBase {
             });
         }
 
-        disableIntakeCommand.andThen(Commands.idle(this)).withName("Disable Intake");
+        disableIntakeCommand = disableIntakeCommand.andThen(Commands.idle(this)).withName("Disable Intake");
 
         return disableIntakeCommand;
     }
@@ -138,7 +138,7 @@ public class Intake extends SubsystemBase {
                 });
         }
 
-        intakeNoteCommand.andThen(Commands.idle(this));
+        intakeNoteCommand = intakeNoteCommand.andThen(Commands.idle(this));
 
         return intakeNoteCommand;
     }

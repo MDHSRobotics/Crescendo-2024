@@ -21,6 +21,7 @@ public final class Constants {
     }
 
     public class LimelightConstants {
+        public static final String kFrontName = "limelight-front";
         // How many degrees back is your limelight rotated from perfectly vertical?
         public static final double kLimelightMountAngleDegrees = 30.0; // a1
         // The distance from the center of the Limelight lens to the floor.

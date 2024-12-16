@@ -183,7 +183,7 @@ public class Shooter extends SubsystemBase {
 
     public boolean tagInSight() {
         Alliance alliance = DriverStation.getAlliance().orElseThrow();
-        double tagID = LimelightHelpers.getFiducialID("limelight-front");
+        double tagID = LimelightHelpers.getFiducialID(LimelightConstants.kFrontName);
         if (alliance == Alliance.Blue && tagID == 7) {
             return true;
         } else if (alliance == Alliance.Red && tagID == 4) {
@@ -372,14 +372,14 @@ public class Shooter extends SubsystemBase {
         angleRotations.setDouble(m_angleEncoder.getPosition());
         angleDegrees.setDouble(m_angleEncoder.getPosition() / ShooterConstants.kDegreesToRotationsConversion
                 + ShooterConstants.kBottomMeasureAngle);
-        tx.setDouble(LimelightHelpers.getTX("limelight-front"));
-        ty.setDouble(LimelightHelpers.getTY("limelight-front"));
+        tx.setDouble(LimelightHelpers.getTX(LimelightConstants.kFrontName));
+        ty.setDouble(LimelightHelpers.getTY(LimelightConstants.kFrontName));
 
         // Widget data
         atSpeed.setBoolean(topShooter.getEncoder().getVelocity() < -3800);
         isAtAngle.setBoolean(isAtAngle());
         seeTag.setBoolean(tagInSight());
-        txCorrect.setBoolean(Aiming.approximatelyEqual(LimelightHelpers.getTX("limelight-front"), 0, 3));
+        txCorrect.setBoolean(Aiming.approximatelyEqual(LimelightHelpers.getTX(LimelightConstants.kFrontName), 0, 3));
         ready.setBoolean(isReady());
     }
 }
