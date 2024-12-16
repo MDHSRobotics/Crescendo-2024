@@ -72,7 +72,6 @@ public class RobotContainer {
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
-
         // Register the autonomous commands for Pathplanner
         registerPathplannerCommands();
 
@@ -129,7 +128,6 @@ public class RobotContainer {
      * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureButtonBindings() {
-
         if (driverController != null) {
             configureDriverButtonBindings();
         }
@@ -140,7 +138,6 @@ public class RobotContainer {
     }
 
     private void configureDriverButtonBindings() {
-
         /* Driver Buttons */
 
         /* IMPORTANT Please see the following URL to get a graphical annotation of which xbox buttons
@@ -223,7 +220,6 @@ public class RobotContainer {
         driverController.povLeft().whileTrue(s_Climb.runClimbCommand(1, 0).withName("Raise the Left Climb"));
 
         driverController.povRight().whileTrue(s_Climb.runClimbCommand(0, 1).withName("Raise the Right Climb"));
-
         // Run wheel radius calculation
         // driverController.share().whileTrue(new WheelRadiusCharacterization(s_Swerve));
 
@@ -240,7 +236,6 @@ public class RobotContainer {
     }
 
     private void configureOperatorButtonBindings() {
-
         /* Operator Buttons */
 
         /* IMPORTANT Please see the following URL to get a graphical annotation of which xbox buttons

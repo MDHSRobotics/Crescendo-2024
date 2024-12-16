@@ -26,6 +26,7 @@ import frc.robot.subsystems.Swerve;
  *     Advantage's code</a>
  */
 public class WheelRadiusCharacterization extends Command {
+
     private final Swerve swerve;
     private final SwerveRequest.ApplyChassisSpeeds rotationRequest = new SwerveRequest.ApplyChassisSpeeds();
     private final SwerveRequest.ApplyChassisSpeeds stopRequest =

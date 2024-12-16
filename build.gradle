@@ -112,7 +112,7 @@ spotless {
             exclude '**/build/**', '**/build-*/**', '**/bin/**', '**/.idea/**'
         }
         toggleOffOn()
-        palantirJavaFormat()
+        palantirJavaFormat('2.28.0')
         removeUnusedImports()
         trimTrailingWhitespace()
         endWithNewline()

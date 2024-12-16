@@ -72,7 +72,7 @@ public class LED extends SubsystemBase {
     }
 
     public void redShift() {
-        final int hue = (m_rainbowFirstPixelHue + (m_firstPixel * 180 / m_ledBuffer.getLength())) % 180;
+        final int hue = (m_rainbowFirstPixelHue + ((m_firstPixel * 180) / m_ledBuffer.getLength())) % 180;
         // Set the value
         m_ledBuffer.setHSV(m_firstPixel, hue, 255, 128);
         m_ledBuffer.setRGB(m_lastPixel, 0, 0, 0);
@@ -103,7 +103,7 @@ public class LED extends SubsystemBase {
                     for (int i = 0; i < m_ledBuffer.getLength(); i++) {
                         // Calculate the hue - hue is easier for rainbows because the color
                         // shape is a circle so only one value needs to precess
-                        final int hue = (m_rainbowFirstPixelHue + (i * 180 / m_ledBuffer.getLength())) % 180;
+                        final int hue = (m_rainbowFirstPixelHue + ((i * 180) / m_ledBuffer.getLength())) % 180;
                         // Set the value
                         m_ledBuffer.setHSV(i, hue, 255, 128);
                     }

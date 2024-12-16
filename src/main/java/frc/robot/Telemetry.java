@@ -18,6 +18,7 @@ import edu.wpi.first.networktables.StructPublisher;
  * TunerConstants.kSpeedAt12VoltsMps, and the frame size to PathPlanner's Robot Length and Width.
  */
 public class Telemetry {
+
     private final NetworkTableInstance inst = NetworkTableInstance.getDefault();
 
     /* Robot pose for field positioning */
@@ -59,9 +60,9 @@ public class Telemetry {
         odomPeriodPublisher.set(state.OdometryPeriod);
 
         /* Log to SignalLogger */
-        SignalLogger.writeDoubleArray(
-                "odometry",
-                new double[] {pose.getX(), pose.getY(), pose.getRotation().getDegrees()});
+        SignalLogger.writeDoubleArray("odometry", new double[] {
+            pose.getX(), pose.getY(), pose.getRotation().getDegrees(),
+        });
         SignalLogger.writeDouble("odom period", state.OdometryPeriod, "seconds");
     }
 }

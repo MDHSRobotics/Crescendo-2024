@@ -10,9 +10,11 @@ import frc.robot.generated.TunerConstants;
 import java.util.Map;
 
 public final class Constants {
+
     public static final double stickDeadband = 0.1;
 
     public class SwerveSpeedConstants {
+
         public static final double MaxSpeed = TunerConstants.kSpeedAt12VoltsMps;
         // Max angular rate in radians per second.
         // https://www.chiefdelphi.com/t/how-to-calculate-the-max-free-speed-of-a-swerve/400741/3
@@ -21,6 +23,7 @@ public final class Constants {
     }
 
     public class LimelightConstants {
+
         public static final String kFrontName = "limelight-front";
         // How many degrees back is your limelight rotated from perfectly vertical?
         public static final double kLimelightMountAngleDegrees = 30.0; // a1
@@ -48,6 +51,7 @@ public final class Constants {
     }
 
     public class PoseConstants {
+
         // Initial vector of the robot orientation, representing a robot with no rotation.
         public static final Vector<N3> facingForwardVector = VecBuilder.fill(1, 0, 0);
 
@@ -146,18 +150,27 @@ public final class Constants {
 
     // This map is used for labelling Spark Maxes and Spark Flexes with URCL.
     public static final Map<Integer, String> sparkDeviceNames = Map.of(
-            ShooterConstants.kTopID, "Shooter Top",
-            ShooterConstants.kBottomID, "Shooter Bottom",
-            ShooterConstants.kAngleID, "Shooter Angler",
-            ShooterConstants.kFeederID, "Feeder",
-            IntakeConstants.kLeftAngleID, "Intake Left Angler",
-            IntakeConstants.kRightAngleID, "Intake Right Angler",
-            IntakeConstants.kIntakeID, "Intake",
-            IntakeConstants.kConveyorID, "Conveyer",
-            ClimbConstants.kLeftClimbMotorID, "Left Climb",
-            ClimbConstants.kRightClimbMotorID, "Right Climb");
+            ShooterConstants.kTopID,
+            "Shooter Top",
+            ShooterConstants.kBottomID,
+            "Shooter Bottom",
+            ShooterConstants.kAngleID,
+            "Shooter Angler",
+            ShooterConstants.kFeederID,
+            "Feeder",
+            IntakeConstants.kLeftAngleID,
+            "Intake Left Angler",
+            IntakeConstants.kRightAngleID,
+            "Intake Right Angler",
+            IntakeConstants.kIntakeID,
+            "Intake",
+            IntakeConstants.kConveyorID,
+            "Conveyer",
+            ClimbConstants.kLeftClimbMotorID,
+            "Left Climb",
+            ClimbConstants.kRightClimbMotorID,
+            "Right Climb");
 }
-
 /*
 CAN Sequence
 -RoboRIO

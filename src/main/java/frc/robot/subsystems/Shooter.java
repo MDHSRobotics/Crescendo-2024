@@ -182,7 +182,15 @@ public class Shooter extends SubsystemBase {
     }
 
     public boolean tagInSight() {
-        Alliance alliance = DriverStation.getAlliance().orElseThrow();
+        Alliance alliance = DriverStation.getAlliance().orElse(null);
+
+        if (alliance == null) {
+            DriverStation.reportWarning(
+                    "Could not get the alliance from DriverStation. tagInSight() will return false until you connect to DriverStation.",
+                    false);
+            return false;
+        }
+
         double tagID = LimelightHelpers.getFiducialID(LimelightConstants.kFrontName);
         if (alliance == Alliance.Blue && tagID == 7) {
             return true;
@@ -194,7 +202,10 @@ public class Shooter extends SubsystemBase {
     }
 
     public boolean isReady() {
-        return tagInSight() && atSpeed.getBoolean(false) && isAtAngle.getBoolean(false) && txCorrect.getBoolean(false);
+        return (tagInSight()
+                && atSpeed.getBoolean(false)
+                && isAtAngle.getBoolean(false)
+                && txCorrect.getBoolean(false));
     }
 
     /* Instance Command Factory Methods

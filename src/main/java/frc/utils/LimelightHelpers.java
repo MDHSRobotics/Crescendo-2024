@@ -370,6 +370,7 @@ public class LimelightHelpers {
     }
 
     public static class RawFiducial {
+
         public int id = 0;
         public double txnc = 0;
         public double tync = 0;
@@ -397,6 +398,7 @@ public class LimelightHelpers {
     }
 
     public static class RawDetection {
+
         public int classId = 0;
         public double txnc = 0;
         public double tync = 0;
@@ -439,6 +441,7 @@ public class LimelightHelpers {
     }
 
     public static class PoseEstimate {
+
         public Pose2d pose;
         public double timestampSeconds;
         public double latency;
@@ -469,7 +472,6 @@ public class LimelightHelpers {
                 double avgTagDist,
                 double avgTagArea,
                 RawFiducial[] rawFiducials) {
-
             this.pose = pose;
             this.timestampSeconds = timestampSeconds;
             this.latency = latency;
@@ -952,7 +954,6 @@ public class LimelightHelpers {
      * @return
      */
     public static Pose2d getBotPose2d_wpiBlue(String limelightName) {
-
         double[] result = getBotPose_wpiBlue(limelightName);
         return toPose2D(result);
     }
@@ -986,7 +987,6 @@ public class LimelightHelpers {
      * @return
      */
     public static Pose2d getBotPose2d_wpiRed(String limelightName) {
-
         double[] result = getBotPose_wpiRed(limelightName);
         return toPose2D(result);
     }
@@ -1020,7 +1020,6 @@ public class LimelightHelpers {
      * @return
      */
     public static Pose2d getBotPose2d(String limelightName) {
-
         double[] result = getBotPose(limelightName);
         return toPose2D(result);
     }
@@ -1123,7 +1122,6 @@ public class LimelightHelpers {
             double roll,
             double rollRate,
             boolean flush) {
-
         double[] entries = new double[6];
         entries[0] = yaw;
         entries[1] = yawRate;
@@ -1138,7 +1136,6 @@ public class LimelightHelpers {
     }
 
     public static void SetFidcuial3DOffset(String limelightName, double x, double y, double z) {
-
         double[] entries = new double[3];
         entries[0] = x;
         entries[1] = y;
@@ -1230,7 +1227,6 @@ public class LimelightHelpers {
 
     /** Parses Limelight's JSON results dump into a LimelightResults Object */
     public static LimelightResults getLatestResults(String limelightName) {
-
         long start = System.nanoTime();
         LimelightHelpers.LimelightResults results = new LimelightHelpers.LimelightResults();
         if (mapper == null) {

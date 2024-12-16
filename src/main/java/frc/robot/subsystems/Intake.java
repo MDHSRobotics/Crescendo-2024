@@ -18,9 +18,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.IntakeConstants;
 
 public class Intake extends SubsystemBase {
+
     public enum IntakePositions {
         BOTTOM,
-        MID
+        MID,
     }
 
     private CANSparkFlex intake;
