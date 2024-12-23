@@ -115,8 +115,7 @@ public class LED extends SubsystemBase {
                     m_led.setData(m_ledBuffer);
                     m_led.start();
                 })
-                .andThen(Commands.idle(this))
-                .withName("Rainbow");
+                .withName("Rainbow LEDs");
     }
 
     /**
