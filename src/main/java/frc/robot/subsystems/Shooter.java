@@ -315,7 +315,7 @@ public class Shooter extends SubsystemBase {
                     feeder.set(0.7);
                 })
                 .andThen(Commands.idle(this))
-                .withTimeout(0.25)
+                .withTimeout(1)
                 .withName("Run the shooter");
     }
 
@@ -346,11 +346,13 @@ public class Shooter extends SubsystemBase {
     public Command manualShootCommand() {
         return Commands.sequence(
                 spinUpFlywheelsCommand(),
+                Commands.idle(this).withTimeout(1),
                 shootNoteCommand(),
                 this.runOnce(() -> {
                     topShooter.set(0);
                     bottomShooter.set(0);
                     feeder.set(0);
+                    DriverStation.reportWarning("Command ended!", false);
                 }),
                 Commands.idle(this));
     }

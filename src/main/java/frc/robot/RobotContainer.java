@@ -245,7 +245,7 @@ public class RobotContainer {
         */
 
         // Run intake at mid position
-        operatorController
+        /*operatorController
                 .rightTrigger()
                 .toggleOnTrue(
                         Commands.race(s_Intake.intakeNoteCommand(IntakePositions.MID), s_Shooter.intakeNoteCommand())
@@ -309,23 +309,23 @@ public class RobotContainer {
                                 s_Swerve.applyRequest(() ->
                                         drive.withVelocityX(0).withVelocityY(0).withRotationalRate(0)),
                                 s_Shooter.shootNoteCommand())
-                        .withName("Shoot Note"));
+                        .withName("Shoot Note"));*/
 
         /* Manual Controls */
         // Enable manual aim for the shooter
-        operatorController.povLeft().toggleOnTrue(s_Shooter.manualAimCommand(operatorController::getRightY));
+        operatorController.x().toggleOnTrue(s_Shooter.manualAimCommand(operatorController::getRightY));
 
         // Manually rev up and shoot a note
-        operatorController.povRight().onTrue(s_Shooter.manualShootCommand());
+        operatorController.a().onTrue(s_Shooter.manualShootCommand());
 
         // Point Blank Shooting Angle
-        operatorController.rightStick().toggleOnTrue(s_Shooter.aimShooterWithAngleCommand(51));
+        /*operatorController.rightStick().toggleOnTrue(s_Shooter.aimShooterWithAngleCommand(51));
 
         // Fully eject note from intake
         operatorController
                 .back()
                 .toggleOnTrue(Commands.race(s_Intake.ejectNoteCommand(), s_Shooter.ejectNoteCommand())
-                        .withName("Eject Note"));
+                        .withName("Eject Note"));*/
     }
 
     // Register autonomous commands
